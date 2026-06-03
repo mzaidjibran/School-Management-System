@@ -70,19 +70,8 @@ function transformStudentDoc(doc) {
 
 export const createStudent = async (request, response) => {
   try {
-    const userId = request.userId;
-    if (!userId) {
-      return response.status(401).json({
-        success: false,
-        error: true,
-        message: "Unauthorized: Student ID not found",
-      });
-    }
     const studentData = normalizePayload(request.body, request.file);
-    const student = await Student.create({
-      ...studentData,
-      user: userId,
-    });
+    const student = await Student.create(studentData);
     response.status(201).json(transformStudentDoc(student));
   } catch (error) {
     response.status(400).json({
@@ -95,18 +84,7 @@ export const createStudent = async (request, response) => {
 
 export const getAllStudents = async (request, response) => {
   try {
-    const userId = request.userId;
-    if (!userId) {
-      return response.status(401).json({
-        success: false,
-        error: true,
-        message: "Unauthorized: Student ID not found",
-        data: null,
-      });
-    }
-    const students = await Student.find({
-      $or: [{ user: userId }, { user: null }, { user: { $exists: false } }],
-    });
+    const students = await Student.find({});
     const mapped = students.map(transformStudentDoc);
     response.status(200).json({
       success: true,
@@ -155,10 +133,9 @@ export const getSingleStudent = async (request, response) => {
 
 export const updateStudent = async (request, response) => {
   try {
-    const userId = request.userId;
     const studentId = request.params.id;
 
-    // Verify the student belongs to the current user
+    // Verify the student exists
     const existingStudent = await Student.findById(studentId);
     if (!existingStudent) {
       return response.status(404).json({
@@ -168,22 +145,7 @@ export const updateStudent = async (request, response) => {
       });
     }
 
-    // Check if user owns this student (with backward compatibility)
-    if (
-      existingStudent.user &&
-      existingStudent.user.toString() !== userId.toString()
-    ) {
-      return response.status(403).json({
-        success: false,
-        error: true,
-        message: "Unauthorized: You can only update your own student",
-      });
-    }
-
-    const updateData = {
-      ...normalizePayload(request.body, request.file),
-      user: userId,
-    };
+    const updateData = normalizePayload(request.body, request.file);
 
     const updatedStudent = await Student.findByIdAndUpdate(
       studentId,
@@ -212,28 +174,15 @@ export const updateStudent = async (request, response) => {
 
 export const deleteStudent = async (request, response) => {
   try {
-    const userId = request.userId;
     const studentId = request.params.id;
 
-    // Verify the student belongs to the current user
+    // Verify the student exists
     const existingStudent = await Student.findById(studentId);
     if (!existingStudent) {
       return response.status(404).json({
         success: false,
         error: true,
         message: "Student not found",
-      });
-    }
-
-    // Check if user owns this student (with backward compatibility)
-    if (
-      existingStudent.user &&
-      existingStudent.user.toString() !== userId.toString()
-    ) {
-      return response.status(403).json({
-        success: false,
-        error: true,
-        message: "Unauthorized: You can only delete your own student",
       });
     }
 

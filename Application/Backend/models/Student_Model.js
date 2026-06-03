@@ -52,23 +52,23 @@ const studentSchema = new mongoose.Schema(
       default: "Active",
     },
 
-    address: {
-      street: String,
-      city: String,
-      state: String,
-      country: String,
-      zipCode: String,
-    },
+    // address: {
+    //   street: String,
+    //   city: String,
+    //   state: String,
+    //   country: String,
+    //   zipCode: String,
+    // },
 
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
+    // user: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "User",
+    // },
 
-    profileImage: {
-      type: String,
-      default: "",
-    },
+    // profileImage: {
+    //   type: String,
+    //   default: "",
+    // },
   },
   {
     timestamps: true,

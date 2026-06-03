@@ -4,7 +4,7 @@ import express from "express";
 import connectDB from "./config/config.js";
 import cors from "cors";
 
-// import Student_Route from "./routers/Student_Route.js"
+import Student_Route from "./routers/Student_Route.js"
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -21,7 +21,7 @@ app.get("/", (req, res) => {
   res.send("Backend is running...");
 });
 
-// app.use("/api/employee", EmployeeRoutes);
+app.use("/api/student", Student_Route);
 
 app.get("/api/test", (req, res) => {
   res.json({
