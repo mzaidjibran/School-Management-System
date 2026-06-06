@@ -1,65 +1,66 @@
-import Student from "../models/Student_Model.js"
+import { Student } from "../models/Student_Model.js";
 import path from "path";
 
+// ─── Helper: Normalize Incoming Data ─────────────────────────────
 function normalizePayload(body, file) {
   const data = { ...body };
+
+  // Name → firstName + lastName
   if (data.Name) {
-    const parts = String(data.Name || "")
-      .trim()
-      .split(/\s+/);
+    const parts = String(data.Name).trim().split(/\s+/);
     data.firstName = parts[0] || "";
     data.lastName = parts.slice(1).join(" ") || parts[0] || "";
     delete data.Name;
   }
+
+  // CNIC
   if (data.cnic && !data.CNIC) {
     data.CNIC = data.cnic;
     delete data.cnic;
   }
 
+  // Date of Birth
   if (data.dateofBirth && !data.dateOfBirth) {
     data.dateOfBirth = data.dateofBirth;
     delete data.dateofBirth;
   }
 
-  if (data.dateOfJoining && !data.dateOfJoining) {
-  }
-
+  // Gender — match karo model ke enum se (lowercase)
   if (data.gender && typeof data.gender === "string") {
     const g = data.gender.toLowerCase();
-    if (g === "male") data.gender = "Male";
-    else if (g === "female") data.gender = "Female";
-    else data.gender = "Other";
+    if (["male", "female", "other"].includes(g)) data.gender = g;
   }
 
-  // normalize status
-
+  // Status — match karo model ke enum se
   if (data.status && typeof data.status === "string") {
     const s = data.status.toLowerCase();
-    if (s === "active") data.status = "Active";
-    else if (s === "inactive") data.status = "Inactive";
-    else if (s === "terminated") data.status = "Terminated";
-    else if (s === "leave" || s === "on leave") data.status = "On Leave";
+    const map = {
+      active: "active",
+      inactive: "inactive",
+      graduated: "graduated",
+      expelled: "expelled",
+      transferred: "transferred",
+    };
+    if (map[s]) data.status = map[s];
   }
 
+  // Profile Image
   if (file) data.profileImage = `/image/${file.filename}`;
+
   return data;
 }
 
+// ─── Helper: Transform Doc for Frontend ──────────────────────────
 function transformStudentDoc(doc) {
   if (!doc) return doc;
-
-  // if doc is a mongoose document, use _doc to avoid prototypes
-
   const raw = doc.toObject ? doc.toObject() : { ...doc };
 
   return {
     ...raw,
-    // keep original model fields but also add keys expected by frontend
-
     Name: `${raw.firstName || ""} ${raw.lastName || ""}`.trim(),
     cnic: raw.CNIC || raw.cnic || "",
-    dateofBirth: raw.dateOfBirth || raw.dateofBirth || null,
-    dateOfJoining: raw.dateOfJoining || raw.dateOfJoining || null,
+    dateofBirth: raw.dateOfBirth || null,
+    dateOfJoining: raw.admissionDate || null,
     profileImage: raw.profileImage
       ? raw.profileImage.startsWith("/image/")
         ? raw.profileImage
@@ -68,42 +69,46 @@ function transformStudentDoc(doc) {
   };
 }
 
+// ─── Create Student ───────────────────────────────────────────────
 export const createStudent = async (request, response) => {
   try {
     const studentData = normalizePayload(request.body, request.file);
     const student = await Student.create(studentData);
-    response.status(201).json(transformStudentDoc(student));
+    response.status(201).json({
+      success: true,
+      error: false,
+      message: "Student created successfully",
+      data: transformStudentDoc(student),
+    });
   } catch (error) {
     response.status(400).json({
+      success: false,
+      error: true,
       message: error.message,
     });
   }
 };
 
-// Get all students
-
+// ─── Get All Students ─────────────────────────────────────────────
 export const getAllStudents = async (request, response) => {
   try {
     const students = await Student.find({});
-    const mapped = students.map(transformStudentDoc);
     response.status(200).json({
       success: true,
       error: false,
-      message: "Student fetched successfully",
-      data: mapped,
+      message: "Students fetched successfully",
+      data: students.map(transformStudentDoc),
     });
   } catch (error) {
     response.status(500).json({
       success: false,
       error: true,
-      message: "Error fetching students",
-      data: null,
+      message: error.message,
     });
   }
 };
 
-// Get student by id
-
+// ─── Get Single Student ───────────────────────────────────────────
 export const getSingleStudent = async (request, response) => {
   try {
     const student = await Student.findById(request.params.id);
@@ -124,36 +129,30 @@ export const getSingleStudent = async (request, response) => {
     response.status(500).json({
       success: false,
       error: true,
-      message: "Error fetching student",
+      message: error.message,
     });
   }
 };
 
-// Update student
-
+// ─── Update Student ───────────────────────────────────────────────
 export const updateStudent = async (request, response) => {
   try {
-    const studentId = request.params.id;
+    const updateData = normalizePayload(request.body, request.file);
 
-    // Verify the student exists
-    const existingStudent = await Student.findById(studentId);
-    if (!existingStudent) {
+    // Ek hi query — agar student nahi mila to null milega
+    const updatedStudent = await Student.findByIdAndUpdate(
+      request.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedStudent) {
       return response.status(404).json({
         success: false,
         error: true,
         message: "Student not found",
       });
     }
-
-    const updateData = normalizePayload(request.body, request.file);
-
-    const updatedStudent = await Student.findByIdAndUpdate(
-      studentId,
-      updateData,
-      {
-        new: true,
-      },
-    );
 
     response.status(200).json({
       success: true,
@@ -165,28 +164,24 @@ export const updateStudent = async (request, response) => {
     response.status(500).json({
       success: false,
       error: true,
-      message: "Error updating student",
+      message: error.message,
     });
   }
 };
 
-// Delete student
-
+// ─── Delete Student ───────────────────────────────────────────────
 export const deleteStudent = async (request, response) => {
   try {
-    const studentId = request.params.id;
+    // Ek hi query — find + delete ek saath
+    const deletedStudent = await Student.findByIdAndDelete(request.params.id);
 
-    // Verify the student exists
-    const existingStudent = await Student.findById(studentId);
-    if (!existingStudent) {
+    if (!deletedStudent) {
       return response.status(404).json({
         success: false,
         error: true,
         message: "Student not found",
       });
     }
-
-    const deletedStudent = await Student.findByIdAndDelete(studentId);
 
     response.status(200).json({
       success: true,
@@ -198,7 +193,7 @@ export const deleteStudent = async (request, response) => {
     response.status(500).json({
       success: false,
       error: true,
-      message: "Error deleting student",
+      message: error.message,
     });
   }
 };

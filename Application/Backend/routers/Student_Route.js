@@ -6,15 +6,16 @@ import {
   updateStudent,
   deleteStudent,
 } from "../controllers/Student_Controller.js";
+import { protect, authorize } from "../middleware/Auth_Middleware.js";
 
 const router = express.Router();
 
-//student routers
+// Student routes
 
-router.post("/", createStudent);
-router.get("/",getAllStudents);
-router.get("/:id",getSingleStudent);
-router.put("/:id", updateStudent);
-router.delete("/:id", deleteStudent);
+router.post("/", protect, authorize("admin"), createStudent);                   // POST   /api/students
+router.get("/", protect, authorize("admin", "teacher"), getAllStudents);        // GET    /api/students
+router.get("/:id", protect, authorize("admin", "teacher"), getSingleStudent);  // GET    /api/students/:id
+router.put("/:id", protect, authorize("admin"), updateStudent);                 // PUT    /api/students/:id
+router.delete("/:id", protect, authorize("admin"), deleteStudent);              // DELETE /api/students/:id
 
 export default router;

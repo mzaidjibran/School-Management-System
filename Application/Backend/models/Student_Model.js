@@ -4,75 +4,100 @@ const studentSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
-      required: [true, "First name is required"],
+      required: [true, "First name is mandatory"],
       trim: true,
-      minlength: [2, "First name must be at least 2 characters"],
-      maxlength: [50, "First name cannot exceed 50 characters"],
     },
     lastName: {
       type: String,
-      required: [true, "Last name is required"],
+      required: [true, "Last name is mandatory"],
       trim: true,
-      minlength: [2, "Last name must be at least 2 characters"],
-      maxlength: [50, "Last name cannot exceed 50 characters"],
     },
-
-    phone: {
-      type: String,
-      required: [true, "Phone number is required"],
-      trim: true,
-      maxlength: [20, "Phone number cannot exceed 20 characters"],
-    },
-
-    CNIC: {
-      type: String,
-      unique: true,
-      trim: true,
-      maxlength: [20, "CNIC cannot exceed 20 characters"],
-    },
-
     dateOfBirth: {
       type: Date,
-      default: Date.now,
+      required: [true, "Date of birth is mandatory"],
     },
-
     gender: {
       type: String,
-      enum: ["Male", "Female", "Other"],
+      enum: ["male", "female", "other"],
+      required: [true, "Gender is mandatory"],
+    },
+    profilePicture: {
+      type: String,
+      default: null,
     },
 
-    dateOfJoining: {
+    email: {
+      type: String,
+      unique: true,
+      sparse: true,
+      lowercase: true,
+      trim: true,
+    },
+    phone: {
+      type: String,
+      trim: true,
+    },
+    address: {
+      street: { type: String },
+      city:   { type: String },
+      state:  { type: String },
+      zip:    { type: String },
+    },
+
+    guardian: {
+      name:         { type: String, required: [true, "Guardian name is required"] },
+      relationship: { type: String, enum: ["father", "mother", "other"] },
+      phone:        { type: String, required: [true, "Guardian phone is required"] },
+      email:        { type: String, lowercase: true },
+      cnic:         { type: String },
+    },
+
+    rollNumber: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    admissionNumber: {
+      type: String,
+      unique: true,
+    },
+    admissionDate: {
       type: Date,
       default: Date.now,
+    },
+
+    currentClass: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Class",
+      default: null,
+    },
+    section: {
+      type: String,
+      default: null,
     },
 
     status: {
       type: String,
-      enum: ["Active", "Inactive", "Terminated", "On Leave"],
-      default: "Active",
+      enum: ["active", "inactive", "graduated", "expelled", "transferred"],
+      default: "active",
     },
 
-    // address: {
-    //   street: String,
-    //   city: String,
-    //   state: String,
-    //   country: String,
-    //   zipCode: String,
-    // },
+    documents: [
+      {
+        name: { type: String },  // e.g. "Birth Certificate"
+        url:  { type: String },  // file path / cloud URL
+        uploadedAt: { type: Date, default: Date.now },
+      },
+    ],
 
-    // user: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "User",
-    // },
-
-    // profileImage: {
-    //   type: String,
-    //   default: "",
-    // },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
   {
     timestamps: true,
-  },
+  }
 );
 
-export default mongoose.model("Student", studentSchema);
+export const Student = mongoose.model("Student", studentSchema);
