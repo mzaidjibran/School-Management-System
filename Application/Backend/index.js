@@ -11,6 +11,7 @@ import Fee_Route from "./routers/Fee_Route.js";
 import Auth_Route from "./routers/Auth_Route.js";
 import Class_Route from "./routers/Class_Route.js";
 import teacherRoutes from "./routers/Teacher_Route.js";
+import libraryRoutes from "./routes/Library_Routes.js";
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -30,7 +31,8 @@ app.use("/api/attendance", Attendence_Route);
 app.use("/api/class-assignment", classAssignment_route);
 app.use("/api/fee", Fee_Route);
 app.use("/api/classes", Class_Route);
-app.use("/api/teachers", teacherRoutes);              
+app.use("/api/teachers", teacherRoutes);
+app.use("/api/library", libraryRoutes);          
 
 app.get("/api/test", (req, res) => {
   res.json({ message: "API working successfully" });
