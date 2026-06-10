@@ -1,12 +1,3 @@
-import Card from "../../components/ui/Card";
-
 export default function SubjectList() {
-  return (
-    <Card>
-      <div>Math</div>
-      <div>Physics</div>
-      <div>Chemistry</div>
-      <div>English</div>
-    </Card>
-  );
+  return <h1 className="text-2xl font-bold">Subject List</h1>;
 }

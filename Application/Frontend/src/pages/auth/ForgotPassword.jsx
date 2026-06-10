@@ -1,13 +1,16 @@
-import Input from "../../components/ui/Input";
-import Button from "../../components/ui/Button";
-
 export default function ForgotPassword() {
   return (
     <div className="max-w-md mx-auto mt-20">
-      <Input label="Email Address" type="email" />
+      <input
+        type="email"
+        placeholder="Email Address"
+        className="border border-gray-300 rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
 
       <div className="mt-4">
-        <Button>Send Reset Link</Button>
+        <button className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          Send Reset Link
+        </button>
       </div>
     </div>
   );

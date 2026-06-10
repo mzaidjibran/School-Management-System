@@ -16,7 +16,6 @@ import StudentProfile from "../pages/students/StudentProfile";
 import TeacherPage from "../pages/teachers/TeacherPage";
 import TeacherList from "../pages/teachers/TeacherList";
 import AddTeacher from "../pages/teachers/AddTeacher";
-import TeacherProfile from "../pages/teachers/TeacherProfile";
 
 // Classes
 import ClassPage from "../pages/classes/ClassPage";
@@ -93,7 +92,6 @@ export default function AppRoutes() {
         <Route path="/teachers" element={<TeacherPage />}>
           <Route index element={<TeacherList />} />
           <Route path="add" element={<AddTeacher />} />
-          <Route path="profile" element={<TeacherProfile />} />
         </Route>
 
         {/* Classes */}

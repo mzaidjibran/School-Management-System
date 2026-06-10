@@ -1,5 +1,3 @@
-import Card from "../../components/ui/Card";
-
 export default function Timetable() {
-  return <Card>Weekly Timetable</Card>;
+  return <h1 className="text-3xl font-bold">Timetable</h1>;
 }
