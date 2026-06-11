@@ -11,10 +11,6 @@ export default function ClassPage() {
       label: "Add Class",
       path: "/classes/add",
     },
-    {
-      label: "Details",
-      path: "/classes/details",
-    },
   ];
 
   return (

@@ -9,8 +9,6 @@ import Dashboard from "../pages/dashboard/Dashboard";
 import StudentPage from "../pages/students/StudentPage";
 import StudentList from "../pages/students/StudentList";
 import AddStudent from "../pages/students/AddStudent";
-import EditStudent from "../pages/students/EditStudent";
-import StudentProfile from "../pages/students/StudentProfile";
 
 // Teachers
 import TeacherPage from "../pages/teachers/TeacherPage";
@@ -21,7 +19,6 @@ import AddTeacher from "../pages/teachers/AddTeacher";
 import ClassPage from "../pages/classes/ClassPage";
 import ClassList from "../pages/classes/ClassList";
 import AddClass from "../pages/classes/AddClass";
-import ClassDetails from "../pages/classes/ClassDetails";
 
 // Attendance
 import AttendancePage from "../pages/attendance/AttendancePage";
@@ -84,8 +81,6 @@ export default function AppRoutes() {
         <Route path="/students" element={<StudentPage />}>
           <Route index element={<StudentList />} />
           <Route path="add" element={<AddStudent />} />
-          <Route path="edit" element={<EditStudent />} />
-          <Route path="profile" element={<StudentProfile />} />
         </Route>
 
         {/* Teachers */}
@@ -98,7 +93,6 @@ export default function AppRoutes() {
         <Route path="/classes" element={<ClassPage />}>
           <Route index element={<ClassList />} />
           <Route path="add" element={<AddClass />} />
-          <Route path="details" element={<ClassDetails />} />
         </Route>
 
         {/* Attendance */}

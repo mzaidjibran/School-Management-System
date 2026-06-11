@@ -1,28 +1,16 @@
-import { NavLink, Routes, Route } from "react-router-dom";
-
-import StudentList from "./StudentList";
-import AddStudent from "./AddStudent";
-import EditStudent from "./EditStudent";
-import StudentProfile from "./StudentProfile";
+import TopTabs from "../../components/layouts/TopTabs";
+import { Outlet } from "react-router-dom";
 
 export default function StudentPage() {
+  const tabs = [
+    { label: "All Students", path: "/students" },
+    { label: "Add Student", path: "/students/add" },
+  ];
+
   return (
-    <div>
-      <h1>Students</h1>
-
-      <div className="sub-tabs">
-        <NavLink to="">All Students</NavLink>
-        <NavLink to="add">Add Student</NavLink>
-        <NavLink to="edit">Edit Student</NavLink>
-        <NavLink to="profile">Profile</NavLink>
-      </div>
-
-      <Routes>
-        <Route index element={<StudentList />} />
-        <Route path="add" element={<AddStudent />} />
-        <Route path="edit" element={<EditStudent />} />
-        <Route path="profile" element={<StudentProfile />} />
-      </Routes>
+    <div className="space-y-6">
+      <TopTabs tabs={tabs} />
+      <Outlet />
     </div>
   );
 }
