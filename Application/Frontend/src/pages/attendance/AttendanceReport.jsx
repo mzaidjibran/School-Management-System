@@ -1,20 +1,7 @@
 import { useState, useEffect } from "react";
-import {
-  FaFileCsv,
-  FaFileExcel,
-  FaFilePdf,
-  FaChartLine,
-  FaUserCheck,
-  FaUserTimes,
-  FaBed,
-  FaClock,
-} from "react-icons/fa";
 import * as XLSX from "xlsx";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import { saveAs } from "file-saver";
 
-// ---------- Dummy Data ----------
+// ---------- Data ----------
 const generateStudentReports = () => {
   const students = [
     {
@@ -79,8 +66,8 @@ const generateStudentReports = () => {
   });
 };
 
-const generateMonthlySummary = () => {
-  const months = [
+const generateMonthlySummary = () =>
+  [
     "Jan",
     "Feb",
     "Mar",
@@ -93,25 +80,44 @@ const generateMonthlySummary = () => {
     "Oct",
     "Nov",
     "Dec",
-  ];
-  return months.map((m) => ({
+  ].map((m) => ({
     month: m,
     present: Math.floor(Math.random() * 180) + 20,
     absent: Math.floor(Math.random() * 20),
     leave: Math.floor(Math.random() * 8),
     late: Math.floor(Math.random() * 6),
   }));
-};
 
-const generateClassWiseSummary = () => {
-  const classes = ["9th", "10th", "11th", "12th"];
-  return classes.map((c) => ({
+const generateClassWiseSummary = () =>
+  ["9th", "10th", "11th", "12th"].map((c) => ({
     class: c,
     totalStudents: Math.floor(Math.random() * 40) + 20,
     avgAttendance: Math.floor(Math.random() * 20) + 75,
   }));
+
+// ---------- Helpers ----------
+const avatarColors = [
+  "#6366f1",
+  "#8b5cf6",
+  "#ec4899",
+  "#f59e0b",
+  "#10b981",
+  "#3b82f6",
+];
+
+const getBarColor = (pct) => {
+  if (pct >= 90) return "linear-gradient(90deg,#10b981,#34d399)";
+  if (pct >= 75) return "linear-gradient(90deg,#f59e0b,#fbbf24)";
+  return "linear-gradient(90deg,#ef4444,#f87171)";
 };
 
+const getPctBadge = (pct) => {
+  if (pct >= 90) return { bg: "#d1fae5", color: "#065f46" };
+  if (pct >= 75) return { bg: "#fef3c7", color: "#92400e" };
+  return { bg: "#fee2e2", color: "#991b1b" };
+};
+
+// ---------- Component ----------
 export default function AttendanceReport() {
   const [studentData, setStudentData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -130,38 +136,30 @@ export default function AttendanceReport() {
       setStudentData(data);
       setFilteredData(data);
       setLoading(false);
-    }, 800);
+    }, 600);
   }, []);
 
   useEffect(() => {
-    let result = studentData;
-    if (classFilter) result = result.filter((s) => s.class === classFilter);
-    if (sectionFilter)
-      result = result.filter((s) => s.section === sectionFilter);
+    let r = studentData;
+    if (classFilter) r = r.filter((s) => s.class === classFilter);
+    if (sectionFilter) r = r.filter((s) => s.section === sectionFilter);
     if (studentFilter)
-      result = result.filter(
+      r = r.filter(
         (s) =>
           s.name.toLowerCase().includes(studentFilter.toLowerCase()) ||
           s.rollNo.includes(studentFilter),
       );
-    setFilteredData(result);
+    setFilteredData(r);
   }, [classFilter, sectionFilter, studentFilter, studentData]);
 
-  // Statistics
-  const totalPresentDays = filteredData.reduce((acc, s) => acc + s.present, 0);
-  const totalAbsentDays = filteredData.reduce((acc, s) => acc + s.absent, 0);
-  const totalLeaveDays = filteredData.reduce((acc, s) => acc + s.leave, 0);
-  const totalLateDays = filteredData.reduce((acc, s) => acc + s.late, 0);
-  const totalPossible = filteredData.reduce((acc, s) => acc + s.totalDays, 0);
-  const overallPercent = totalPossible
-    ? ((totalPresentDays / totalPossible) * 100).toFixed(1)
+  const totalPresent = filteredData.reduce((a, s) => a + s.present, 0);
+  const totalAbsent = filteredData.reduce((a, s) => a + s.absent, 0);
+  const totalLeave = filteredData.reduce((a, s) => a + s.leave, 0);
+  const totalLate = filteredData.reduce((a, s) => a + s.late, 0);
+  const totalPossible = filteredData.reduce((a, s) => a + s.totalDays, 0);
+  const overallPct = totalPossible
+    ? ((totalPresent / totalPossible) * 100).toFixed(1)
     : 0;
-
-  const getPercentColor = (percent) => {
-    if (percent >= 90) return "text-emerald-600 bg-emerald-50";
-    if (percent >= 75) return "text-amber-600 bg-amber-50";
-    return "text-rose-600 bg-rose-50";
-  };
 
   const topPerformers = filteredData
     .filter((s) => s.percent >= 90)
@@ -172,7 +170,6 @@ export default function AttendanceReport() {
     .sort((a, b) => a.percent - b.percent)
     .slice(0, 5);
 
-  // Export functions
   const exportCSV = () => {
     const headers = [
       "Roll No",
@@ -197,7 +194,10 @@ export default function AttendanceReport() {
       s.percent,
     ]);
     const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
-    saveAs(new Blob([csv], { type: "text/csv" }), "attendance_report.csv");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+    a.download = "attendance_report.csv";
+    a.click();
   };
   const exportExcel = () => {
     const ws = XLSX.utils.json_to_sheet(
@@ -214,233 +214,390 @@ export default function AttendanceReport() {
       })),
     );
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Attendance Report");
+    XLSX.utils.book_append_sheet(wb, ws, "Attendance");
     XLSX.writeFile(wb, "attendance_report.xlsx");
   };
-  const exportPDF = () => {
-    const doc = new jsPDF();
-    doc.text("Attendance Report", 14, 10);
-    autoTable(doc, {
-      startY: 20,
-      head: [
-        [
-          "Roll No",
-          "Student",
-          "Class",
-          "Section",
-          "Present",
-          "Absent",
-          "Leave",
-          "Late",
-          "Att %",
-        ],
-      ],
-      body: filteredData.map((s) => [
-        s.rollNo,
-        s.name,
-        s.class,
-        s.section,
-        s.present,
-        s.absent,
-        s.leave,
-        s.late,
-        `${s.percent}%`,
-      ]),
-      headStyles: { fillColor: [79, 70, 229] },
-    });
-    doc.save("attendance_report.pdf");
-  };
+  const exportPDF = () => window.print();
 
   const uniqueClasses = [...new Set(studentData.map((s) => s.class))];
   const uniqueSections = [...new Set(studentData.map((s) => s.section))];
 
-  // Shared compact input style
-  const inputCls =
-    "h-8 px-2.5 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full";
+  const inputStyle = {
+    height: 36,
+    padding: "0 12px",
+    fontSize: 13,
+    border: "1px solid #e2e8f0",
+    borderRadius: 10,
+    background: "#fff",
+    outline: "none",
+    width: "100%",
+    color: "#374151",
+    appearance: "none",
+  };
+
+  const statCards = [
+    {
+      label: "Overall Attendance",
+      value: `${overallPct}%`,
+      icon: "📈",
+      bg: "linear-gradient(135deg,#6366f1,#8b5cf6)",
+      sub: "all students",
+    },
+    {
+      label: "Present Days",
+      value: totalPresent,
+      icon: "✅",
+      bg: "linear-gradient(135deg,#10b981,#34d399)",
+      sub: "total days",
+    },
+    {
+      label: "Absent Days",
+      value: totalAbsent,
+      icon: "❌",
+      bg: "linear-gradient(135deg,#ef4444,#f87171)",
+      sub: "total days",
+    },
+    {
+      label: "Leave Days",
+      value: totalLeave,
+      icon: "🏖️",
+      bg: "linear-gradient(135deg,#f59e0b,#fbbf24)",
+      sub: "approved",
+    },
+    {
+      label: "Late Arrivals",
+      value: totalLate,
+      icon: "⏰",
+      bg: "linear-gradient(135deg,#3b82f6,#60a5fa)",
+      sub: "total entries",
+    },
+  ];
+
+  const exportBtns = [
+    {
+      label: "CSV",
+      icon: "📄",
+      color: "#059669",
+      bg: "#ecfdf5",
+      border: "#6ee7b7",
+      action: exportCSV,
+    },
+    {
+      label: "Excel",
+      icon: "📊",
+      color: "#16a34a",
+      bg: "#dcfce7",
+      border: "#86efac",
+      action: exportExcel,
+    },
+    {
+      label: "PDF",
+      icon: "📑",
+      color: "#dc2626",
+      bg: "#fef2f2",
+      border: "#fca5a5",
+      action: exportPDF,
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Breadcrumb */}
-        <nav className="flex mb-5 text-sm text-slate-500">
-          <span className="hover:text-indigo-600 cursor-pointer">
-            Dashboard
-          </span>
-          <span className="mx-2">/</span>
-          <span className="text-indigo-600 font-medium">
-            Attendance Reports
-          </span>
-        </nav>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#f1f5f9",
+        fontFamily: "'Inter', system-ui, sans-serif",
+      }}
+    >
+      <div style={{ maxWidth: 1140, margin: "0 auto", padding: "32px 20px" }}>
+        {/* ── Header Banner ── */}
+        <div
+          style={{
+            background:
+              "linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#312e81 100%)",
+            borderRadius: 20,
+            padding: "28px 32px",
+            marginBottom: 28,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 16,
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          {/* decorative blobs */}
+          <div
+            style={{
+              position: "absolute",
+              top: -40,
+              right: 80,
+              width: 160,
+              height: 160,
+              borderRadius: "50%",
+              background: "rgba(99,102,241,0.25)",
+              pointerEvents: "none",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              bottom: -30,
+              right: 20,
+              width: 100,
+              height: 100,
+              borderRadius: "50%",
+              background: "rgba(139,92,246,0.2)",
+              pointerEvents: "none",
+            }}
+          />
 
-        {/* Header */}
-        <div className="flex flex-wrap justify-between items-start gap-3 mb-7">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">
+          <div style={{ position: "relative" }}>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                color: "rgba(255,255,255,0.55)",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                marginBottom: 6,
+              }}
+            >
+              Dashboard / Reports
+            </div>
+            <h1
+              style={{
+                fontSize: 26,
+                fontWeight: 800,
+                color: "#fff",
+                margin: 0,
+              }}
+            >
               Attendance Reports
             </h1>
-            <p className="text-slate-500 text-sm mt-0.5">
+            <p
+              style={{
+                fontSize: 13,
+                color: "rgba(255,255,255,0.6)",
+                marginTop: 4,
+              }}
+            >
               Analytics and insights on student attendance
             </p>
           </div>
 
-          {/* Colorful export buttons */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={exportCSV}
-              title="Export CSV"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
-            >
-              <FaFileCsv className="text-emerald-600 text-sm" />
-              CSV
-            </button>
-            <button
-              onClick={exportExcel}
-              title="Export Excel"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
-            >
-              <FaFileExcel className="text-green-600 text-sm" />
-              Excel
-            </button>
-            <button
-              onClick={exportPDF}
-              title="Export PDF"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors"
-            >
-              <FaFilePdf className="text-rose-500 text-sm" />
-              PDF
-            </button>
+          <div style={{ display: "flex", gap: 10, position: "relative" }}>
+            {exportBtns.map(({ label, icon, color, bg, border, action }) => (
+              <button
+                key={label}
+                onClick={action}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "9px 16px",
+                  background: bg,
+                  border: `1.5px solid ${border}`,
+                  borderRadius: 10,
+                  color,
+                  fontWeight: 600,
+                  fontSize: 13,
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <span>{icon}</span>
+                {label}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-          {[
-            {
-              label: "Overall Attendance",
-              value: `${overallPercent}%`,
-              color: "text-indigo-600",
-              icon: <FaChartLine className="text-indigo-300 text-xl" />,
-            },
-            {
-              label: "Present %",
-              value: `${totalPossible ? ((totalPresentDays / totalPossible) * 100).toFixed(1) : 0}%`,
-              color: "text-emerald-600",
-              icon: <FaUserCheck className="text-emerald-300 text-xl" />,
-            },
-            {
-              label: "Absent %",
-              value: `${totalPossible ? ((totalAbsentDays / totalPossible) * 100).toFixed(1) : 0}%`,
-              color: "text-rose-600",
-              icon: <FaUserTimes className="text-rose-300   text-xl" />,
-            },
-            {
-              label: "Leave %",
-              value: `${totalPossible ? ((totalLeaveDays / totalPossible) * 100).toFixed(1) : 0}%`,
-              color: "text-amber-600",
-              icon: <FaBed className="text-amber-300  text-xl" />,
-            },
-            {
-              label: "Late %",
-              value: `${totalPossible ? ((totalLateDays / totalPossible) * 100).toFixed(1) : 0}%`,
-              color: "text-blue-600",
-              icon: <FaClock className="text-blue-300   text-xl" />,
-            },
-          ].map((card) => (
+        {/* ── Stat Cards ── */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))",
+            gap: 16,
+            marginBottom: 24,
+          }}
+        >
+          {statCards.map(({ label, value, icon, bg, sub }) => (
             <div
-              key={card.label}
-              className="bg-white rounded-2xl shadow-sm p-4 flex justify-between items-center"
+              key={label}
+              style={{
+                background: bg,
+                borderRadius: 16,
+                padding: "20px 22px",
+                color: "#fff",
+                boxShadow: "0 6px 24px rgba(0,0,0,0.13)",
+              }}
             >
-              <div>
-                <p className="text-xs text-slate-500 leading-tight">
-                  {card.label}
-                </p>
-                <p className={`text-xl font-bold mt-0.5 ${card.color}`}>
-                  {card.value}
-                </p>
+              <div style={{ fontSize: 26, marginBottom: 8 }}>{icon}</div>
+              <div style={{ fontSize: 30, fontWeight: 800, lineHeight: 1 }}>
+                {value}
               </div>
-              {card.icon}
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  opacity: 0.9,
+                  marginTop: 4,
+                }}
+              >
+                {label}
+              </div>
+              <div style={{ fontSize: 11, opacity: 0.65, marginTop: 2 }}>
+                {sub}
+              </div>
             </div>
           ))}
         </div>
 
-        {/* Filters — compact row */}
-        <div className="bg-white rounded-2xl shadow-sm px-4 py-3 mb-5">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 items-center">
-            {/* Search */}
-            <div className="lg:col-span-2">
-              <input
-                type="text"
-                placeholder="Search name or roll no…"
-                value={studentFilter}
-                onChange={(e) => setStudentFilter(e.target.value)}
-                className={inputCls}
-              />
-            </div>
-
-            {/* Class */}
+        {/* ── Filters ── */}
+        <div
+          style={{
+            background: "#fff",
+            borderRadius: 16,
+            padding: "18px 24px",
+            marginBottom: 20,
+            boxShadow: "0 1px 8px rgba(0,0,0,0.06)",
+            border: "1px solid #e2e8f0",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              color: "#94a3b8",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              marginBottom: 12,
+            }}
+          >
+            Filter Records
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr",
+              gap: 10,
+            }}
+          >
+            <input
+              type="text"
+              placeholder="🔍  Search name or roll no…"
+              value={studentFilter}
+              onChange={(e) => setStudentFilter(e.target.value)}
+              style={{ ...inputStyle, background: "#f8fafc" }}
+            />
             <select
               value={classFilter}
               onChange={(e) => setClassFilter(e.target.value)}
-              className={inputCls}
+              style={inputStyle}
             >
               <option value="">All Classes</option>
               {uniqueClasses.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
+                <option key={c}>{c}</option>
               ))}
             </select>
-
-            {/* Section */}
             <select
               value={sectionFilter}
               onChange={(e) => setSectionFilter(e.target.value)}
-              className={inputCls}
+              style={inputStyle}
             >
               <option value="">All Sections</option>
               {uniqueSections.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
+                <option key={s}>{s}</option>
               ))}
             </select>
-
-            {/* Date range */}
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className={inputCls}
+              style={inputStyle}
             />
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className={inputCls}
+              style={inputStyle}
             />
           </div>
         </div>
 
-        {/* Main Table */}
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden mb-7">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 border-b text-slate-600">
-                <tr>
+        {/* ── Main Table ── */}
+        <div
+          style={{
+            background: "#fff",
+            borderRadius: 16,
+            overflow: "hidden",
+            boxShadow: "0 1px 8px rgba(0,0,0,0.06)",
+            border: "1px solid #e2e8f0",
+            marginBottom: 24,
+          }}
+        >
+          <div
+            style={{
+              padding: "16px 24px",
+              borderBottom: "1px solid #f1f5f9",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              background: "linear-gradient(90deg,#fafbff,#f5f3ff)",
+            }}
+          >
+            <span style={{ fontWeight: 700, fontSize: 15, color: "#1e293b" }}>
+              Student Attendance
+            </span>
+            <span
+              style={{
+                background: "#ede9fe",
+                color: "#7c3aed",
+                fontSize: 12,
+                fontWeight: 600,
+                padding: "3px 12px",
+                borderRadius: 99,
+              }}
+            >
+              {filteredData.length} students
+            </span>
+          </div>
+
+          <div style={{ overflowX: "auto" }}>
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                fontSize: 13,
+              }}
+            >
+              <thead>
+                <tr style={{ background: "#f8fafc" }}>
                   {[
                     "Roll No",
                     "Student",
                     "Class",
-                    "Section",
+                    "Sec",
                     "Present",
                     "Absent",
                     "Leave",
                     "Late",
-                    "Attendance %",
+                    "Attendance",
                   ].map((h) => (
                     <th
                       key={h}
-                      className="text-left py-3 px-4 font-medium whitespace-nowrap"
+                      style={{
+                        padding: "11px 16px",
+                        textAlign: "left",
+                        color: "#64748b",
+                        fontWeight: 600,
+                        fontSize: 11,
+                        letterSpacing: "0.05em",
+                        textTransform: "uppercase",
+                        borderBottom: "1px solid #e2e8f0",
+                        whiteSpace: "nowrap",
+                      }}
                     >
                       {h}
                     </th>
@@ -450,94 +607,404 @@ export default function AttendanceReport() {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="9" className="p-10 text-center text-slate-400">
-                      Loading…
+                    <td
+                      colSpan={9}
+                      style={{
+                        padding: 48,
+                        textAlign: "center",
+                        color: "#94a3b8",
+                      }}
+                    >
+                      <div style={{ fontSize: 28, marginBottom: 8 }}>⏳</div>
+                      Loading records…
                     </td>
                   </tr>
                 ) : filteredData.length === 0 ? (
                   <tr>
-                    <td colSpan="9" className="p-10 text-center text-slate-400">
-                      No attendance records found
+                    <td
+                      colSpan={9}
+                      style={{
+                        padding: 48,
+                        textAlign: "center",
+                        color: "#94a3b8",
+                      }}
+                    >
+                      <div style={{ fontSize: 28, marginBottom: 8 }}>🔍</div>No
+                      records found
                     </td>
                   </tr>
                 ) : (
-                  filteredData.map((s) => (
-                    <tr
-                      key={s.id}
-                      className="border-b last:border-0 hover:bg-slate-50 transition-colors"
-                    >
-                      <td className="py-2.5 px-4 text-slate-500">{s.rollNo}</td>
-                      <td className="py-2.5 px-4 font-medium text-slate-800">
-                        {s.name}
-                      </td>
-                      <td className="py-2.5 px-4">{s.class}</td>
-                      <td className="py-2.5 px-4">{s.section}</td>
-                      <td className="py-2.5 px-4 text-emerald-600 font-medium">
-                        {s.present}
-                      </td>
-                      <td className="py-2.5 px-4 text-rose-500">{s.absent}</td>
-                      <td className="py-2.5 px-4 text-amber-500">{s.leave}</td>
-                      <td className="py-2.5 px-4 text-blue-500">{s.late}</td>
-                      <td className="py-2.5 px-4">
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-xs font-semibold ${getPercentColor(s.percent)}`}
+                  filteredData.map((s, i) => {
+                    const badge = getPctBadge(s.percent);
+                    return (
+                      <tr
+                        key={s.id}
+                        style={{ background: i % 2 === 0 ? "#fff" : "#fafbfc" }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.background = "#f5f3ff")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.background =
+                            i % 2 === 0 ? "#fff" : "#fafbfc")
+                        }
+                      >
+                        <td
+                          style={{
+                            padding: "12px 16px",
+                            borderBottom: "1px solid #f1f5f9",
+                          }}
                         >
-                          {s.percent}%
-                        </span>
-                      </td>
-                    </tr>
-                  ))
+                          <code
+                            style={{
+                              background: "#f1f5f9",
+                              padding: "2px 8px",
+                              borderRadius: 6,
+                              fontSize: 11,
+                              color: "#64748b",
+                            }}
+                          >
+                            {s.rollNo}
+                          </code>
+                        </td>
+                        <td
+                          style={{
+                            padding: "12px 16px",
+                            borderBottom: "1px solid #f1f5f9",
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 10,
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: 32,
+                                height: 32,
+                                borderRadius: 10,
+                                flexShrink: 0,
+                                background:
+                                  avatarColors[s.id % avatarColors.length],
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                color: "#fff",
+                                fontWeight: 700,
+                                fontSize: 13,
+                              }}
+                            >
+                              {s.name.charAt(0)}
+                            </div>
+                            <div>
+                              <div
+                                style={{ fontWeight: 600, color: "#1e293b" }}
+                              >
+                                {s.name}
+                              </div>
+                              <div style={{ fontSize: 11, color: "#94a3b8" }}>
+                                Section {s.section}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          style={{
+                            padding: "12px 16px",
+                            borderBottom: "1px solid #f1f5f9",
+                          }}
+                        >
+                          <span
+                            style={{
+                              background: "#ede9fe",
+                              color: "#6d28d9",
+                              padding: "3px 10px",
+                              borderRadius: 6,
+                              fontSize: 12,
+                              fontWeight: 600,
+                            }}
+                          >
+                            {s.class}
+                          </span>
+                        </td>
+                        <td
+                          style={{
+                            padding: "12px 16px",
+                            borderBottom: "1px solid #f1f5f9",
+                            color: "#64748b",
+                            fontWeight: 500,
+                          }}
+                        >
+                          {s.section}
+                        </td>
+                        <td
+                          style={{
+                            padding: "12px 16px",
+                            borderBottom: "1px solid #f1f5f9",
+                          }}
+                        >
+                          <span
+                            style={{
+                              color: "#059669",
+                              fontWeight: 700,
+                              fontSize: 14,
+                            }}
+                          >
+                            {s.present}
+                          </span>
+                        </td>
+                        <td
+                          style={{
+                            padding: "12px 16px",
+                            borderBottom: "1px solid #f1f5f9",
+                          }}
+                        >
+                          <span
+                            style={{
+                              color: "#dc2626",
+                              fontWeight: 700,
+                              fontSize: 14,
+                            }}
+                          >
+                            {s.absent}
+                          </span>
+                        </td>
+                        <td
+                          style={{
+                            padding: "12px 16px",
+                            borderBottom: "1px solid #f1f5f9",
+                          }}
+                        >
+                          <span
+                            style={{
+                              color: "#d97706",
+                              fontWeight: 700,
+                              fontSize: 14,
+                            }}
+                          >
+                            {s.leave}
+                          </span>
+                        </td>
+                        <td
+                          style={{
+                            padding: "12px 16px",
+                            borderBottom: "1px solid #f1f5f9",
+                          }}
+                        >
+                          <span
+                            style={{
+                              color: "#2563eb",
+                              fontWeight: 700,
+                              fontSize: 14,
+                            }}
+                          >
+                            {s.late}
+                          </span>
+                        </td>
+                        <td
+                          style={{
+                            padding: "12px 16px",
+                            borderBottom: "1px solid #f1f5f9",
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 8,
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: 56,
+                                height: 6,
+                                background: "#e2e8f0",
+                                borderRadius: 99,
+                                overflow: "hidden",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: `${s.percent}%`,
+                                  height: "100%",
+                                  background: getBarColor(s.percent),
+                                  borderRadius: 99,
+                                }}
+                              />
+                            </div>
+                            <span
+                              style={{
+                                padding: "3px 10px",
+                                borderRadius: 99,
+                                fontSize: 11,
+                                fontWeight: 700,
+                                background: badge.bg,
+                                color: badge.color,
+                              }}
+                            >
+                              {s.percent}%
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
           </div>
+
+          {!loading && filteredData.length > 0 && (
+            <div
+              style={{
+                padding: "12px 24px",
+                borderTop: "1px solid #f1f5f9",
+                background: "#f8fafc",
+                display: "flex",
+                justifyContent: "space-between",
+                fontSize: 12,
+                color: "#94a3b8",
+              }}
+            >
+              <span>
+                Showing {filteredData.length} of {studentData.length} students
+              </span>
+              <span>
+                {startDate} — {endDate}
+              </span>
+            </div>
+          )}
         </div>
 
-        {/* Analytics Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+        {/* ── Analytics Grid ── */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 20,
+            marginBottom: 20,
+          }}
+        >
           {/* Monthly Summary */}
-          <div className="bg-white rounded-2xl shadow-sm p-5">
-            <h3 className="font-semibold text-slate-800 mb-3 text-sm">
-              Monthly Attendance Summary
-            </h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: 16,
+              overflow: "hidden",
+              boxShadow: "0 1px 8px rgba(0,0,0,0.06)",
+              border: "1px solid #e2e8f0",
+            }}
+          >
+            <div
+              style={{
+                padding: "16px 20px",
+                borderBottom: "1px solid #f1f5f9",
+                background: "linear-gradient(90deg,#fafbff,#f0fdf4)",
+              }}
+            >
+              <span style={{ fontWeight: 700, fontSize: 14, color: "#1e293b" }}>
+                📅 Monthly Summary
+              </span>
+            </div>
+            <div style={{ overflowX: "auto" }}>
+              <table
+                style={{
+                  width: "100%",
+                  borderCollapse: "collapse",
+                  fontSize: 12,
+                }}
+              >
                 <thead>
-                  <tr className="text-slate-500 border-b">
-                    <th className="text-left py-2 font-medium">Month</th>
-                    <th className="text-center py-2 font-medium text-emerald-600">
-                      Present
-                    </th>
-                    <th className="text-center py-2 font-medium text-rose-500">
-                      Absent
-                    </th>
-                    <th className="text-center py-2 font-medium text-amber-500">
-                      Leave
-                    </th>
-                    <th className="text-center py-2 font-medium text-blue-500">
-                      Late
-                    </th>
+                  <tr style={{ background: "#f8fafc" }}>
+                    {[
+                      { h: "Month", color: "#64748b" },
+                      { h: "Present", color: "#059669" },
+                      { h: "Absent", color: "#dc2626" },
+                      { h: "Leave", color: "#d97706" },
+                      { h: "Late", color: "#2563eb" },
+                    ].map(({ h, color }) => (
+                      <th
+                        key={h}
+                        style={{
+                          padding: "9px 14px",
+                          textAlign: h === "Month" ? "left" : "center",
+                          color,
+                          fontWeight: 600,
+                          borderBottom: "1px solid #e2e8f0",
+                          fontSize: 11,
+                        }}
+                      >
+                        {h}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {monthlyData.map((m) => (
+                  {monthlyData.map((m, i) => (
                     <tr
                       key={m.month}
-                      className="border-b last:border-0 hover:bg-slate-50"
+                      style={{ background: i % 2 === 0 ? "#fff" : "#fafbfc" }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.background = "#f5f3ff")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.background =
+                          i % 2 === 0 ? "#fff" : "#fafbfc")
+                      }
                     >
-                      <td className="py-1.5 font-medium text-slate-700">
+                      <td
+                        style={{
+                          padding: "8px 14px",
+                          fontWeight: 600,
+                          color: "#374151",
+                          borderBottom: "1px solid #f1f5f9",
+                        }}
+                      >
                         {m.month}
                       </td>
-                      <td className="py-1.5 text-center text-emerald-600">
+                      <td
+                        style={{
+                          padding: "8px 14px",
+                          textAlign: "center",
+                          color: "#059669",
+                          fontWeight: 600,
+                          borderBottom: "1px solid #f1f5f9",
+                        }}
+                      >
                         {m.present}
                       </td>
-                      <td className="py-1.5 text-center text-rose-500">
+                      <td
+                        style={{
+                          padding: "8px 14px",
+                          textAlign: "center",
+                          color: "#dc2626",
+                          fontWeight: 600,
+                          borderBottom: "1px solid #f1f5f9",
+                        }}
+                      >
                         {m.absent}
                       </td>
-                      <td className="py-1.5 text-center text-amber-500">
+                      <td
+                        style={{
+                          padding: "8px 14px",
+                          textAlign: "center",
+                          color: "#d97706",
+                          fontWeight: 600,
+                          borderBottom: "1px solid #f1f5f9",
+                        }}
+                      >
                         {m.leave}
                       </td>
-                      <td className="py-1.5 text-center text-blue-500">
+                      <td
+                        style={{
+                          padding: "8px 14px",
+                          textAlign: "center",
+                          color: "#2563eb",
+                          fontWeight: 600,
+                          borderBottom: "1px solid #f1f5f9",
+                        }}
+                      >
                         {m.late}
                       </td>
                     </tr>
@@ -548,81 +1015,333 @@ export default function AttendanceReport() {
           </div>
 
           {/* Class Wise */}
-          <div className="bg-white rounded-2xl shadow-sm p-5">
-            <h3 className="font-semibold text-slate-800 mb-4 text-sm">
-              Class Wise Attendance
-            </h3>
-            <div className="space-y-4">
-              {classWiseData.map((c) => (
-                <div key={c.class}>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="font-medium text-slate-700">
-                      Class {c.class}
-                    </span>
-                    <span className="font-semibold text-indigo-600">
-                      {c.avgAttendance}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-slate-100 rounded-full h-1.5">
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: 16,
+              overflow: "hidden",
+              boxShadow: "0 1px 8px rgba(0,0,0,0.06)",
+              border: "1px solid #e2e8f0",
+            }}
+          >
+            <div
+              style={{
+                padding: "16px 20px",
+                borderBottom: "1px solid #f1f5f9",
+                background: "linear-gradient(90deg,#fafbff,#faf5ff)",
+              }}
+            >
+              <span style={{ fontWeight: 700, fontSize: 14, color: "#1e293b" }}>
+                🏫 Class-wise Attendance
+              </span>
+            </div>
+            <div style={{ padding: "20px" }}>
+              {classWiseData.map((c, i) => {
+                const colors = [
+                  "linear-gradient(90deg,#6366f1,#818cf8)",
+                  "linear-gradient(90deg,#8b5cf6,#a78bfa)",
+                  "linear-gradient(90deg,#ec4899,#f472b6)",
+                  "linear-gradient(90deg,#f59e0b,#fbbf24)",
+                ];
+                return (
+                  <div
+                    key={c.class}
+                    style={{
+                      marginBottom: i < classWiseData.length - 1 ? 20 : 0,
+                    }}
+                  >
                     <div
-                      className="bg-indigo-500 h-1.5 rounded-full transition-all duration-500"
-                      style={{ width: `${c.avgAttendance}%` }}
-                    />
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        marginBottom: 6,
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: 8,
+                            background: colors[i % colors.length],
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "#fff",
+                            fontSize: 11,
+                            fontWeight: 700,
+                          }}
+                        >
+                          {c.class.replace("th", "")}
+                        </div>
+                        <span
+                          style={{
+                            fontWeight: 600,
+                            fontSize: 13,
+                            color: "#374151",
+                          }}
+                        >
+                          Class {c.class}
+                        </span>
+                        <span style={{ fontSize: 11, color: "#94a3b8" }}>
+                          {c.totalStudents} students
+                        </span>
+                      </div>
+                      <span
+                        style={{
+                          fontWeight: 700,
+                          fontSize: 14,
+                          color: "#6366f1",
+                        }}
+                      >
+                        {c.avgAttendance}%
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        height: 8,
+                        background: "#e2e8f0",
+                        borderRadius: 99,
+                        overflow: "hidden",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: `${c.avgAttendance}%`,
+                          height: "100%",
+                          background: colors[i % colors.length],
+                          borderRadius: 99,
+                          transition: "width 0.6s ease",
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
 
-        {/* Top Performers & Low Attendance */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <div className="bg-white rounded-2xl shadow-sm p-5">
-            <h3 className="font-semibold text-emerald-700 mb-3 text-sm">
-              🏆 Top Performers (≥90%)
-            </h3>
-            {topPerformers.length ? (
-              <ul className="divide-y divide-slate-100">
-                {topPerformers.map((s) => (
-                  <li
+        {/* ── Top & Low ── */}
+        <div
+          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}
+        >
+          {/* Top Performers */}
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: 16,
+              overflow: "hidden",
+              boxShadow: "0 1px 8px rgba(0,0,0,0.06)",
+              border: "1px solid #e2e8f0",
+            }}
+          >
+            <div
+              style={{
+                padding: "16px 20px",
+                borderBottom: "1px solid #f1f5f9",
+                background: "linear-gradient(90deg,#f0fdf4,#dcfce7)",
+              }}
+            >
+              <span style={{ fontWeight: 700, fontSize: 14, color: "#065f46" }}>
+                🏆 Top Performers ≥ 90%
+              </span>
+            </div>
+            <div style={{ padding: "8px 0" }}>
+              {topPerformers.length ? (
+                topPerformers.map((s, i) => (
+                  <div
                     key={s.id}
-                    className="flex justify-between items-center py-2 text-sm"
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "10px 20px",
+                      borderBottom:
+                        i < topPerformers.length - 1
+                          ? "1px solid #f1f5f9"
+                          : "none",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.background = "#f0fdf4")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.background = "transparent")
+                    }
                   >
-                    <span className="text-slate-700">{s.name}</span>
-                    <span className="text-emerald-600 font-semibold">
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 10 }}
+                    >
+                      <div
+                        style={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: 8,
+                          background: avatarColors[s.id % avatarColors.length],
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "#fff",
+                          fontWeight: 700,
+                          fontSize: 12,
+                        }}
+                      >
+                        {s.name.charAt(0)}
+                      </div>
+                      <div>
+                        <div
+                          style={{
+                            fontWeight: 600,
+                            fontSize: 13,
+                            color: "#1e293b",
+                          }}
+                        >
+                          {s.name}
+                        </div>
+                        <div style={{ fontSize: 11, color: "#94a3b8" }}>
+                          {s.class} — {s.rollNo}
+                        </div>
+                      </div>
+                    </div>
+                    <span
+                      style={{
+                        background: "#d1fae5",
+                        color: "#065f46",
+                        padding: "4px 12px",
+                        borderRadius: 99,
+                        fontWeight: 700,
+                        fontSize: 13,
+                      }}
+                    >
                       {s.percent}%
                     </span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-slate-400 text-sm">No students in top range</p>
-            )}
+                  </div>
+                ))
+              ) : (
+                <div
+                  style={{
+                    padding: "32px 20px",
+                    textAlign: "center",
+                    color: "#94a3b8",
+                    fontSize: 13,
+                  }}
+                >
+                  No students in top range
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm p-5">
-            <h3 className="font-semibold text-rose-600 mb-3 text-sm">
-              ⚠️ Low Attendance (&lt;75%)
-            </h3>
-            {lowAttendance.length ? (
-              <ul className="divide-y divide-slate-100">
-                {lowAttendance.map((s) => (
-                  <li
+          {/* Low Attendance */}
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: 16,
+              overflow: "hidden",
+              boxShadow: "0 1px 8px rgba(0,0,0,0.06)",
+              border: "1px solid #e2e8f0",
+            }}
+          >
+            <div
+              style={{
+                padding: "16px 20px",
+                borderBottom: "1px solid #f1f5f9",
+                background: "linear-gradient(90deg,#fff1f2,#fee2e2)",
+              }}
+            >
+              <span style={{ fontWeight: 700, fontSize: 14, color: "#991b1b" }}>
+                ⚠️ Low Attendance &lt; 75%
+              </span>
+            </div>
+            <div style={{ padding: "8px 0" }}>
+              {lowAttendance.length ? (
+                lowAttendance.map((s, i) => (
+                  <div
                     key={s.id}
-                    className="flex justify-between items-center py-2 text-sm"
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "10px 20px",
+                      borderBottom:
+                        i < lowAttendance.length - 1
+                          ? "1px solid #f1f5f9"
+                          : "none",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.background = "#fff1f2")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.background = "transparent")
+                    }
                   >
-                    <span className="text-slate-700">{s.name}</span>
-                    <span className="text-rose-500 font-semibold">
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 10 }}
+                    >
+                      <div
+                        style={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: 8,
+                          background: "#fee2e2",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "#ef4444",
+                          fontWeight: 700,
+                          fontSize: 12,
+                        }}
+                      >
+                        {s.name.charAt(0)}
+                      </div>
+                      <div>
+                        <div
+                          style={{
+                            fontWeight: 600,
+                            fontSize: 13,
+                            color: "#1e293b",
+                          }}
+                        >
+                          {s.name}
+                        </div>
+                        <div style={{ fontSize: 11, color: "#94a3b8" }}>
+                          {s.class} — {s.rollNo}
+                        </div>
+                      </div>
+                    </div>
+                    <span
+                      style={{
+                        background: "#fee2e2",
+                        color: "#991b1b",
+                        padding: "4px 12px",
+                        borderRadius: 99,
+                        fontWeight: 700,
+                        fontSize: 13,
+                      }}
+                    >
                       {s.percent}%
                     </span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-slate-400 text-sm">
-                All students have good attendance ✓
-              </p>
-            )}
+                  </div>
+                ))
+              ) : (
+                <div
+                  style={{
+                    padding: "32px 20px",
+                    textAlign: "center",
+                    color: "#94a3b8",
+                    fontSize: 13,
+                  }}
+                >
+                  ✓ All students have good attendance
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

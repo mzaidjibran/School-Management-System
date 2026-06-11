@@ -1,19 +1,14 @@
 import { useState, useEffect } from "react";
+import * as XLSX from "xlsx";
 import {
   FaFileCsv,
   FaFileExcel,
-  FaFilePdf,
   FaPrint,
+  FaSearch,
   FaEye,
-  FaTrophy,
-  FaChartLine,
 } from "react-icons/fa";
-import * as XLSX from "xlsx";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import { saveAs } from "file-saver";
 
-// ---------- Dummy Results Data ----------
+// ---------- Dummy Data ----------
 const generateResults = () => {
   const students = [
     {
@@ -77,122 +72,223 @@ const generateResults = () => {
   });
 };
 
-const calculateGrade = (percentage) => {
-  if (percentage >= 90) return "A+";
-  if (percentage >= 80) return "A";
-  if (percentage >= 70) return "B";
-  if (percentage >= 60) return "C";
-  if (percentage >= 50) return "D";
+const calculateGrade = (p) => {
+  if (p >= 90) return "A+";
+  if (p >= 80) return "A";
+  if (p >= 70) return "B";
+  if (p >= 60) return "C";
+  if (p >= 50) return "D";
   return "F";
 };
 
-const getPerformanceColor = (percent) => {
-  if (percent >= 80) return "text-emerald-600 bg-emerald-50";
-  if (percent >= 60) return "text-blue-600 bg-blue-50";
-  if (percent >= 40) return "text-amber-600 bg-amber-50";
-  return "text-rose-600 bg-rose-50";
+const gradeColor = (grade) => {
+  const map = {
+    "A+": "bg-indigo-600",
+    A: "bg-violet-600",
+    B: "bg-blue-500",
+    C: "bg-amber-500",
+    D: "bg-orange-500",
+    F: "bg-red-500",
+  };
+  return map[grade] || "bg-slate-500";
 };
 
-const ResultBadge = ({ status }) => (
-  <span
-    className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${status === "Pass" ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800"}`}
-  >
-    {status}
-  </span>
+// ---------- Stats Card ----------
+const StatsCard = ({ label, value, bgColor, iconColor, icon }) => (
+  <div className="bg-white rounded-xl shadow-sm border border-slate-100">
+    <div className="p-4 flex justify-between items-center">
+      <div>
+        <p className="text-sm text-slate-500">{label}</p>
+        <p className="text-2xl font-bold text-slate-800">{value}</p>
+      </div>
+      <div
+        className={`w-10 h-10 rounded-full ${bgColor} flex items-center justify-center`}
+      >
+        <svg
+          className={`w-5 h-5 ${iconColor}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d={icon}
+          />
+        </svg>
+      </div>
+    </div>
+  </div>
 );
 
-// ---------- Student Result Modal ----------
+// ---------- View Modal ----------
 const StudentResultModal = ({ student, onClose }) => {
   if (!student) return null;
-  // Subject wise dummy marks
   const subjects = ["Mathematics", "Physics", "Chemistry", "English", "Urdu"];
   const subjectMarks = subjects.map((s) => ({
     subject: s,
     obtained: Math.floor(Math.random() * 80) + 20,
     total: 100,
   }));
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4 max-h-[85vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
-          <h3 className="text-lg font-bold text-slate-800">
-            Student Result Detail
-          </h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-5 flex justify-between items-start">
+          <div>
+            <p className="text-xs font-semibold text-indigo-200 uppercase tracking-widest mb-1">
+              Student Result
+            </p>
+            <h2 className="text-xl font-bold text-white">{student.name}</h2>
+            <p className="text-sm text-indigo-200 mt-1">
+              Roll No: {student.rollNo} &nbsp;·&nbsp; Class: {student.class}{" "}
+              &nbsp;·&nbsp; {student.examName}
+            </p>
+          </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600"
+            className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/20 text-white hover:bg-white/30 transition text-sm"
           >
             ✕
           </button>
         </div>
-        <div className="p-6">
-          <div className="mb-6">
-            <h4 className="text-xl font-semibold">{student.name}</h4>
-            <p className="text-slate-500">
-              Roll No: {student.rollNo} | Class: {student.class} | Exam:{" "}
-              {student.examName}
+
+        {/* Content */}
+        <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
+          {/* Summary Cards */}
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              {
+                label: "Total Marks",
+                value: student.totalMarks,
+                color: "text-slate-700",
+              },
+              {
+                label: "Obtained",
+                value: student.obtained,
+                color: "text-indigo-600",
+              },
+              {
+                label: "Percentage",
+                value: `${student.percentage}%`,
+                color: "text-violet-600",
+              },
+              { label: "Grade", value: student.grade, color: "text-slate-800" },
+            ].map(({ label, value, color }) => (
+              <div
+                key={label}
+                className="bg-slate-50 border border-slate-100 rounded-xl p-4"
+              >
+                <p className="text-xs text-slate-400 mb-1">{label}</p>
+                <p className={`text-2xl font-bold ${color}`}>{value}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Status Banner */}
+          <div
+            className={`rounded-xl px-4 py-3 flex items-center gap-2 text-sm font-semibold border
+            ${
+              student.status === "Pass"
+                ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                : "bg-red-50 border-red-200 text-red-800"
+            }`}
+          >
+            <span>{student.status === "Pass" ? "🎉" : "⚠️"}</span>
+            {student.status === "Pass"
+              ? `Passed with ${student.grade} Grade`
+              : "Failed — Improvement Required"}
+          </div>
+
+          {/* Subject Table */}
+          <div>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+              Subject-wise Breakdown
             </p>
-          </div>
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="p-3 bg-slate-50 rounded-xl">
-              <p className="text-sm text-slate-500">Total Marks</p>
-              <p className="text-xl font-bold">{student.totalMarks}</p>
-            </div>
-            <div className="p-3 bg-slate-50 rounded-xl">
-              <p className="text-sm text-slate-500">Obtained Marks</p>
-              <p className="text-xl font-bold">{student.obtained}</p>
-            </div>
-            <div className="p-3 bg-slate-50 rounded-xl">
-              <p className="text-sm text-slate-500">Percentage</p>
-              <p className="text-xl font-bold text-indigo-600">
-                {student.percentage}%
-              </p>
-            </div>
-            <div className="p-3 bg-slate-50 rounded-xl">
-              <p className="text-sm text-slate-500">Grade</p>
-              <p className="text-xl font-bold">{student.grade}</p>
-            </div>
-          </div>
-          <h5 className="font-semibold mb-2">Subject Wise Marks</h5>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b">
-                <th className="text-left py-2">Subject</th>
-                <th className="text-left py-2">Obtained</th>
-                <th className="text-left py-2">Total</th>
-                <th className="text-left py-2">%</th>
-                <th>Grade</th>
-              </tr>
-            </thead>
-            <tbody>
-              {subjectMarks.map((s) => {
-                const percent = (s.obtained / s.total) * 100;
-                return (
-                  <tr key={s.subject} className="border-b">
-                    <td className="py-2">{s.subject}</td>
-                    <td>{s.obtained}</td>
-                    <td>{s.total}</td>
-                    <td>{percent.toFixed(1)}%</td>
-                    <td>{calculateGrade(percent)}</td>
+            <div className="border border-slate-100 rounded-xl overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50">
+                  <tr>
+                    {[
+                      "Subject",
+                      "Obtained",
+                      "Total",
+                      "Percentage",
+                      "Grade",
+                    ].map((h) => (
+                      <th
+                        key={h}
+                        className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide border-b border-slate-100"
+                      >
+                        {h}
+                      </th>
+                    ))}
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          <div className="mt-6">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg w-full"
-            >
-              Close
-            </button>
+                </thead>
+                <tbody>
+                  {subjectMarks.map((s, i) => {
+                    const pct = ((s.obtained / s.total) * 100).toFixed(1);
+                    const g = calculateGrade(pct);
+                    return (
+                      <tr
+                        key={s.subject}
+                        className={i % 2 === 0 ? "bg-white" : "bg-slate-50/50"}
+                      >
+                        <td className="px-4 py-3 font-medium text-slate-700 border-b border-slate-50">
+                          {s.subject}
+                        </td>
+                        <td className="px-4 py-3 text-slate-600 border-b border-slate-50">
+                          {s.obtained}
+                        </td>
+                        <td className="px-4 py-3 text-slate-600 border-b border-slate-50">
+                          {s.total}
+                        </td>
+                        <td className="px-4 py-3 border-b border-slate-50">
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-indigo-500 rounded-full"
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+                            <span className="text-xs text-slate-500 w-9">
+                              {pct}%
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 border-b border-slate-50">
+                          <span
+                            className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold text-white ${gradeColor(g)}`}
+                          >
+                            {g}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-slate-100">
+          <button
+            onClick={onClose}
+            className="w-full py-2.5 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition"
+          >
+            Close
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
+// ---------- Main Component ----------
 export default function ResultReport() {
   const [results, setResults] = useState([]);
   const [filtered, setFiltered] = useState([]);
@@ -208,18 +304,18 @@ export default function ResultReport() {
       setResults(data);
       setFiltered(data);
       setLoading(false);
-    }, 800);
+    }, 600);
   }, []);
 
   useEffect(() => {
-    let result = results;
-    if (examFilter) result = result.filter((r) => r.examName === examFilter);
-    if (classFilter) result = result.filter((r) => r.class === classFilter);
+    let r = results;
+    if (examFilter) r = r.filter((x) => x.examName === examFilter);
+    if (classFilter) r = r.filter((x) => x.class === classFilter);
     if (studentFilter)
-      result = result.filter((r) =>
-        r.name.toLowerCase().includes(studentFilter.toLowerCase()),
+      r = r.filter((x) =>
+        x.name.toLowerCase().includes(studentFilter.toLowerCase()),
       );
-    setFiltered(result);
+    setFiltered(r);
   }, [examFilter, classFilter, studentFilter, results]);
 
   const totalStudents = filtered.length;
@@ -254,8 +350,12 @@ export default function ResultReport() {
       r.status,
     ]);
     const csv = [headers, ...rows].map((row) => row.join(",")).join("\n");
-    saveAs(new Blob([csv], { type: "text/csv" }), "results.csv");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+    a.download = "results.csv";
+    a.click();
   };
+
   const exportExcel = () => {
     const ws = XLSX.utils.json_to_sheet(
       filtered.map((r) => ({
@@ -273,209 +373,271 @@ export default function ResultReport() {
     XLSX.utils.book_append_sheet(wb, ws, "Results");
     XLSX.writeFile(wb, "results.xlsx");
   };
-  const exportPDF = () => {
-    const doc = new jsPDF();
-    doc.text("Result Report", 14, 10);
-    autoTable(doc, {
-      startY: 20,
-      head: [
-        [
-          "Roll No",
-          "Student",
-          "Class",
-          "Total",
-          "Obtained",
-          "Percent",
-          "Grade",
-          "Result",
-        ],
-      ],
-      body: filtered.map((r) => [
-        r.rollNo,
-        r.name,
-        r.class,
-        r.totalMarks,
-        r.obtained,
-        `${r.percentage}%`,
-        r.grade,
-        r.status,
-      ]),
-      headStyles: { fillColor: [79, 70, 229] },
-    });
-    doc.save("results.pdf");
-  };
-  const printResult = () => window.print();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <nav className="flex mb-6 text-sm">
-          <span>Dashboard</span>
-          <span className="mx-2">/</span>
-          <span className="text-indigo-600">Results</span>
-        </nav>
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-2xl font-bold">Results</h1>
-            <p className="text-slate-500">
-              View student results and performance analytics
-            </p>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <p className="text-xs text-slate-400 mb-1">Dashboard / Results</p>
+          <h1 className="text-2xl font-bold text-slate-800">Result Report</h1>
+          <p className="text-sm text-slate-500 mt-0.5">
+            Final Term 2025 — Student performance overview
+          </p>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <StatsCard
+          label="Total Students"
+          value={totalStudents}
+          bgColor="bg-indigo-100"
+          iconColor="text-indigo-600"
+          icon="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+        />
+        <StatsCard
+          label="Passed"
+          value={passed}
+          bgColor="bg-emerald-100"
+          iconColor="text-emerald-600"
+          icon="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+        <StatsCard
+          label="Failed"
+          value={failed}
+          bgColor="bg-red-100"
+          iconColor="text-red-500"
+          icon="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+        <StatsCard
+          label="Pass Rate"
+          value={`${passPercent}%`}
+          bgColor="bg-amber-100"
+          iconColor="text-amber-600"
+          icon="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+        />
+      </div>
+
+      {/* Filters + Exports in one box */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+        <div className="flex flex-wrap gap-3 items-center">
+          {/* Search */}
+          <div className="relative flex-1 min-w-[200px]">
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
+            <input
+              type="text"
+              placeholder="Search student name..."
+              value={studentFilter}
+              onChange={(e) => setStudentFilter(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+            />
           </div>
-          <div className="flex gap-2">
+          {/* Exam filter */}
+          <select
+            value={examFilter}
+            onChange={(e) => setExamFilter(e.target.value)}
+            className="px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="">All Exams</option>
+            {uniqueExams.map((e) => (
+              <option key={e}>{e}</option>
+            ))}
+          </select>
+          {/* Class filter */}
+          <select
+            value={classFilter}
+            onChange={(e) => setClassFilter(e.target.value)}
+            className="px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="">All Classes</option>
+            {uniqueClasses.map((c) => (
+              <option key={c}>{c}</option>
+            ))}
+          </select>
+          {/* Exports */}
+          <div className="flex gap-2 ml-auto">
             <button
               onClick={exportCSV}
-              className="p-2 bg-white border rounded-xl"
+              title="Export CSV"
+              className="p-2 bg-slate-100 hover:bg-slate-200 rounded-lg transition"
             >
-              <FaFileCsv />
+              <FaFileCsv className="text-slate-600 w-4 h-4" />
             </button>
             <button
               onClick={exportExcel}
-              className="p-2 bg-white border rounded-xl"
+              title="Export Excel"
+              className="p-2 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition"
             >
-              <FaFileExcel />
+              <FaFileExcel className="text-emerald-600 w-4 h-4" />
             </button>
             <button
-              onClick={exportPDF}
-              className="p-2 bg-white border rounded-xl"
+              onClick={() => window.print()}
+              title="Print"
+              className="p-2 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition"
             >
-              <FaFilePdf />
-            </button>
-            <button
-              onClick={printResult}
-              className="p-2 bg-white border rounded-xl"
-            >
-              <FaPrint />
+              <FaPrint className="text-indigo-600 w-4 h-4" />
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-8">
-          <div className="bg-white rounded-2xl p-5">
-            <div>
-              <p className="text-sm text-slate-500">Total Students</p>
-              <p className="text-2xl font-bold">{totalStudents}</p>
-            </div>
-          </div>
-          <div className="bg-white rounded-2xl p-5">
-            <div>
-              <p className="text-sm text-slate-500">Passed</p>
-              <p className="text-2xl font-bold text-emerald-600">{passed}</p>
-            </div>
-          </div>
-          <div className="bg-white rounded-2xl p-5">
-            <div>
-              <p className="text-sm text-slate-500">Failed</p>
-              <p className="text-2xl font-bold text-rose-600">{failed}</p>
-            </div>
-          </div>
-          <div className="bg-white rounded-2xl p-5">
-            <div>
-              <p className="text-sm text-slate-500">Pass %</p>
-              <p className="text-2xl font-bold text-indigo-600">
-                {passPercent}%
-              </p>
-            </div>
-          </div>
+      {/* Table */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+          <span className="font-semibold text-slate-800 text-sm">Students</span>
+          <span className="bg-indigo-50 text-indigo-600 text-xs font-semibold px-3 py-1 rounded-full">
+            {filtered.length} records
+          </span>
         </div>
-
-        {/* Filters */}
-        <div className="bg-white rounded-2xl shadow-sm p-5 mb-6">
-          <div className="grid md:grid-cols-3 gap-4">
-            <select
-              value={examFilter}
-              onChange={(e) => setExamFilter(e.target.value)}
-            >
-              <option value="">All Exams</option>
-              {uniqueExams.map((e) => (
-                <option key={e}>{e}</option>
-              ))}
-            </select>
-            <select
-              value={classFilter}
-              onChange={(e) => setClassFilter(e.target.value)}
-            >
-              <option value="">All Classes</option>
-              {uniqueClasses.map((c) => (
-                <option key={c}>{c}</option>
-              ))}
-            </select>
-            <input
-              type="text"
-              placeholder="Search student..."
-              value={studentFilter}
-              onChange={(e) => setStudentFilter(e.target.value)}
-              className="border rounded-xl px-3 py-2"
-            />
-          </div>
-        </div>
-
-        {/* Results Table */}
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-slate-50 border-b">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-slate-50 border-b border-slate-200">
+              <tr>
+                {[
+                  "Roll No",
+                  "Student Name",
+                  "Class",
+                  "Total",
+                  "Obtained",
+                  "Percentage",
+                  "Grade",
+                  "Result",
+                  "",
+                ].map((h) => (
+                  <th
+                    key={h}
+                    className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap"
+                  >
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
                 <tr>
-                  <th className="text-left py-3 px-4">Roll No</th>
-                  <th>Student</th>
-                  <th>Class</th>
-                  <th>Total</th>
-                  <th>Obtained</th>
-                  <th>%</th>
-                  <th>Grade</th>
-                  <th>Result</th>
-                  <th>Actions</th>
+                  <td
+                    colSpan={9}
+                    className="px-5 py-12 text-center text-slate-400 text-sm"
+                  >
+                    Loading results...
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan="9" className="p-10 text-center">
-                      Loading...
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={9}
+                    className="px-5 py-12 text-center text-slate-400 text-sm"
+                  >
+                    No students match your filters
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((r, i) => (
+                  <tr
+                    key={r.id}
+                    className="border-b border-slate-100 hover:bg-slate-50 transition"
+                  >
+                    <td className="px-5 py-3.5">
+                      <code className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs">
+                        {r.rollNo}
+                      </code>
                     </td>
-                  </tr>
-                ) : (
-                  filtered.map((r) => (
-                    <tr key={r.id} className="border-b hover:bg-slate-50">
-                      <td className="py-3 px-4">{r.rollNo}</td>
-                      <td className="font-medium">{r.name}</td>
-                      <td>{r.class}</td>
-                      <td>{r.totalMarks}</td>
-                      <td>{r.obtained}</td>
-                      <td>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${getPerformanceColor(r.percentage)}`}
-                        >
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                          {r.name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-800">
+                            {r.name}
+                          </p>
+                          <p className="text-xs text-slate-400">
+                            Section {r.section}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <span className="bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded text-xs font-semibold">
+                        {r.class}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5 text-slate-500">
+                      {r.totalMarks}
+                    </td>
+                    <td className="px-5 py-3.5 font-semibold text-slate-800">
+                      {r.obtained}
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-2">
+                        <div className="w-14 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${r.percentage}%`,
+                              background:
+                                r.percentage >= 80
+                                  ? "#10b981"
+                                  : r.percentage >= 60
+                                    ? "#6366f1"
+                                    : r.percentage >= 40
+                                      ? "#f59e0b"
+                                      : "#ef4444",
+                            }}
+                          />
+                        </div>
+                        <span className="text-xs font-semibold text-slate-600">
                           {r.percentage}%
                         </span>
-                      </td>
-                      <td>{r.grade}</td>
-                      <td>
-                        <ResultBadge status={r.status} />
-                      </td>
-                      <td>
-                        <button
-                          onClick={() => setSelectedStudent(r)}
-                          className="text-indigo-600 hover:bg-indigo-50 p-1.5 rounded-lg"
-                        >
-                          <FaEye />
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <span
+                        className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold text-white ${gradeColor(r.grade)}`}
+                      >
+                        {r.grade}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <span
+                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold
+                        ${r.status === "Pass" ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}
+                      >
+                        {r.status === "Pass" ? "✓" : "✗"} {r.status}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <button
+                        onClick={() => setSelectedStudent(r)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 rounded-lg transition"
+                      >
+                        <FaEye className="w-3 h-3" /> View
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-
-        {selectedStudent && (
-          <StudentResultModal
-            student={selectedStudent}
-            onClose={() => setSelectedStudent(null)}
-          />
+        {!loading && filtered.length > 0 && (
+          <div className="px-5 py-3.5 border-t border-slate-100 bg-slate-50 flex justify-between text-xs text-slate-400">
+            <span>
+              Showing {filtered.length} of {results.length} students
+            </span>
+            <span>Final Term 2025</span>
+          </div>
         )}
       </div>
+
+      {selectedStudent && (
+        <StudentResultModal
+          student={selectedStudent}
+          onClose={() => setSelectedStudent(null)}
+        />
+      )}
     </div>
   );
 }
