@@ -1,4 +1,4 @@
-import { TeacherLeave } from "../models/Teacher_Leave_Model.js";
+import TeacherLeave from "../models/Teacher_Leave_Model.js";
 
 // ─── Apply Leave ──────────────────────────────────────────────────
 export const applyLeave = async (request, response) => {

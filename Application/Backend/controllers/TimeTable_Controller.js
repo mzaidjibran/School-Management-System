@@ -1,6 +1,6 @@
-import Timetable from "../models/Timetable.js";
+import TimeTable from "../models/TimeTable_model.js";
 
-exports.createOrUpdateTimetable = async (req, res) => {
+export const createOrUpdateTimetable = async (req, res) => {
   try {
     const { class: classId, day, session } = req.body;
     const timetable = await Timetable.findOneAndUpdate(
@@ -14,7 +14,7 @@ exports.createOrUpdateTimetable = async (req, res) => {
   }
 };
 
-exports.getClassTimetable = async (req, res) => {
+export const getClassTimetable = async (req, res) => {
   try {
     const { classId } = req.params;
     const { session } = req.query;
@@ -36,7 +36,7 @@ exports.getClassTimetable = async (req, res) => {
   }
 };
 
-exports.getTodayTimetable = async (req, res) => {
+export const getTodayTimetable = async (req, res) => {
   try {
     const { classId } = req.params;
     const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -65,7 +65,7 @@ exports.getTodayTimetable = async (req, res) => {
   }
 };
 
-exports.getTeacherTimetable = async (req, res) => {
+export const getTeacherTimetable = async (req, res) => {
   try {
     const { teacherId } = req.params;
     const { session } = req.query;
@@ -81,7 +81,7 @@ exports.getTeacherTimetable = async (req, res) => {
   }
 };
 
-exports.deleteTimetable = async (req, res) => {
+export const deleteTimetable = async (req, res) => {
   try {
     await Timetable.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: "Timetable deleted" });

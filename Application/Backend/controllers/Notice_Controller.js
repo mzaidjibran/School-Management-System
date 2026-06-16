@@ -1,6 +1,6 @@
-import Notice from "../models/Notice.js";
+import Notice from "../models/Notice_Model.js";
 
-exports.getAllNotices = async (req, res) => {
+export const getAllNotices = async (req, res) => {
   try {
     const { status, priority, targetAudience, page = 1, limit = 20 } = req.query;
     const filter = {};
@@ -22,7 +22,7 @@ exports.getAllNotices = async (req, res) => {
   }
 };
 
-exports.getNoticeById = async (req, res) => {
+export const getNoticeById = async (req, res) => {
   try {
     const notice = await Notice.findByIdAndUpdate(
       req.params.id,
@@ -36,7 +36,7 @@ exports.getNoticeById = async (req, res) => {
   }
 };
 
-exports.createNotice = async (req, res) => {
+export const createNotice = async (req, res) => {
   try {
     const notice = new Notice({ ...req.body, createdBy: req.user._id });
     await notice.save();
@@ -46,7 +46,7 @@ exports.createNotice = async (req, res) => {
   }
 };
 
-exports.updateNotice = async (req, res) => {
+export const updateNotice = async (req, res) => {
   try {
     const notice = await Notice.findByIdAndUpdate(req.params.id, req.body, {
       new: true, runValidators: true,
@@ -58,7 +58,7 @@ exports.updateNotice = async (req, res) => {
   }
 };
 
-exports.deleteNotice = async (req, res) => {
+export const deleteNotice = async (req, res) => {
   try {
     await Notice.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: "Notice deleted" });
@@ -67,7 +67,7 @@ exports.deleteNotice = async (req, res) => {
   }
 };
 
-exports.getActiveNotices = async (req, res) => {
+export const getActiveNotices = async (req, res) => {
   try {
     const now = new Date();
     const notices = await Notice.find({

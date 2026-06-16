@@ -1,8 +1,8 @@
-import {Exam,Results}from "../models/Exam.js";
+import { Exam, Result } from "../models/Exam_Model.js";
 
 // ─── EXAMS ────────────────────────────────────────────────────────────────────
 
-exports.getAllExams = async (req, res) => {
+export const getAllExams = async (req, res) => {
   try {
     const { classId, status, examType, session, page = 1, limit = 20 } = req.query;
     const filter = {};
@@ -24,7 +24,7 @@ exports.getAllExams = async (req, res) => {
   }
 };
 
-exports.getExamById = async (req, res) => {
+export const getExamById = async (req, res) => {
   try {
     const exam = await Exam.findById(req.params.id).populate("class", "name section");
     if (!exam) return res.status(404).json({ success: false, message: "Exam not found" });
@@ -34,7 +34,7 @@ exports.getExamById = async (req, res) => {
   }
 };
 
-exports.createExam = async (req, res) => {
+export const createExam = async (req, res) => {
   try {
     const exam = new Exam({ ...req.body, createdBy: req.user._id });
     await exam.save();
@@ -44,7 +44,7 @@ exports.createExam = async (req, res) => {
   }
 };
 
-exports.updateExam = async (req, res) => {
+export const updateExam = async (req, res) => {
   try {
     const exam = await Exam.findByIdAndUpdate(req.params.id, req.body, {
       new: true, runValidators: true,
@@ -56,7 +56,7 @@ exports.updateExam = async (req, res) => {
   }
 };
 
-exports.deleteExam = async (req, res) => {
+export const deleteExam = async (req, res) => {
   try {
     await Result.deleteMany({ exam: req.params.id });
     await Exam.findByIdAndDelete(req.params.id);
@@ -68,7 +68,7 @@ exports.deleteExam = async (req, res) => {
 
 // ─── MARKS / RESULTS ─────────────────────────────────────────────────────────
 
-exports.enterMarks = async (req, res) => {
+export const enterMarks = async (req, res) => {
   try {
     const { examId } = req.params;
     const { results } = req.body; // [{ student, obtainedMarks, remarks }]
@@ -87,7 +87,7 @@ exports.enterMarks = async (req, res) => {
   }
 };
 
-exports.getExamResults = async (req, res) => {
+export const getExamResults = async (req, res) => {
   try {
     const results = await Result.find({ exam: req.params.examId })
       .populate("student", "name rollNumber");
@@ -109,7 +109,7 @@ exports.getExamResults = async (req, res) => {
   }
 };
 
-exports.getStudentResults = async (req, res) => {
+export const getStudentResults = async (req, res) => {
   try {
     const results = await Result.find({ student: req.params.studentId })
       .populate("exam", "name examType examDate totalMarks passingMarks subject class");
@@ -119,7 +119,7 @@ exports.getStudentResults = async (req, res) => {
   }
 };
 
-exports.getResultReport = async (req, res) => {
+export const getResultReport = async (req, res) => {
   try {
     const { classId, examType, session } = req.query;
     const examFilter = {};

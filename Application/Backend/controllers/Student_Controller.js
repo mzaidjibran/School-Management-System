@@ -81,6 +81,7 @@ export const createStudent = async (request, response) => {
       data: transformStudentDoc(student),
     });
   } catch (error) {
+    console.log("Validation error:", error.message); 
     response.status(400).json({
       success: false,
       error: true,

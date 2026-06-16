@@ -1,9 +1,9 @@
-import { TeacherAttendance } from "../models/Teacher_Attendance_Model.js";
+import TeacherAttendance from "../models/Teacher_Attendence_Model.js";
 
 // ─── Mark Attendance ──────────────────────────────────────────────
 export const markAttendance = async (request, response) => {
   try {
-    const attendance = await TeacherAttendance.create(request.body);
+    const attendance = await TeacherAttendance.create(request.body); 
     response.status(201).json({
       success: true,
       error: false,

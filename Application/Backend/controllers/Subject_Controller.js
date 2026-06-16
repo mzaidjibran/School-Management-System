@@ -1,6 +1,6 @@
-import Subject from "../models/Subject.js";
+import Subject from "../models/Subject_Model.js";
 
-exports.getAllSubjects = async (req, res) => {
+export const getAllSubjects = async (req, res) => {
   try {
     const { classId, status, search } = req.query;
     const filter = {};
@@ -19,7 +19,7 @@ exports.getAllSubjects = async (req, res) => {
   }
 };
 
-exports.getSubjectById = async (req, res) => {
+export const getSubjectById = async (req, res) => {
   try {
     const subject = await Subject.findById(req.params.id)
       .populate("class", "name section")
@@ -31,7 +31,7 @@ exports.getSubjectById = async (req, res) => {
   }
 };
 
-exports.addSubject = async (req, res) => {
+export const addSubject = async (req, res) => {
   try {
     const subject = new Subject(req.body);
     await subject.save();
@@ -41,7 +41,7 @@ exports.addSubject = async (req, res) => {
   }
 };
 
-exports.updateSubject = async (req, res) => {
+export const updateSubject = async (req, res) => {
   try {
     const subject = await Subject.findByIdAndUpdate(req.params.id, req.body, {
       new: true, runValidators: true,
@@ -53,7 +53,7 @@ exports.updateSubject = async (req, res) => {
   }
 };
 
-exports.deleteSubject = async (req, res) => {
+export const deleteSubject = async (req, res) => {
   try {
     await Subject.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: "Subject deleted" });

@@ -5,7 +5,7 @@ import express from "express";
 import {
   createTeacher,
   getAllTeachers,
-  getTeacherById,
+  getSingleTeacher,
   updateTeacher,
   deleteTeacher,
   assignClass,
@@ -39,7 +39,7 @@ const router = express.Router();
 // ─── Teacher CRUD ─────────────────────────────────────────────────────────────
 router.post("/",          protect, authorize("admin"),            createTeacher);      // POST   /api/teachers
 router.get("/",           protect, authorize("admin", "teacher"), getAllTeachers);     // GET    /api/teachers
-router.get("/:id",        protect, authorize("admin", "teacher"), getTeacherById);  // GET    /api/teachers/:id
+router.get("/:id",        protect, authorize("admin", "teacher"), getSingleTeacher);  // GET    /api/teachers/:id
 router.put("/:id",        protect, authorize("admin"),            updateTeacher);      // PUT    /api/teachers/:id
 router.delete("/:id",     protect, authorize("admin"),            deleteTeacher);      // DELETE /api/teachers/:id
 router.post("/:id/class", protect, authorize("admin"),            assignClass);        // POST   /api/teachers/:id/class

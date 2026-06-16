@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const ExamSchema = new mongoose.Schema(
   {
@@ -61,4 +61,4 @@ ResultSchema.index({ exam: 1, student: 1 }, { unique: true });
 const Exam = mongoose.model("Exam", ExamSchema);
 const Result = mongoose.model("Result", ResultSchema);
 
-module.exports = { Exam, Result };
+export { Exam, Result };  

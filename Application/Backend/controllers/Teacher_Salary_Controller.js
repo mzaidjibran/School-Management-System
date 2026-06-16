@@ -1,5 +1,5 @@
-import { TeacherSalary } from "../models/Teacher_Salary_Model.js";
-import { Teacher } from "../models/Teacher_Model.js";
+import TeacherSalary from "../models/Teacher_Salary_Model.js";
+import Teacher from "../models/Teacher_Model.js";
 
 // ─── Generate Salary ──────────────────────────────────────────────
 export const generateSalary = async (request, response) => {

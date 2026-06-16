@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const TimetableSchema = new mongoose.Schema(
   {
@@ -33,4 +33,4 @@ const TimetableSchema = new mongoose.Schema(
 // One timetable per class per day per session
 TimetableSchema.index({ class: 1, day: 1, session: 1 }, { unique: true });
 
-module.exports = mongoose.model("Timetable", TimetableSchema);
+export default mongoose.model('TimeTable', TimetableSchema);

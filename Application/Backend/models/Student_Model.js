@@ -21,10 +21,10 @@ const studentSchema = new mongoose.Schema(
       enum: ["male", "female", "other"],
       required: [true, "Gender is mandatory"],
     },
-    profilePicture: {
-      type: String,
-      default: null,
-    },
+    profileImage: {
+  type: String,
+  default: null,
+},
 
     email: {
       type: String,

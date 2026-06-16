@@ -1,4 +1,4 @@
-import { Teacher } from "../models/Teacher_Model.js";
+import Teacher from "../models/Teacher_Model.js";
 import path from "path";
 
 // ─── Helper: Normalize Payload ────────────────────────────────────
