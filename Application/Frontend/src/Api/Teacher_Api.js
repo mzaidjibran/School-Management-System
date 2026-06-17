@@ -10,8 +10,9 @@ const createTeacher = async (data) => {
     headers: isFormData ? getFormHeaders() : getHeaders(),
     body: isFormData ? data : JSON.stringify(data),
   });
-  if (!response.ok) throw new Error(`Create failed: ${response.status}`);
-  return response.json();
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || `Create failed: ${response.status}`);
+  return result;
 };
 
 export default createTeacher;
@@ -22,8 +23,9 @@ export const getAllTeachers = async () => {
     method: "GET",
     headers: getHeaders(),
   });
-  if (!response.ok) throw new Error(`Get all failed: ${response.status}`);
-  return response.json();
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || `Get all failed: ${response.status}`);
+  return result;
 };
 
 // ─── Get Single Teacher ───────────────────────────────────────────
@@ -32,8 +34,9 @@ export const getSingleTeacher = async (id) => {
     method: "GET",
     headers: getHeaders(),
   });
-  if (!response.ok) throw new Error(`Get single failed: ${response.status}`);
-  return response.json();
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || `Get single failed: ${response.status}`);
+  return result;
 };
 
 // ─── Update Teacher ───────────────────────────────────────────────
@@ -44,8 +47,9 @@ export const updateTeacher = async (id, data) => {
     headers: isFormData ? getFormHeaders() : getHeaders(),
     body: isFormData ? data : JSON.stringify(data),
   });
-  if (!response.ok) throw new Error(`Update failed: ${response.status}`);
-  return response.json();
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || `Update failed: ${response.status}`);
+  return result;
 };
 
 // ─── Delete Teacher ───────────────────────────────────────────────
@@ -54,17 +58,7 @@ export const deleteTeacher = async (id) => {
     method: "DELETE",
     headers: getHeaders(),
   });
-  if (!response.ok) throw new Error(`Delete failed: ${response.status}`);
-  return response.json();
-};
-
-// ─── Assign Class to Teacher ──────────────────────────────────────
-export const assignClass = async (id, data) => {
-  const response = await fetch(`${API_BASE}/api/teachers/${id}/class`, {
-    method: "POST",
-    headers: getHeaders(),
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error(`Assign class failed: ${response.status}`);
-  return response.json();
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || `Delete failed: ${response.status}`);
+  return result;
 };

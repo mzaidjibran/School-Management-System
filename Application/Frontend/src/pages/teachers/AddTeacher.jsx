@@ -1,4 +1,6 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import createTeacher from "../../api/Teacher_Api.js";
 
 // ---------- Floating Label Input ----------
 const Input = ({
@@ -11,6 +13,7 @@ const Input = ({
   disabled = false,
   error,
   className = "",
+  placeholder,
 }) => {
   const isDate = type === "date";
   const hasValue = !!value;
@@ -24,7 +27,7 @@ const Input = ({
         value={value}
         onChange={onChange}
         disabled={disabled}
-        placeholder=" "
+        placeholder={placeholder || " "}
         style={isDate && !hasValue ? { color: "transparent" } : {}}
         onFocus={(e) => {
           if (isDate) e.target.style.color = "inherit";
@@ -32,9 +35,9 @@ const Input = ({
         onBlur={(e) => {
           if (isDate && !value) e.target.style.color = "transparent";
         }}
-        className={`peer w-full px-4 pt-5 pb-2 border rounded-xl bg-white dark:bg-slate-800
-          text-slate-800 dark:text-slate-200 outline-none transition-all text-sm
-          ${error ? "border-red-400 focus:ring-red-400" : "border-slate-300 dark:border-slate-600 focus:border-indigo-500 focus:ring-indigo-500"}
+        className={`peer w-full px-4 pt-5 pb-2 border rounded-xl bg-white
+          text-slate-800 outline-none transition-all text-sm
+          ${error ? "border-red-400 focus:ring-red-100" : "border-slate-300 focus:border-indigo-500 focus:ring-indigo-100"}
           focus:ring-2 disabled:bg-slate-50 disabled:cursor-not-allowed`}
       />
       <label
@@ -68,9 +71,9 @@ const Select = ({
       id={name}
       value={value}
       onChange={onChange}
-      className={`peer w-full px-4 pt-5 pb-2 border rounded-xl bg-white dark:bg-slate-800
-        text-slate-800 dark:text-slate-200 outline-none transition-all appearance-none text-sm
-        ${error ? "border-red-400 focus:ring-red-400" : "border-slate-300 dark:border-slate-600 focus:border-indigo-500 focus:ring-indigo-500"}
+      className={`peer w-full px-4 pt-5 pb-2 border rounded-xl bg-white
+        text-slate-800 outline-none transition-all appearance-none text-sm
+        ${error ? "border-red-400 focus:ring-red-100" : "border-slate-300 focus:border-indigo-500 focus:ring-indigo-100"}
         focus:ring-2`}
     >
       <option value=""></option>
@@ -95,12 +98,7 @@ const Select = ({
       stroke="currentColor"
       viewBox="0 0 24 24"
     >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M19 9l-7 7-7-7"
-      />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
     </svg>
     {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
   </div>
@@ -108,7 +106,7 @@ const Select = ({
 
 // ---------- Section Title ----------
 const SectionTitle = ({ title }) => (
-  <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+  <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
     <span className="w-1 h-6 bg-indigo-600 rounded-full"></span>
     {title}
   </h3>
@@ -153,7 +151,9 @@ export default function AddTeacherPage() {
   const fileInputRef = useRef(null);
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -201,34 +201,26 @@ export default function AddTeacherPage() {
   const validateStep = () => {
     const newErrors = {};
     if (currentStep === 1) {
-      if (!formData.fullName.trim())
-        newErrors.fullName = "Full name is required";
+      if (!formData.fullName.trim()) newErrors.fullName = "Full name is required";
       if (!formData.email.trim()) newErrors.email = "Email is required";
-      else if (!/\S+@\S+\.\S+/.test(formData.email))
-        newErrors.email = "Invalid email";
+      else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Invalid email";
       if (!formData.phone.trim()) newErrors.phone = "Phone number is required";
       if (!formData.gender) newErrors.gender = "Gender is required";
-      if (!formData.dateOfBirth)
-        newErrors.dateOfBirth = "Date of birth is required";
+      if (!formData.dateOfBirth) newErrors.dateOfBirth = "Date of birth is required";
     } else if (currentStep === 2) {
       if (!formData.subject.trim()) newErrors.subject = "Subject is required";
-      if (!formData.qualification.trim())
-        newErrors.qualification = "Qualification is required";
+      if (!formData.qualification.trim()) newErrors.qualification = "Qualification is required";
     } else if (currentStep === 3) {
-      if (!formData.employeeId.trim())
-        newErrors.employeeId = "Employee ID is required";
-      if (!formData.joiningDate)
-        newErrors.joiningDate = "Joining date is required";
-      if (!formData.employmentStatus)
-        newErrors.employmentStatus = "Employment status is required";
+      if (!formData.employeeId.trim()) newErrors.employeeId = "Employee ID is required";
+      if (!formData.joiningDate) newErrors.joiningDate = "Joining date is required";
+      if (!formData.employmentStatus) newErrors.employmentStatus = "Employment status is required";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const nextStep = () => {
-    if (validateStep() && currentStep < totalSteps)
-      setCurrentStep(currentStep + 1);
+    if (validateStep() && currentStep < totalSteps) setCurrentStep(currentStep + 1);
   };
   const prevStep = () => {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
@@ -238,16 +230,32 @@ export default function AddTeacherPage() {
     e.preventDefault();
     if (!validateStep()) return;
     setIsSaving(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    setIsSaving(false);
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 3000);
-    if (addAnother) {
-      setFormData(emptyForm);
-      setProfileImage(null);
-      setImagePreview(null);
-      setErrors({});
-      setCurrentStep(1);
+    setSubmitError("");
+    try {
+      const payload = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== "" && value !== null && value !== undefined) payload.append(key, value);
+      });
+      if (profileImage) payload.append("profileImage", profileImage);
+
+      await createTeacher(payload);
+
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+
+      if (addAnother) {
+        setFormData(emptyForm);
+        setProfileImage(null);
+        setImagePreview(null);
+        setErrors({});
+        setCurrentStep(1);
+      } else {
+        navigate("/teachers");
+      }
+    } catch (err) {
+      setSubmitError(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -256,7 +264,9 @@ export default function AddTeacherPage() {
     setProfileImage(null);
     setImagePreview(null);
     setErrors({});
+    setSubmitError("");
     setSaveSuccess(false);
+    setCurrentStep(1);
   };
 
   const completionPercentage = () => {
@@ -271,107 +281,87 @@ export default function AddTeacherPage() {
       joiningDate: formData.joiningDate,
     };
     return Math.round(
-      (Object.values(fields).filter(Boolean).length /
-        Object.keys(fields).length) *
-        100,
+      (Object.values(fields).filter(Boolean).length / Object.keys(fields).length) * 100
     );
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
+
         {/* Header */}
         <div className="mb-6">
-          <nav className="text-sm text-slate-500 dark:text-slate-400 mb-2">
-            <span className="hover:text-indigo-600 cursor-pointer">
-              Dashboard
-            </span>{" "}
+          <nav className="text-sm text-slate-500 mb-2">
+            <span className="hover:text-indigo-600 cursor-pointer">Dashboard</span>{" "}
             /{" "}
-            <span className="hover:text-indigo-600 cursor-pointer">
-              Teachers
-            </span>{" "}
+            <span className="hover:text-indigo-600 cursor-pointer">Teachers</span>{" "}
             /{" "}
-            <span className="text-indigo-600 dark:text-indigo-400">
-              Add Teacher
-            </span>
+            <span className="text-indigo-600">Add Teacher</span>
           </nav>
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-xl">
-              <svg
-                className="w-5 h-5 text-indigo-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
+            <div className="p-2 bg-indigo-100 rounded-xl">
+              <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-800 dark:text-white">
-                Add New Teacher
-              </h1>
-              <p className="text-slate-500 dark:text-slate-400 text-sm">
-                Fill in the details to create a teacher profile
-              </p>
+              <h1 className="text-2xl font-bold text-slate-800">Add New Teacher</h1>
+              <p className="text-slate-500 text-sm">Fill in the details to create a teacher profile</p>
             </div>
           </div>
         </div>
 
         {/* Progress */}
-        <div className="mb-8 bg-white/60 dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl p-4 shadow-sm">
+        <div className="mb-8 bg-white/60 backdrop-blur-sm rounded-2xl p-4 shadow-sm">
           <div className="flex justify-between items-center mb-2">
             <div className="flex gap-2">
               {[1, 2, 3].map((step) => (
                 <div
                   key={step}
-                  className={`h-2 rounded-full transition-all duration-300 ${currentStep >= step ? "bg-indigo-600 w-16" : "bg-slate-200 dark:bg-slate-700 w-8"}`}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    currentStep >= step ? "bg-indigo-600 w-16" : "bg-slate-200 w-8"
+                  }`}
                 />
               ))}
             </div>
-            <div className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+            <div className="text-sm font-medium text-indigo-600">
               {completionPercentage()}% completed
             </div>
           </div>
-          <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
+          <div className="flex justify-between text-xs text-slate-500">
             <span>Personal & Contact</span>
             <span>Academic</span>
             <span>Employment</span>
           </div>
         </div>
 
+        {/* API Error */}
+        {submitError && (
+          <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl flex items-center justify-between">
+            <span>{submitError}</span>
+            <button onClick={() => setSubmitError("")} className="text-red-400 hover:text-red-600 ml-3 flex-shrink-0">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        )}
+
         {/* Form */}
         <form onSubmit={(e) => handleSubmit(e, false)}>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-100">
+
             {/* Profile Image */}
-            <div className="p-6 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-indigo-50/50 to-blue-50/50 dark:from-indigo-950/30 dark:to-blue-950/30">
+            <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-indigo-50/50 to-blue-50/50">
               <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="relative flex-shrink-0">
-                  <div className="w-28 h-28 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-700 ring-4 ring-white dark:ring-slate-900 shadow-lg">
+                  <div className="w-28 h-28 rounded-full overflow-hidden bg-slate-200 ring-4 ring-white shadow-lg">
                     {imagePreview ? (
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-slate-400">
-                        <svg
-                          className="w-12 h-12"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={1}
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                          />
+                        <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                       </div>
                     )}
@@ -382,18 +372,8 @@ export default function AddTeacherPage() {
                       onClick={removeImage}
                       className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600"
                     >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>
                   )}
@@ -413,133 +393,49 @@ export default function AddTeacherPage() {
                     <div
                       onDrop={handleImageDrop}
                       onDragOver={(e) => e.preventDefault()}
-                      className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl px-4 py-2 text-sm text-slate-500 dark:text-slate-400 hover:border-indigo-500 transition cursor-pointer"
+                      className="border-2 border-dashed border-slate-300 rounded-xl px-4 py-2 text-sm text-slate-500 hover:border-indigo-500 transition cursor-pointer"
                     >
                       Drag & Drop
                     </div>
                     <button
                       type="button"
                       onClick={removeImage}
-                      className="border border-slate-300 dark:border-slate-600 rounded-xl px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+                      className="border border-slate-300 rounded-xl px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 transition"
                     >
                       Remove
                     </button>
                   </div>
-                  {imageError && (
-                    <p className="text-red-500 text-xs mt-2">{imageError}</p>
-                  )}
-                  <p className="text-xs text-slate-400 mt-2">
-                    JPG or PNG, max 2MB
-                  </p>
+                  {imageError && <p className="text-red-500 text-xs mt-2">{imageError}</p>}
+                  <p className="text-xs text-slate-400 mt-2">JPG or PNG, max 2MB</p>
                 </div>
               </div>
             </div>
 
             {/* Step Content */}
             <div className="p-6 space-y-8">
+
               {/* Step 1 — Personal & Contact */}
               {currentStep === 1 && (
                 <>
                   <div>
                     <SectionTitle title="Personal Information" />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      <Input
-                        label="Full Name"
-                        name="fullName"
-                        value={formData.fullName}
-                        onChange={handleInputChange}
-                        required
-                        error={errors.fullName}
-                      />
-                      <Select
-                        label="Gender"
-                        name="gender"
-                        options={["Male", "Female", "Other"]}
-                        value={formData.gender}
-                        onChange={handleInputChange}
-                        required
-                        error={errors.gender}
-                      />
-                      <Input
-                        label="Date of Birth"
-                        type="date"
-                        name="dateOfBirth"
-                        value={formData.dateOfBirth}
-                        onChange={handleInputChange}
-                        required
-                        error={errors.dateOfBirth}
-                      />
-                      <Input
-                        label="CNIC"
-                        name="cnic"
-                        value={formData.cnic}
-                        onChange={handleInputChange}
-                      />
-                      <Select
-                        label="Blood Group"
-                        name="bloodGroup"
-                        options={[
-                          "A+",
-                          "A-",
-                          "B+",
-                          "B-",
-                          "O+",
-                          "O-",
-                          "AB+",
-                          "AB-",
-                        ]}
-                        value={formData.bloodGroup}
-                        onChange={handleInputChange}
-                      />
-                      <Select
-                        label="Marital Status"
-                        name="maritalStatus"
-                        options={["Single", "Married", "Divorced", "Widowed"]}
-                        value={formData.maritalStatus}
-                        onChange={handleInputChange}
-                      />
+                      <Input label="Full Name" name="fullName" value={formData.fullName} onChange={handleInputChange} required error={errors.fullName} />
+                      <Select label="Gender" name="gender" options={["Male", "Female", "Other"]} value={formData.gender} onChange={handleInputChange} required error={errors.gender} />
+                      <Input label="Date of Birth" type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleInputChange} required error={errors.dateOfBirth} />
+                      <Input label="CNIC" name="cnic" value={formData.cnic} onChange={handleInputChange} />
+                      <Select label="Blood Group" name="bloodGroup" options={["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"]} value={formData.bloodGroup} onChange={handleInputChange} />
+                      <Select label="Marital Status" name="maritalStatus" options={["Single", "Married", "Divorced", "Widowed"]} value={formData.maritalStatus} onChange={handleInputChange} />
                     </div>
                   </div>
                   <div>
                     <SectionTitle title="Contact Information" />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      <Input
-                        label="Phone Number"
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        required
-                        error={errors.phone}
-                      />
-                      <Input
-                        label="Alternate Phone"
-                        type="tel"
-                        name="alternatePhone"
-                        value={formData.alternatePhone}
-                        onChange={handleInputChange}
-                      />
-                      <Input
-                        label="Email Address"
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                        error={errors.email}
-                      />
-                      <Input
-                        label="Address"
-                        name="address"
-                        value={formData.address}
-                        onChange={handleInputChange}
-                      />
-                      <Input
-                        label="City"
-                        name="city"
-                        value={formData.city}
-                        onChange={handleInputChange}
-                      />
+                      <Input label="Phone Number" type="tel" name="phone" value={formData.phone} onChange={handleInputChange} required error={errors.phone} />
+                      <Input label="Alternate Phone" type="tel" name="alternatePhone" value={formData.alternatePhone} onChange={handleInputChange} />
+                      <Input label="Email Address" type="email" name="email" value={formData.email} onChange={handleInputChange} required error={errors.email} />
+                      <Input label="Address" name="address" value={formData.address} onChange={handleInputChange} />
+                      <Input label="City" name="city" value={formData.city} onChange={handleInputChange} />
                     </div>
                   </div>
                 </>
@@ -550,41 +446,11 @@ export default function AddTeacherPage() {
                 <div>
                   <SectionTitle title="Academic Information" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <Input
-                      label="Subject"
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleInputChange}
-                      required
-                      error={errors.subject}
-                    />
-                    <Input
-                      label="Qualification"
-                      name="qualification"
-                      value={formData.qualification}
-                      onChange={handleInputChange}
-                      required
-                      error={errors.qualification}
-                    />
-                    <Input
-                      label="Specialization"
-                      name="specialization"
-                      value={formData.specialization}
-                      onChange={handleInputChange}
-                    />
-                    <Input
-                      label="University"
-                      name="university"
-                      value={formData.university}
-                      onChange={handleInputChange}
-                    />
-                    <Input
-                      label="Passing Year"
-                      type="number"
-                      name="passingYear"
-                      value={formData.passingYear}
-                      onChange={handleInputChange}
-                    />
+                    <Input label="Subject" name="subject" value={formData.subject} onChange={handleInputChange} required error={errors.subject} />
+                    <Input label="Qualification" name="qualification" value={formData.qualification} onChange={handleInputChange} required error={errors.qualification} />
+                    <Input label="Specialization" name="specialization" value={formData.specialization} onChange={handleInputChange} />
+                    <Input label="University" name="university" value={formData.university} onChange={handleInputChange} />
+                    <Input label="Passing Year" type="number" name="passingYear" value={formData.passingYear} onChange={handleInputChange} />
                   </div>
                 </div>
               )}
@@ -595,46 +461,14 @@ export default function AddTeacherPage() {
                   <div>
                     <SectionTitle title="Employment Information" />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      <Input
-                        label="Employee ID"
-                        name="employeeId"
-                        value={formData.employeeId}
-                        onChange={handleInputChange}
-                        required
-                        error={errors.employeeId}
-                      />
-                      <Input
-                        label="Joining Date"
-                        type="date"
-                        name="joiningDate"
-                        value={formData.joiningDate}
-                        onChange={handleInputChange}
-                        required
-                        error={errors.joiningDate}
-                      />
-                      <Input
-                        label="Experience (years)"
-                        type="number"
-                        name="experience"
-                        value={formData.experience}
-                        onChange={handleInputChange}
-                      />
-                      <Input
-                        label="Salary"
-                        type="number"
-                        name="salary"
-                        value={formData.salary}
-                        onChange={handleInputChange}
-                      />
+                      <Input label="Employee ID" name="employeeId" value={formData.employeeId} onChange={handleInputChange} required error={errors.employeeId} />
+                      <Input label="Joining Date" type="date" name="joiningDate" value={formData.joiningDate} onChange={handleInputChange} required error={errors.joiningDate} />
+                      <Input label="Experience (years)" type="number" name="experience" value={formData.experience} onChange={handleInputChange} />
+                      <Input label="Salary" type="number" name="salary" value={formData.salary} onChange={handleInputChange} />
                       <Select
                         label="Employment Status"
                         name="employmentStatus"
-                        options={[
-                          "Permanent",
-                          "Contract",
-                          "Probation",
-                          "Part-time",
-                        ]}
+                        options={["Permanent", "Contract", "Probation", "Part-time"]}
                         value={formData.employmentStatus}
                         onChange={handleInputChange}
                         required
@@ -646,45 +480,32 @@ export default function AddTeacherPage() {
                     <SectionTitle title="Additional Information" />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div className="md:col-span-2">
-                        <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                          Notes
-                        </label>
+                        <label className="block text-xs font-medium text-slate-500 mb-1.5">Notes</label>
                         <textarea
                           name="notes"
                           value={formData.notes}
                           onChange={handleInputChange}
-                          rows="3"
+                          rows={3}
                           placeholder="Any additional notes..."
-                          className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
+                          className="w-full px-4 py-3 border border-slate-300 rounded-xl text-sm bg-white text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
                         />
                       </div>
-                      <Input
-                        label="Emergency Contact Name"
-                        name="emergencyName"
-                        value={formData.emergencyName}
-                        onChange={handleInputChange}
-                      />
-                      <Input
-                        label="Emergency Contact Number"
-                        type="tel"
-                        name="emergencyPhone"
-                        value={formData.emergencyPhone}
-                        onChange={handleInputChange}
-                      />
+                      <Input label="Emergency Contact Name" name="emergencyName" value={formData.emergencyName} onChange={handleInputChange} />
+                      <Input label="Emergency Contact Number" type="tel" name="emergencyPhone" value={formData.emergencyPhone} onChange={handleInputChange} />
                     </div>
                   </div>
                 </>
               )}
             </div>
 
-            {/* Footer Actions */}
-            <div className="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-700 flex flex-wrap justify-between gap-3 rounded-b-2xl">
+            {/* Footer */}
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-wrap justify-between gap-3 rounded-b-2xl">
               <div className="flex flex-wrap gap-3">
                 {currentStep > 1 && (
                   <button
                     type="button"
                     onClick={prevStep}
-                    className="px-6 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                    className="px-6 py-2 text-sm border border-slate-300 rounded-xl text-slate-700 hover:bg-slate-100 transition"
                   >
                     Back
                   </button>
@@ -705,24 +526,9 @@ export default function AddTeacherPage() {
                       className="px-6 py-2 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition shadow-sm disabled:opacity-60 flex items-center gap-2"
                     >
                       {isSaving && (
-                        <svg
-                          className="w-4 h-4 animate-spin"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          />
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8v8H4z"
-                          />
+                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                         </svg>
                       )}
                       {isSaving ? "Saving..." : "Save Teacher"}
@@ -738,7 +544,7 @@ export default function AddTeacherPage() {
                     <button
                       type="button"
                       onClick={resetForm}
-                      className="px-6 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                      className="px-6 py-2 text-sm border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-100 transition"
                     >
                       Reset
                     </button>
@@ -759,18 +565,8 @@ export default function AddTeacherPage() {
         {/* Success Toast */}
         {saveSuccess && (
           <div className="fixed bottom-6 right-6 bg-emerald-500 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-2">
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
             Teacher saved successfully!
           </div>
