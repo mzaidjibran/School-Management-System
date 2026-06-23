@@ -4,7 +4,6 @@ import { Attendance } from "../models/Attendence_Model.js";
 // Ek ya multiple students ki hazri ek saath mark karo
 export const markAttendance = async (request, response) => {
   try {
-    // request.body = array of { student, class, date, status, lateMinutes, remarks }
     const { records } = request.body;
 
     if (!records || !Array.isArray(records) || records.length === 0) {
@@ -15,16 +14,17 @@ export const markAttendance = async (request, response) => {
       });
     }
 
-    // markedBy har record mein add karo
-    const preparedRecords = records.map((rec) => ({
-      ...rec,
-      markedBy: request.user._id, // auth middleware se aayega
-    }));
-
-    // insertMany with ordered:false — agar koi duplicate ho to baaki save hote rahein
-    const inserted = await Attendance.insertMany(preparedRecords, {
-      ordered: false,
-    });
+    // Ek ek karke save karo
+    const inserted = [];
+    for (const rec of records) {
+      try {
+        const { Attendance } = await import("../models/Attendence_Model.js");
+        const doc = await Attendance.create(rec);
+        inserted.push(doc);
+      } catch (e) {
+        console.log("Skip:", e.message);
+      }
+    }
 
     response.status(201).json({
       success: true,
@@ -33,14 +33,6 @@ export const markAttendance = async (request, response) => {
       data: inserted,
     });
   } catch (error) {
-    // Duplicate key error (ek student ki ek din mein dobara hazri)
-    if (error.code === 11000) {
-      return response.status(409).json({
-        success: false,
-        error: true,
-        message: "Attendence of this student is already marked!",
-      });
-    }
     response.status(500).json({
       success: false,
       error: true,

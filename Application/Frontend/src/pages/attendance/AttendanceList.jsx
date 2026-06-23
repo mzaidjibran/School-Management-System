@@ -4,71 +4,10 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveAs } from "file-saver";
+import { getAllClasses } from "../../api/Class_Api.js";
+import { getAttendanceByClassAndDate } from "../../api/Attendence_Api.js";
 
-// ---------- Dummy Data ----------
-const generateAttendanceRecords = () => {
-  const students = [
-    {
-      id: 1,
-      name: "Ali Raza",
-      rollNo: "2024-001",
-      class: "10th",
-      section: "A",
-    },
-    {
-      id: 2,
-      name: "Sana Khan",
-      rollNo: "2024-002",
-      class: "10th",
-      section: "A",
-    },
-    {
-      id: 3,
-      name: "Imran Ali",
-      rollNo: "2024-003",
-      class: "10th",
-      section: "B",
-    },
-    {
-      id: 4,
-      name: "Fatima Ahmed",
-      rollNo: "2024-004",
-      class: "9th",
-      section: "A",
-    },
-    {
-      id: 5,
-      name: "Usman Chaudhry",
-      rollNo: "2024-005",
-      class: "9th",
-      section: "B",
-    },
-  ];
-  const statuses = ["Present", "Absent", "Leave", "Late"];
-  const dates = [
-    "2025-03-10",
-    "2025-03-11",
-    "2025-03-12",
-    "2025-03-13",
-    "2025-03-14",
-  ];
-  const records = [];
-  for (let i = 0; i < 35; i++) {
-    records.push({
-      id: i + 1,
-      rollNo: students[i % students.length].rollNo,
-      studentName: students[i % students.length].name,
-      class: students[i % students.length].class,
-      section: students[i % students.length].section,
-      date: dates[Math.floor(Math.random() * dates.length)],
-      status: statuses[Math.floor(Math.random() * statuses.length)],
-      remarks: i % 5 === 0 ? "Medical leave" : "",
-    });
-  }
-  return records;
-};
-
-// ---------- Skeleton Loader ----------
+// ---------- Skeleton ----------
 const TableSkeleton = () => (
   <div className="animate-pulse px-4 py-3">
     <div className="h-8 bg-slate-200 rounded mb-2" />
@@ -79,142 +18,140 @@ const TableSkeleton = () => (
 );
 
 // ---------- Empty State ----------
-const EmptyState = () => (
+const EmptyState = ({ message = "No attendance records found" }) => (
   <div className="text-center py-12">
-    <div className="w-24 h-24 mx-auto bg-slate-100 rounded-full flex items-center justify-center">
-      <svg
-        className="w-12 h-12 text-slate-400"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={1.5}
-          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-        />
+    <div className="w-20 h-20 mx-auto bg-slate-100 rounded-full flex items-center justify-center mb-4">
+      <svg className="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
       </svg>
     </div>
-    <h3 className="mt-4 text-base font-medium text-slate-700">
-      No attendance records found
-    </h3>
-    <p className="text-sm text-slate-400 mt-1">
-      Try adjusting your search or filters
-    </p>
+    <h3 className="text-base font-medium text-slate-700">{message}</h3>
+    <p className="text-sm text-slate-400 mt-1">Class aur date select karo records dekhne ke liye</p>
   </div>
 );
 
 // ---------- Status Badge ----------
 const StatusBadge = ({ status }) => {
   const styles = {
-    Present: "bg-emerald-100 text-emerald-700",
-    Absent: "bg-rose-100    text-rose-700",
-    Leave: "bg-amber-100   text-amber-700",
-    Late: "bg-blue-100    text-blue-700",
+    present: "bg-emerald-100 text-emerald-700",
+    absent:  "bg-rose-100    text-rose-700",
+    leave:   "bg-amber-100   text-amber-700",
+    late:    "bg-blue-100    text-blue-700",
   };
+  const labels = { present: "Present", absent: "Absent", leave: "Leave", late: "Late" };
+  const key = status?.toLowerCase();
   return (
-    <span
-      className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${styles[status]}`}
-    >
-      {status}
+    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${styles[key] || "bg-slate-100 text-slate-600"}`}>
+      {labels[key] || status}
     </span>
   );
 };
 
 export default function AttendanceList() {
-  const [records, setRecords] = useState([]);
-  const [filtered, setFiltered] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [dateFilter, setDateFilter] = useState("");
-  const [classFilter, setClassFilter] = useState("");
-  const [sectionFilter, setSectionFilter] = useState("");
+  const [classes, setClasses]         = useState([]);
+  const [records, setRecords]         = useState([]);
+  const [filtered, setFiltered]       = useState([]);
+  const [loading, setLoading]         = useState(false);
+  const [loadingClasses, setLoadingClasses] = useState(true);
+
+  const [selectedClass, setSelectedClass] = useState("");
+  const [selectedDate, setSelectedDate]   = useState(
+    new Date().toISOString().split("T")[0]
+  );
+  const [search, setSearch]           = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  // ── Load classes ───────────────────────────────────────────────
   useEffect(() => {
-    setTimeout(() => {
-      const data = generateAttendanceRecords();
-      setRecords(data);
-      setFiltered(data);
-      setLoading(false);
-    }, 800);
+    const fetch = async () => {
+      try {
+        const result = await getAllClasses();
+        setClasses(result.data || []);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoadingClasses(false);
+      }
+    };
+    fetch();
   }, []);
 
+  // ── Load attendance jab class ya date change ho ───────────────
+  useEffect(() => {
+    if (!selectedClass || !selectedDate) {
+      setRecords([]);
+      setFiltered([]);
+      return;
+    }
+    const fetch = async () => {
+      setLoading(true);
+      try {
+        const result = await getAttendanceByClassAndDate(selectedClass, selectedDate);
+        setRecords(result.data || []);
+      } catch (e) {
+        console.error(e);
+        setRecords([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetch();
+  }, [selectedClass, selectedDate]);
+
+  // ── Client-side filters ───────────────────────────────────────
   useEffect(() => {
     let result = records;
-    if (search)
-      result = result.filter(
-        (r) =>
-          r.studentName.toLowerCase().includes(search.toLowerCase()) ||
-          r.rollNo.includes(search),
-      );
-    if (dateFilter) result = result.filter((r) => r.date === dateFilter);
-    if (classFilter) result = result.filter((r) => r.class === classFilter);
-    if (sectionFilter)
-      result = result.filter((r) => r.section === sectionFilter);
+    if (search) {
+      result = result.filter((r) => {
+        const name = `${r.student?.firstName || ""} ${r.student?.lastName || ""}`.toLowerCase();
+        const roll = r.student?.rollNumber || "";
+        return name.includes(search.toLowerCase()) || roll.includes(search);
+      });
+    }
     if (statusFilter) result = result.filter((r) => r.status === statusFilter);
     setFiltered(result);
     setCurrentPage(1);
-  }, [search, dateFilter, classFilter, sectionFilter, statusFilter, records]);
+  }, [search, statusFilter, records]);
 
-  // Stats
-  const totalStudents = [...new Set(records.map((r) => r.rollNo))].length;
-  const today = new Date().toISOString().split("T")[0];
-  const presentToday = records.filter(
-    (r) => r.date === today && r.status === "Present",
-  ).length;
-  const absentToday = records.filter(
-    (r) => r.date === today && r.status === "Absent",
-  ).length;
-  const attendancePercent = totalStudents
-    ? ((presentToday / totalStudents) * 100).toFixed(1)
+  // ── Stats ──────────────────────────────────────────────────────
+  const presentCount = records.filter((r) => r.status === "present").length;
+  const absentCount  = records.filter((r) => r.status === "absent").length;
+  const leaveCount   = records.filter((r) => r.status === "leave").length;
+  const lateCount    = records.filter((r) => r.status === "late").length;
+  const attendancePct = records.length
+    ? ((presentCount / records.length) * 100).toFixed(1)
     : 0;
 
-  // Pagination
-  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  // ── Pagination ─────────────────────────────────────────────────
+  const totalPages    = Math.ceil(filtered.length / itemsPerPage);
   const paginatedData = filtered.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
+    currentPage * itemsPerPage
   );
 
-  // Exports
+  // ── Exports ────────────────────────────────────────────────────
+  const flatRows = () =>
+    filtered.map((r) => ({
+      rollNo:      r.student?.rollNumber || "—",
+      studentName: `${r.student?.firstName || ""} ${r.student?.lastName || ""}`.trim(),
+      date:        new Date(r.date).toLocaleDateString(),
+      status:      r.status,
+      remarks:     r.remarks || "",
+    }));
+
   const exportCSV = () => {
-    const headers = [
-      "Roll No",
-      "Student Name",
-      "Class",
-      "Section",
-      "Date",
-      "Status",
-      "Remarks",
-    ];
-    const rows = filtered.map((r) => [
-      r.rollNo,
-      r.studentName,
-      r.class,
-      r.section,
-      r.date,
-      r.status,
-      r.remarks,
-    ]);
-    const csv = [headers, ...rows].map((row) => row.join(",")).join("\n");
-    saveAs(new Blob([csv], { type: "text/csv" }), "attendance.csv");
+    const headers = ["Roll No", "Student Name", "Date", "Status", "Remarks"];
+    const rows    = flatRows().map((r) => [r.rollNo, r.studentName, r.date, r.status, r.remarks]);
+    saveAs(
+      new Blob([[headers, ...rows].map((r) => r.join(",")).join("\n")], { type: "text/csv" }),
+      "attendance.csv"
+    );
   };
   const exportExcel = () => {
-    const ws = XLSX.utils.json_to_sheet(
-      filtered.map((r) => ({
-        "Roll No": r.rollNo,
-        "Student Name": r.studentName,
-        Class: r.class,
-        Section: r.section,
-        Date: r.date,
-        Status: r.status,
-        Remarks: r.remarks,
-      })),
-    );
+    const ws = XLSX.utils.json_to_sheet(flatRows());
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Attendance");
     XLSX.writeFile(wb, "attendance.xlsx");
@@ -224,260 +161,131 @@ export default function AttendanceList() {
     doc.text("Attendance Records", 14, 10);
     autoTable(doc, {
       startY: 20,
-      head: [
-        ["Roll No", "Student", "Class", "Section", "Date", "Status", "Remarks"],
-      ],
-      body: filtered.map((r) => [
-        r.rollNo,
-        r.studentName,
-        r.class,
-        r.section,
-        r.date,
-        r.status,
-        r.remarks,
-      ]),
+      head:   [["Roll No", "Student", "Date", "Status", "Remarks"]],
+      body:   flatRows().map((r) => [r.rollNo, r.studentName, r.date, r.status, r.remarks]),
       headStyles: { fillColor: [79, 70, 229] },
     });
     doc.save("attendance.pdf");
   };
 
-  const uniqueClasses = [...new Set(records.map((r) => r.class))];
-  const uniqueSections = [...new Set(records.map((r) => r.section))];
-  const uniqueDates = [...new Set(records.map((r) => r.date))];
-
-  // Compact input style
-  const inputCls =
-    "h-8 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full";
+  const inputCls = "h-8 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Breadcrumb */}
         <nav className="flex mb-5 text-sm text-slate-500">
-          <span className="hover:text-indigo-600 cursor-pointer">
-            Dashboard
-          </span>
+          <span className="hover:text-indigo-600 cursor-pointer">Dashboard</span>
           <span className="mx-2">/</span>
-          <span className="text-indigo-600 font-medium">
-            Attendance Records
-          </span>
+          <span className="text-indigo-600 font-medium">Attendance Records</span>
         </nav>
 
         {/* Header */}
         <div className="flex flex-wrap justify-between items-start gap-3 mb-7">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">
-              Attendance Records
-            </h1>
-            <p className="text-slate-500 text-sm mt-0.5">
-              View and manage student attendance history
-            </p>
+            <h1 className="text-2xl font-bold text-slate-800">Attendance Records</h1>
+            <p className="text-slate-500 text-sm mt-0.5">Class aur date select karke records dekho</p>
           </div>
-
-          {/* Colorful export buttons */}
           <div className="flex items-center gap-2">
-            <button
-              onClick={exportCSV}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
-            >
-              <FaFileCsv className="text-emerald-600 text-sm" /> CSV
+            <button onClick={exportCSV}   className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition">
+              <FaFileCsv className="text-sm" /> CSV
             </button>
-            <button
-              onClick={exportExcel}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
-            >
-              <FaFileExcel className="text-green-600 text-sm" /> Excel
+            <button onClick={exportExcel} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 transition">
+              <FaFileExcel className="text-sm" /> Excel
             </button>
-            <button
-              onClick={exportPDF}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors"
-            >
-              <FaFilePdf className="text-rose-500 text-sm" /> PDF
+            <button onClick={exportPDF}   className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition">
+              <FaFilePdf className="text-sm" /> PDF
             </button>
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-          {[
-            {
-              label: "Total Students",
-              value: totalStudents,
-              color: "text-slate-800",
-              bg: "bg-indigo-100",
-              iconColor: "text-indigo-600",
-              icon: (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                />
-              ),
-            },
-            {
-              label: "Present Today",
-              value: presentToday,
-              color: "text-emerald-600",
-              bg: "bg-emerald-100",
-              iconColor: "text-emerald-600",
-              icon: (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              ),
-            },
-            {
-              label: "Absent Today",
-              value: absentToday,
-              color: "text-rose-600",
-              bg: "bg-rose-100",
-              iconColor: "text-rose-600",
-              icon: (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              ),
-            },
-            {
-              label: "Attendance %",
-              value: `${attendancePercent}%`,
-              color: "text-blue-600",
-              bg: "bg-blue-100",
-              iconColor: "text-blue-600",
-              icon: (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                />
-              ),
-            },
-          ].map((card) => (
-            <div
-              key={card.label}
-              className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex justify-between items-center"
-            >
-              <div>
-                <p className="text-xs text-slate-500">{card.label}</p>
-                <p className={`text-xl font-bold mt-0.5 ${card.color}`}>
-                  {card.value}
-                </p>
-              </div>
-              <div
-                className={`w-9 h-9 ${card.bg} rounded-xl flex items-center justify-center shrink-0`}
+        {/* Class + Date selector */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-slate-500 mb-1.5">Select Class</label>
+              <select
+                value={selectedClass}
+                onChange={(e) => setSelectedClass(e.target.value)}
+                disabled={loadingClasses}
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-400"
               >
-                <svg
-                  className={`w-4 h-4 ${card.iconColor}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  {card.icon}
-                </svg>
-              </div>
+                <option value="">{loadingClasses ? "Loading..." : "-- Select Class --"}</option>
+                {classes.map((c) => (
+                  <option key={c._id} value={c._id}>
+                    {c.name} — Section {c.section}
+                  </option>
+                ))}
+              </select>
             </div>
-          ))}
+            <div>
+              <label className="block text-xs font-medium text-slate-500 mb-1.5">Select Date</label>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Filters — compact single row */}
+        {/* Stats */}
+        {records.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
+            {[
+              { label: "Total",      value: records.length, color: "text-slate-800",   bg: "bg-indigo-100"  },
+              { label: "Present",    value: presentCount,   color: "text-emerald-600", bg: "bg-emerald-100" },
+              { label: "Absent",     value: absentCount,    color: "text-rose-600",    bg: "bg-rose-100"    },
+              { label: "Leave",      value: leaveCount,     color: "text-amber-600",   bg: "bg-amber-100"   },
+              { label: "Attendance", value: `${attendancePct}%`, color: "text-blue-600", bg: "bg-blue-100"  },
+            ].map((card) => (
+              <div key={card.label} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex justify-between items-center">
+                <div>
+                  <p className="text-xs text-slate-500">{card.label}</p>
+                  <p className={`text-xl font-bold mt-0.5 ${card.color}`}>{card.value}</p>
+                </div>
+                <div className={`w-9 h-9 ${card.bg} rounded-xl`} />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Filters */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 px-4 py-3 mb-5">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 items-center">
-            {/* Search */}
-            <div className="relative lg:col-span-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 items-center">
+            <div className="relative">
               <FaSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs" />
               <input
                 type="text"
-                placeholder="Name or roll no…"
+                placeholder="Name ya roll no..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className={`${inputCls} pl-7 pr-2.5`}
               />
             </div>
-
-            {/* Date */}
-            <select
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className={`${inputCls} px-2.5`}
-            >
-              <option value="">All Dates</option>
-              {uniqueDates.map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
-            </select>
-
-            {/* Class */}
-            <select
-              value={classFilter}
-              onChange={(e) => setClassFilter(e.target.value)}
-              className={`${inputCls} px-2.5`}
-            >
-              <option value="">All Classes</option>
-              {uniqueClasses.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-
-            {/* Section */}
-            <select
-              value={sectionFilter}
-              onChange={(e) => setSectionFilter(e.target.value)}
-              className={`${inputCls} px-2.5`}
-            >
-              <option value="">All Sections</option>
-              {uniqueSections.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-
-            {/* Status */}
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className={`${inputCls} px-2.5`}
             >
               <option value="">All Status</option>
-              <option value="Present">Present</option>
-              <option value="Absent">Absent</option>
-              <option value="Leave">Leave</option>
-              <option value="Late">Late</option>
+              <option value="present">Present</option>
+              <option value="absent">Absent</option>
+              <option value="leave">Leave</option>
+              <option value="late">Late</option>
             </select>
           </div>
         </div>
 
-        {/* DataTable */}
+        {/* Table */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  {[
-                    "Roll No",
-                    "Student Name",
-                    "Class",
-                    "Section",
-                    "Date",
-                    "Status",
-                    "Remarks",
-                  ].map((h) => (
-                    <th
-                      key={h}
-                      className="text-left py-3 px-4 text-xs font-semibold text-slate-600 whitespace-nowrap"
-                    >
+                  {["#", "Roll No", "Student Name", "Date", "Status", "Remarks"].map((h) => (
+                    <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-slate-600 whitespace-nowrap uppercase">
                       {h}
                     </th>
                   ))}
@@ -485,37 +293,21 @@ export default function AttendanceList() {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr>
-                    <td colSpan="7" className="p-0">
-                      <TableSkeleton />
-                    </td>
-                  </tr>
+                  <tr><td colSpan="6"><TableSkeleton /></td></tr>
+                ) : !selectedClass ? (
+                  <tr><td colSpan="6"><EmptyState message="Pehle class aur date select karo" /></td></tr>
                 ) : paginatedData.length === 0 ? (
-                  <tr>
-                    <td colSpan="7">
-                      <EmptyState />
-                    </td>
-                  </tr>
+                  <tr><td colSpan="6"><EmptyState message="Is date ke liye koi record nahi mila" /></td></tr>
                 ) : (
-                  paginatedData.map((record) => (
-                    <tr
-                      key={record.id}
-                      className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
-                    >
-                      <td className="py-2.5 px-4 text-slate-500">
-                        {record.rollNo}
-                      </td>
+                  paginatedData.map((record, idx) => (
+                    <tr key={record._id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition">
+                      <td className="py-2.5 px-4 text-slate-400">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
+                      <td className="py-2.5 px-4 text-slate-500">{record.student?.rollNumber || "—"}</td>
                       <td className="py-2.5 px-4 font-medium text-slate-800">
-                        {record.studentName}
+                        {record.student?.firstName} {record.student?.lastName}
                       </td>
                       <td className="py-2.5 px-4 text-slate-600">
-                        {record.class}
-                      </td>
-                      <td className="py-2.5 px-4 text-slate-600">
-                        {record.section}
-                      </td>
-                      <td className="py-2.5 px-4 text-slate-600">
-                        {record.date}
+                        {new Date(record.date).toLocaleDateString()}
                       </td>
                       <td className="py-2.5 px-4">
                         <StatusBadge status={record.status} />
@@ -535,14 +327,13 @@ export default function AttendanceList() {
             <div className="flex flex-wrap justify-between items-center px-4 py-3 border-t border-slate-100 gap-2">
               <p className="text-xs text-slate-500">
                 Showing {(currentPage - 1) * itemsPerPage + 1}–
-                {Math.min(currentPage * itemsPerPage, filtered.length)} of{" "}
-                {filtered.length} entries
+                {Math.min(currentPage * itemsPerPage, filtered.length)} of {filtered.length}
               </p>
               <div className="flex items-center gap-1.5">
                 <button
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage((p) => p - 1)}
-                  className="px-3 py-1 text-xs border border-slate-200 rounded-lg disabled:opacity-40 hover:bg-slate-50 transition-colors"
+                  className="px-3 py-1 text-xs border border-slate-200 rounded-lg disabled:opacity-40 hover:bg-slate-50"
                 >
                   Previous
                 </button>
@@ -552,7 +343,7 @@ export default function AttendanceList() {
                 <button
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage((p) => p + 1)}
-                  className="px-3 py-1 text-xs border border-slate-200 rounded-lg disabled:opacity-40 hover:bg-slate-50 transition-colors"
+                  className="px-3 py-1 text-xs border border-slate-200 rounded-lg disabled:opacity-40 hover:bg-slate-50"
                 >
                   Next
                 </button>

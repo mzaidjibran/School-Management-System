@@ -1,10 +1,10 @@
-import { getHeaders } from "./apiHelper.js";
+import { getHeaders } from "./Api_Helper.js";
 
 const API_BASE = "http://127.0.0.1:3000";
 
 // ─── Mark Attendance (Array of records) ──────────────────────────
 export const markAttendance = async (records) => {
-  const response = await fetch(`${API_BASE}/api/attendance`, {
+  const response = await fetch(`${API_BASE}/api/attendence`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify({ records }),

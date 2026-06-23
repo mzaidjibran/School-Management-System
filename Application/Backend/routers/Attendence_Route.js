@@ -11,9 +11,9 @@ const router = express.Router();
 
 // Attendance routes
 
-router.post("/", protect, authorize("admin", "teacher"), markAttendance);                              // POST   /api/attendance
-router.get("/", protect, authorize("admin", "teacher"), getAttendanceByClassAndDate);                  // GET    /api/attendance?classId=&date=
-router.get("/student/:studentId", protect, authorize("admin", "teacher"), getAttendanceByStudent);     // GET    /api/attendance/student/:studentId
-router.put("/:id", protect, authorize("admin", "teacher"), updateAttendance);                          // PUT    /api/attendance/:id
+router.post("/", markAttendance);                              // POST   /api/attendance
+router.get("/",getAttendanceByClassAndDate);                  // GET    /api/attendance?classId=&date=
+router.get("/student/:studentId",getAttendanceByStudent);     // GET    /api/attendance/student/:studentId
+router.put("/:id",updateAttendance);                          // PUT    /api/attendance/:id
 
 export default router;

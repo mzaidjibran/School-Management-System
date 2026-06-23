@@ -36,11 +36,11 @@ const attendanceSchema = new mongoose.Schema(
       default: null,
     },
 
-    markedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: [true, "Marked by is mandatory"],
-    },
+    // markedBy: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "Teacher",
+    //   required: [true, "Marked by is mandatory"],
+    // },
   },
   {
     timestamps: true,
