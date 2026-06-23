@@ -2,26 +2,29 @@ import mongoose from "mongoose";
 
 const ExamSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, trim: true }, // "Mid Term", "Final Term"
+    name: { type: String, required: true, trim: true },
     class: { type: mongoose.Schema.Types.ObjectId, ref: "Class", required: true },
     subject: { type: String, required: true, trim: true },
     examDate: { type: Date, required: true },
-    startTime: { type: String }, // "09:00"
-    duration: { type: Number }, // minutes
+    endDate: { type: Date },
+    startTime: { type: String },
+    duration: { type: Number },
     totalMarks: { type: Number, required: true, default: 100 },
     passingMarks: { type: Number, required: true, default: 40 },
     venue: { type: String },
     examType: {
       type: String,
-      enum: ["mid_term", "final_term", "unit_test", "practical", "quiz"],
+      enum: ["mid_term", "final_term", "unit_test", "practical", "quiz", "Theory", "Practical", "Both"],
       required: true,
     },
     session: { type: String },
+    instructions: { type: String },
     status: {
       type: String,
-      enum: ["scheduled", "ongoing", "completed", "cancelled"],
+      enum: ["scheduled", "ongoing", "completed", "cancelled", "Upcoming", "Ongoing", "Completed", "Cancelled"],
       default: "scheduled",
     },
+    // Optional — set karo jab auth ho
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
@@ -34,7 +37,8 @@ const ResultSchema = new mongoose.Schema(
     obtainedMarks: { type: Number, required: true },
     grade: { type: String },
     remarks: { type: String },
-    status: { type: String, enum: ["pass", "fail"], },
+    status: { type: String, enum: ["pass", "fail"] },
+    // Optional — set karo jab auth ho
     enteredBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
@@ -61,4 +65,4 @@ ResultSchema.index({ exam: 1, student: 1 }, { unique: true });
 const Exam = mongoose.model("Exam", ExamSchema);
 const Result = mongoose.model("Result", ResultSchema);
 
-export { Exam, Result };  
+export { Exam, Result };
