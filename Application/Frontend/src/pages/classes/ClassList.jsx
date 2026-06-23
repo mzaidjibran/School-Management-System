@@ -12,6 +12,8 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveAs } from "file-saver";
+import { getAllClasses, updateClass, deleteClass } from "../../api/Class_Api.js"; // path apne folder structure ke hisaab se adjust kar lein
+import { getAllTeachers } from "../../api/Teacher_Api.js"; // path apne folder structure ke hisaab se adjust kar lein
 
 // ---------- Floating Input ----------
 const FloatingInput = ({
@@ -22,6 +24,7 @@ const FloatingInput = ({
   onChange,
   required,
   error,
+  disabled,
 }) => (
   <div className="relative">
     <input
@@ -29,6 +32,7 @@ const FloatingInput = ({
       name={name}
       value={value}
       onChange={onChange}
+      disabled={disabled}
       placeholder=" "
       className={`peer w-full px-4 pt-5 pb-2 border rounded-xl bg-white text-slate-800 outline-none transition-all text-sm
         ${error ? "border-rose-400 focus:ring-rose-100" : "border-slate-200 focus:border-indigo-500 focus:ring-indigo-100"}
@@ -47,6 +51,10 @@ const FloatingInput = ({
 );
 
 // ---------- Floating Select (disabled = plain text) ----------
+// options ab dono support karta hai: array of strings, ya array of
+// {value, label} objects (Class Teacher dropdown). displayValue use
+// hota hai sirf jab disabled=true ho aur value ko name mein resolve
+// karna ho (jaise Teacher ID ki jagah Teacher ka naam dikhana).
 const FloatingSelect = ({
   label,
   name,
@@ -56,12 +64,13 @@ const FloatingSelect = ({
   required,
   error,
   disabled,
+  displayValue,
 }) => {
   if (disabled) {
     return (
       <div className="relative">
         <div className="w-full px-4 pt-5 pb-2 border border-slate-200 rounded-xl bg-slate-50 text-sm text-slate-700 min-h-[52px]">
-          {value || "—"}
+          {displayValue !== undefined ? displayValue || "—" : value || "—"}
         </div>
         <label className="absolute left-4 top-1.5 text-[10px] text-indigo-600 pointer-events-none">
           {label}
@@ -80,11 +89,15 @@ const FloatingSelect = ({
           focus:ring-2`}
       >
         <option value=""></option>
-        {options.map((o) => (
-          <option key={o} value={o}>
-            {o}
-          </option>
-        ))}
+        {options.map((o) => {
+          const optValue = typeof o === "object" ? o.value : o;
+          const optLabel = typeof o === "object" ? o.label : o;
+          return (
+            <option key={optValue} value={optValue}>
+              {optLabel}
+            </option>
+          );
+        })}
       </select>
       <label
         className={`absolute left-4 pointer-events-none transition-all duration-200 text-slate-400
@@ -161,20 +174,27 @@ const StatusBadge = ({ status }) => (
 );
 
 // ---------- Teacher Avatar ----------
-const TeacherAvatar = ({ name }) => (
-  <div className="flex items-center gap-2">
-    <div className="w-7 h-7 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 flex items-center justify-center text-white text-xs font-medium">
-      {name.charAt(0)}
+const TeacherAvatar = ({ teacher }) => {
+  if (!teacher) {
+    return <span className="text-xs text-slate-400 italic">Not Assigned</span>;
+  }
+  const name = teacher.name || `${teacher.firstName || ""} ${teacher.lastName || ""}`.trim() || "—";
+  return (
+    <div className="flex items-center gap-2">
+      <div className="w-7 h-7 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 flex items-center justify-center text-white text-xs font-medium">
+        {name.charAt(0)}
+      </div>
+      <span className="text-sm font-medium text-slate-700">{name}</span>
     </div>
-    <span className="text-sm font-medium text-slate-700">{name}</span>
-  </div>
-);
+  );
+};
 
 // ---------- View/Edit Modal ----------
-const ClassModal = ({ isOpen, onClose, cls, mode, onSave }) => {
+const ClassModal = ({ isOpen, onClose, cls, mode, onSave, teachers }) => {
   const [formData, setFormData] = useState({
     className: "",
     section: "",
+    academicYear: "",
     classTeacher: "",
     roomNumber: "",
     capacity: "",
@@ -186,17 +206,25 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave }) => {
   const [isSaving, setIsSaving] = useState(false);
   const isViewOnly = mode === "view";
 
+  const teacherOptions = teachers
+    .map((t) => ({
+      value: t._id,
+      label: t.name || `${t.firstName || ""} ${t.lastName || ""}`.trim() || "Unknown",
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+
   useEffect(() => {
     if (!isOpen) return;
     if (cls) {
       setFormData({
-        className: cls.className || "",
+        className: cls.name || "",
         section: cls.section || "",
-        classTeacher: cls.classTeacher || "",
-        roomNumber: cls.roomNo || "",
-        capacity: cls.students?.toString() || "",
+        academicYear: cls.academicYear || "",
+        classTeacher: cls.classTeacher?._id || cls.classTeacher || "",
+        roomNumber: cls.room || "",
+        capacity: cls.capacity?.toString() || "",
         shift: cls.shift || "Morning",
-        status: cls.status || "Active",
+        status: cls.isActive ? "Active" : "Inactive",
         description: cls.description || "",
       });
     }
@@ -212,33 +240,48 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave }) => {
   const validate = () => {
     const e = {};
     if (!formData.className.trim()) e.className = "Required";
-    if (!formData.classTeacher.trim()) e.classTeacher = "Required";
-    if (!formData.roomNumber.trim()) e.roomNumber = "Required";
+    if (!formData.section.trim()) e.section = "Required";
+    if (!formData.academicYear.trim()) e.academicYear = "Required";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+     console.log("formData:", JSON.stringify(formData));
     if (isViewOnly || !validate()) return;
+
     setIsSaving(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setIsSaving(false);
-    onSave({
-      ...cls,
-      className: formData.className,
-      section: formData.section,
-      classTeacher: formData.classTeacher,
-      roomNo: formData.roomNumber,
-      students: parseInt(formData.capacity) || cls.students,
+
+    const payload = {
+      name: formData.className.trim(),
+      section: formData.section.trim(),
+      academicYear: formData.academicYear.trim(),
+      room: formData.roomNumber.trim() || undefined,
+      capacity: formData.capacity ? Number(formData.capacity) : undefined,
       shift: formData.shift,
-      status: formData.status,
-      description: formData.description,
-    });
-    onClose();
+      description: formData.description.trim(),
+      isActive: formData.status === "Active",
+    };
+    if (formData.classTeacher) payload.classTeacher = formData.classTeacher;
+
+    try {
+      const result = await updateClass(cls._id, payload);
+      setIsSaving(false);
+      onSave(result.data);
+      // onClose();
+    } catch (error) {
+      setIsSaving(false);
+      setErrors((prev) => ({ ...prev, submit: error.message || "Update fail ho gaya" }));
+    }
   };
 
   if (!isOpen) return null;
+
+ const classTeacherDisplayName = cls?.classTeacher
+  ? cls.classTeacher.name || `${cls.classTeacher.firstName || ""} ${cls.classTeacher.lastName || ""}`.trim()
+  : "Not Assigned";
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
@@ -285,24 +328,33 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave }) => {
                 name="section"
                 value={formData.section}
                 onChange={handleChange}
+                required
+                error={errors.section}
                 disabled={isViewOnly}
               />
               <FloatingInput
-                label="Class Teacher"
-                name="classTeacher"
-                value={formData.classTeacher}
+                label="Academic Year"
+                name="academicYear"
+                value={formData.academicYear}
                 onChange={handleChange}
                 required
-                error={errors.classTeacher}
+                error={errors.academicYear}
                 disabled={isViewOnly}
+              />
+              <FloatingSelect
+                label="Class Teacher"
+                name="classTeacher"
+                options={teacherOptions}
+                value={formData.classTeacher}
+                onChange={handleChange}
+                disabled={isViewOnly}
+                displayValue={classTeacherDisplayName}
               />
               <FloatingInput
                 label="Room Number"
                 name="roomNumber"
                 value={formData.roomNumber}
                 onChange={handleChange}
-                required
-                error={errors.roomNumber}
                 disabled={isViewOnly}
               />
               <FloatingInput
@@ -349,6 +401,9 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave }) => {
                 )}
               </div>
             </div>
+            {errors.submit && (
+              <p className="text-rose-500 text-xs mt-3">{errors.submit}</p>
+            )}
           </form>
         </div>
 
@@ -412,6 +467,7 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave }) => {
 export default function ClassList() {
   const [classes, setClasses] = useState([]);
   const [filtered, setFiltered] = useState([]);
+  const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [shiftFilter, setShiftFilter] = useState("");
@@ -421,95 +477,84 @@ export default function ClassList() {
   const [selectedClass, setSelectedClass] = useState(null);
 
   useEffect(() => {
-    setTimeout(() => {
-      const dummyClasses = [
-        {
-          id: 1,
-          className: "Nursery",
-          section: "A",
-          classTeacher: "Ms. Fatima",
-          students: 28,
-          roomNo: "101",
-          shift: "Morning",
-          status: "Active",
-          description: "",
-        },
-        {
-          id: 2,
-          className: "Prep",
-          section: "B",
-          classTeacher: "Mr. Ahmed",
-          students: 32,
-          roomNo: "102",
-          shift: "Morning",
-          status: "Active",
-          description: "",
-        },
-        {
-          id: 3,
-          className: "1st",
-          section: "A",
-          classTeacher: "Ms. Sana",
-          students: 30,
-          roomNo: "103",
-          shift: "Evening",
-          status: "Active",
-          description: "",
-        },
-        {
-          id: 4,
-          className: "2nd",
-          section: "C",
-          classTeacher: "Mr. Imran",
-          students: 25,
-          roomNo: "104",
-          shift: "Morning",
-          status: "Inactive",
-          description: "",
-        },
-      ];
-      setClasses(dummyClasses);
-      setFiltered(dummyClasses);
-      setLoading(false);
-    }, 800);
+    const fetchClasses = async () => {
+      setLoading(true);
+      try {
+        const result = await getAllClasses();
+        setClasses(result.data || []);
+        setFiltered(result.data || []);
+      } catch (error) {
+        console.error(error);
+        setClasses([]);
+        setFiltered([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchClasses();
+  }, []);
+
+  // Teacher list — ClassModal ke "Class Teacher" dropdown ke liye
+  useEffect(() => {
+    const fetchTeachers = async () => {
+      try {
+        const result = await getAllTeachers();
+        setTeachers(result.data || []);
+      } catch (error) {
+        console.error(error);
+        setTeachers([]);
+      }
+    };
+    fetchTeachers();
   }, []);
 
   useEffect(() => {
     let result = classes;
-    if (search)
+    if (search) {
       result = result.filter(
         (c) =>
-          c.className.toLowerCase().includes(search.toLowerCase()) ||
-          c.classTeacher.toLowerCase().includes(search.toLowerCase()),
+          c.name?.toLowerCase().includes(search.toLowerCase()) ||
+          (c.classTeacher &&
+            `${c.classTeacher.firstName} ${c.classTeacher.lastName}`
+              .toLowerCase()
+              .includes(search.toLowerCase()))
       );
+    }
     if (shiftFilter) result = result.filter((c) => c.shift === shiftFilter);
-    if (statusFilter) result = result.filter((c) => c.status === statusFilter);
+    if (statusFilter)
+      result = result.filter((c) =>
+        statusFilter === "Active" ? c.isActive : !c.isActive
+      );
     setFiltered(result);
   }, [search, shiftFilter, statusFilter, classes]);
 
   const totalClasses = classes.length;
-  const activeClasses = classes.filter((c) => c.status === "Active").length;
-  const totalStudents = classes.reduce((acc, c) => acc + c.students, 0);
-  const totalTeachers = [...new Set(classes.map((c) => c.classTeacher))].length;
+  const activeClasses = classes.filter((c) => c.isActive).length;
+  const totalCapacity = classes.reduce((acc, c) => acc + (c.capacity || 0), 0);
+  const totalTeachers = [
+    ...new Set(classes.filter((c) => c.classTeacher).map((c) => c.classTeacher._id)),
+  ].length;
 
   const exportCSV = () => {
     const headers = [
       "Class",
       "Section",
+      "Academic Year",
       "Teacher",
-      "Students",
+      "Capacity",
       "Room No",
       "Shift",
       "Status",
     ];
     const rows = filtered.map((c) => [
-      c.className,
+      c.name,
       c.section,
-      c.classTeacher,
-      c.students,
-      c.roomNo,
+      c.academicYear,
+      c.classTeacher ? `${c.classTeacher.firstName} ${c.classTeacher.lastName}` : "Not Assigned",
+      c.capacity,
+      c.room,
       c.shift,
-      c.status,
+      c.isActive ? "Active" : "Inactive",
     ]);
     saveAs(
       new Blob([[headers, ...rows].map((r) => r.join(",")).join("\n")], {
@@ -521,13 +566,14 @@ export default function ClassList() {
   const exportExcel = () => {
     const ws = XLSX.utils.json_to_sheet(
       filtered.map((c) => ({
-        Class: c.className,
+        Class: c.name,
         Section: c.section,
-        Teacher: c.classTeacher,
-        Students: c.students,
-        "Room No": c.roomNo,
+        "Academic Year": c.academicYear,
+        Teacher: c.classTeacher ? `${c.classTeacher.firstName} ${c.classTeacher.lastName}` : "Not Assigned",
+        Capacity: c.capacity,
+        "Room No": c.room,
         Shift: c.shift,
-        Status: c.status,
+        Status: c.isActive ? "Active" : "Inactive",
       })),
     );
     const wb = XLSX.utils.book_new();
@@ -540,16 +586,17 @@ export default function ClassList() {
     autoTable(doc, {
       startY: 20,
       head: [
-        ["Class", "Section", "Teacher", "Students", "Room", "Shift", "Status"],
+        ["Class", "Section", "Academic Year", "Teacher", "Capacity", "Room", "Shift", "Status"],
       ],
       body: filtered.map((c) => [
-        c.className,
+        c.name,
         c.section,
-        c.classTeacher,
-        c.students,
-        c.roomNo,
+        c.academicYear,
+        c.classTeacher ? `${c.classTeacher.firstName} ${c.classTeacher.lastName}` : "Not Assigned",
+        c.capacity,
+        c.room,
         c.shift,
-        c.status,
+        c.isActive ? "Active" : "Inactive",
       ]),
       headStyles: { fillColor: [79, 70, 229] },
     });
@@ -565,13 +612,20 @@ export default function ClassList() {
     setModalOpen(false);
     setSelectedClass(null);
   };
-  const handleSave = (updated) => {
-    setClasses((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
-    closeModal();
-  };
-  const handleDelete = (cls) => {
-    if (window.confirm(`Delete ${cls.className}?`))
-      setClasses((prev) => prev.filter((c) => c.id !== cls.id));
+const handleSave = (updatedClass) => {
+  setClasses((prev) =>
+    prev.map((c) => (c._id === updatedClass._id ? updatedClass : c))
+  );
+  closeModal();
+};
+  const handleDelete = async (cls) => {
+    if (!window.confirm(`Delete ${cls.name}?`)) return;
+    try {
+      await deleteClass(cls._id);
+      setClasses((prev) => prev.filter((c) => c._id !== cls._id));
+    } catch (error) {
+      alert(error.message || "Class delete nahi ho saki");
+    }
   };
 
   return (
@@ -616,8 +670,8 @@ export default function ClassList() {
               path: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
             },
             {
-              label: "Total Students",
-              value: totalStudents,
+              label: "Total Capacity",
+              value: totalCapacity,
               bg: "bg-blue-100",
               ic: "text-blue-600",
               path: "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z",
@@ -740,8 +794,9 @@ export default function ClassList() {
                     {[
                       "Class Name",
                       "Section",
+                      "Academic Year",
                       "Class Teacher",
-                      "Students",
+                      "Capacity",
                       "Room No",
                       "Shift",
                       "Status",
@@ -759,23 +814,26 @@ export default function ClassList() {
                 <tbody>
                   {filtered.map((cls) => (
                     <tr
-                      key={cls.id}
+                      key={cls._id}
                       className="border-b border-slate-100 hover:bg-slate-50 transition"
                     >
                       <td className="py-3.5 px-5 font-medium text-slate-800 text-sm">
-                        {cls.className}
+                        {cls.name}
                       </td>
                       <td className="py-3.5 px-5 text-slate-600 text-sm">
                         {cls.section}
                       </td>
+                      <td className="py-3.5 px-5 text-slate-600 text-sm">
+                        {cls.academicYear}
+                      </td>
                       <td className="py-3.5 px-5">
-                        <TeacherAvatar name={cls.classTeacher} />
+                        <TeacherAvatar teacher={cls.classTeacher} />
                       </td>
                       <td className="py-3.5 px-5 text-slate-600 text-sm">
-                        {cls.students}
+                        {cls.capacity}
                       </td>
                       <td className="py-3.5 px-5 text-slate-600 text-sm">
-                        {cls.roomNo}
+                        {cls.room || "—"}
                       </td>
                       <td className="py-3.5 px-5">
                         <span className="px-2.5 py-1 bg-slate-100 rounded-lg text-xs font-medium text-slate-600">
@@ -783,7 +841,7 @@ export default function ClassList() {
                         </span>
                       </td>
                       <td className="py-3.5 px-5">
-                        <StatusBadge status={cls.status} />
+                        <StatusBadge status={cls.isActive ? "Active" : "Inactive"} />
                       </td>
                       <td className="py-3.5 px-5">
                         <div className="flex items-center gap-2">
@@ -825,6 +883,7 @@ export default function ClassList() {
         cls={selectedClass}
         mode={modalMode}
         onSave={handleSave}
+        teachers={teachers}
       />
     </div>
   );

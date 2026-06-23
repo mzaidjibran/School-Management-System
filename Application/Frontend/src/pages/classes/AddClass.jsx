@@ -1,13 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  FaBook,
-  FaChalkboardTeacher,
-  FaDoorOpen,
-  FaUsers,
-  FaSun,
-  FaCheckCircle,
-} from "react-icons/fa";
+import { FaBook, FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
+import { createClass } from "../../api/Class_Api.js"; // path apne folder structure ke hisaab se adjust kar lein
+import { getAllTeachers } from "../../api/Teacher_Api.js"; // path apne folder structure ke hisaab se adjust kar lein
 
 // ---------- Floating Input ----------
 const FloatingInput = ({
@@ -42,6 +37,8 @@ const FloatingInput = ({
 );
 
 // ---------- Floating Select ----------
+// options ab dono support karta hai: array of strings (Shift, Status)
+// ya array of {value, label} objects (Class Teacher dropdown)
 const FloatingSelect = ({
   label,
   name,
@@ -61,11 +58,15 @@ const FloatingSelect = ({
         focus:ring-2`}
     >
       <option value=""></option>
-      {options.map((opt) => (
-        <option key={opt} value={opt}>
-          {opt}
-        </option>
-      ))}
+      {options.map((opt) => {
+        const optValue = typeof opt === "object" ? opt.value : opt;
+        const optLabel = typeof opt === "object" ? opt.label : opt;
+        return (
+          <option key={optValue} value={optValue}>
+            {optLabel}
+          </option>
+        );
+      })}
     </select>
     <label
       className={`absolute left-4 pointer-events-none transition-all duration-200 text-slate-400
@@ -96,6 +97,7 @@ export default function AddClass() {
   const [form, setForm] = useState({
     className: "",
     section: "",
+    academicYear: "",
     classTeacher: "",
     roomNumber: "",
     capacity: "",
@@ -106,9 +108,33 @@ export default function AddClass() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [apiError, setApiError] = useState("");
   const [savingAnother, setSavingAnother] = useState(false);
+  const [teachers, setTeachers] = useState([]);
 
-  const requiredFields = ["className", "classTeacher", "roomNumber"];
+  // Teacher list fetch karo dropdown ke liye
+  useEffect(() => {
+    const fetchTeachers = async () => {
+      try {
+        const result = await getAllTeachers();
+        setTeachers(result.data || []);
+      } catch (error) {
+        console.error(error);
+        setTeachers([]);
+      }
+    };
+    fetchTeachers();
+  }, []);
+
+  const teacherOptions = teachers
+    .map((t) => ({
+      value: t._id,
+      label: t.name || `${t.firstName || ""} ${t.lastName || ""}`.trim() || "Unknown",
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+
+  // Model ke hisaab se sirf yeh teen fields actually required hain
+  const requiredFields = ["className", "section", "academicYear"];
   const filledCount = requiredFields.filter((f) => form[f]?.trim()).length;
   const progressPercent = (filledCount / requiredFields.length) * 100;
 
@@ -121,10 +147,9 @@ export default function AddClass() {
   const validate = () => {
     const newErrors = {};
     if (!form.className.trim()) newErrors.className = "Class name is required";
-    if (!form.classTeacher.trim())
-      newErrors.classTeacher = "Class teacher is required";
-    if (!form.roomNumber.trim())
-      newErrors.roomNumber = "Room number is required";
+    if (!form.section.trim()) newErrors.section = "Section is required";
+    if (!form.academicYear.trim())
+      newErrors.academicYear = "Academic year is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -133,6 +158,7 @@ export default function AddClass() {
     setForm({
       className: "",
       section: "",
+      academicYear: "",
       classTeacher: "",
       roomNumber: "",
       capacity: "",
@@ -146,14 +172,34 @@ export default function AddClass() {
   const handleSubmit = async (e, addAnother = false) => {
     e.preventDefault();
     if (!validate()) return;
+
     setLoading(true);
     setSavingAnother(addAnother);
-    await new Promise((r) => setTimeout(r, 1200));
-    setLoading(false);
-    setSuccess(true);
-    setTimeout(() => setSuccess(false), 3000);
-    if (addAnother) resetForm();
-    else navigate(-1);
+    setApiError("");
+
+    const payload = {
+      name: form.className.trim(),
+      section: form.section.trim(),
+      academicYear: form.academicYear.trim(),
+      room: form.roomNumber.trim() || undefined,
+      capacity: form.capacity ? Number(form.capacity) : undefined,
+      shift: form.shift,
+      description: form.description.trim(),
+      isActive: form.status === "Active",
+    };
+    if (form.classTeacher) payload.classTeacher = form.classTeacher;
+
+    try {
+      await createClass(payload);
+      setLoading(false);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+      if (addAnother) resetForm();
+      else navigate(-1);
+    } catch (error) {
+      setLoading(false);
+      setApiError(error.message || "Class create nahi ho saki");
+    }
   };
 
   return (
@@ -226,22 +272,29 @@ export default function AddClass() {
                 name="section"
                 value={form.section}
                 onChange={handleChange}
+                required
+                error={errors.section}
               />
               <FloatingInput
-                label="Class Teacher"
-                name="classTeacher"
-                value={form.classTeacher}
+                label="Academic Year"
+                name="academicYear"
+                value={form.academicYear}
                 onChange={handleChange}
                 required
-                error={errors.classTeacher}
+                error={errors.academicYear}
+              />
+              <FloatingSelect
+                label="Class Teacher"
+                name="classTeacher"
+                options={teacherOptions}
+                value={form.classTeacher}
+                onChange={handleChange}
               />
               <FloatingInput
                 label="Room Number"
                 name="roomNumber"
                 value={form.roomNumber}
                 onChange={handleChange}
-                required
-                error={errors.roomNumber}
               />
               <FloatingInput
                 label="Capacity"
@@ -338,6 +391,13 @@ export default function AddClass() {
           <div className="fixed bottom-6 right-6 bg-emerald-500 text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 z-50">
             <FaCheckCircle className="w-5 h-5" />
             <span>Class saved successfully!</span>
+          </div>
+        )}
+
+        {apiError && (
+          <div className="fixed bottom-6 right-6 bg-rose-500 text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 z-50">
+            <FaExclamationCircle className="w-5 h-5" />
+            <span>{apiError}</span>
           </div>
         )}
       </div>

@@ -3,12 +3,7 @@ import {Class} from "../models/Class_Model.js";
 // ─── Create Class ─────────────────────────────────────────────────
 export const createClass = async (request, response) => {
   try {
-    const classData = {
-      ...request.body,
-      createdBy: request.user._id,
-    };
-
-    const newClass = await Class.create(classData);
+    const newClass = await Class.create(request.body);
 
     response.status(201).json({
       success: true,
@@ -41,7 +36,7 @@ export const getAllClasses = async (request, response) => {
     if (isActive !== undefined) filter.isActive = isActive === "true";
 
     const classes = await Class.find(filter)
-      .populate("classTeacher", "firstName lastName email")
+      .populate("classTeacher", "firstName lastName name email")
       .sort({ name: 1, section: 1 });
 
     response.status(200).json({
@@ -65,7 +60,7 @@ export const getSingleClass = async (request, response) => {
   try {
     const singleClass = await Class.findById(request.params.id).populate(
       "classTeacher",
-      "firstName lastName email"
+      "firstName lastName name email"
     );
 
     if (!singleClass) {
@@ -98,7 +93,7 @@ export const updateClass = async (request, response) => {
       request.params.id,
       request.body,
       { new: true, runValidators: true }
-    );
+    ).populate("classTeacher", "firstName lastName name email");
 
     if (!updatedClass) {
       return response.status(404).json({

@@ -1,6 +1,11 @@
-import { getHeaders } from "./apiHelper.js";
+import { getHeaders } from "./Api_Helper";
 
-const API_BASE = "http://127.0.0.1:3000";
+// NOTE: backend (index.js) "process.env.PORT || 5000" par chalta hai.
+// Pehle yahan 3000 likha tha jo backend se match nahi karta tha — isi
+// wajah se koi bhi request connect hi nahi ho rahi thi.
+// Agar aapke .env me PORT kuch aur set hai to neeche wo number daal dein,
+// ya VITE_API_BASE_URL environment variable use karein.
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 // ─── Create Class ─────────────────────────────────────────────────
 export const createClass = async (data) => {
@@ -9,8 +14,11 @@ export const createClass = async (data) => {
     headers: getHeaders(),
     body: JSON.stringify(data),
   });
-  if (!response.ok) throw new Error(`Create class failed: ${response.status}`);
-  return response.json();
+  const result = await response.json();
+  if (!response.ok) {
+    throw new Error(result.message || `Create class failed: ${response.status}`);
+  }
+  return result;
 };
 
 // ─── Get All Classes ──────────────────────────────────────────────
@@ -25,8 +33,11 @@ export const getAllClasses = async (academicYear, isActive) => {
     method: "GET",
     headers: getHeaders(),
   });
-  if (!response.ok) throw new Error(`Get classes failed: ${response.status}`);
-  return response.json();
+  const result = await response.json();
+  if (!response.ok) {
+    throw new Error(result.message || `Get classes failed: ${response.status}`);
+  }
+  return result;
 };
 
 // ─── Get Single Class ─────────────────────────────────────────────
@@ -35,8 +46,11 @@ export const getSingleClass = async (id) => {
     method: "GET",
     headers: getHeaders(),
   });
-  if (!response.ok) throw new Error(`Get class failed: ${response.status}`);
-  return response.json();
+  const result = await response.json();
+  if (!response.ok) {
+    throw new Error(result.message || `Get class failed: ${response.status}`);
+  }
+  return result;
 };
 
 // ─── Update Class ─────────────────────────────────────────────────
@@ -46,8 +60,11 @@ export const updateClass = async (id, data) => {
     headers: getHeaders(),
     body: JSON.stringify(data),
   });
-  if (!response.ok) throw new Error(`Update class failed: ${response.status}`);
-  return response.json();
+  const result = await response.json();
+  if (!response.ok) {
+    throw new Error(result.message || `Update class failed: ${response.status}`);
+  }
+  return result;
 };
 
 // ─── Delete Class ─────────────────────────────────────────────────
@@ -56,6 +73,9 @@ export const deleteClass = async (id) => {
     method: "DELETE",
     headers: getHeaders(),
   });
-  if (!response.ok) throw new Error(`Delete class failed: ${response.status}`);
-  return response.json();
+  const result = await response.json();
+  if (!response.ok) {
+    throw new Error(result.message || `Delete class failed: ${response.status}`);
+  }
+  return result;
 };

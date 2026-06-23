@@ -17,7 +17,7 @@ const classSchema = new mongoose.Schema(
 
     classTeacher: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Teacher",
       default: null,
     },
 
@@ -34,6 +34,19 @@ const classSchema = new mongoose.Schema(
     capacity: {
       type: Number,
       default: 40,
+    },
+
+    // ── NEW: frontend (Add/Edit Class form) sends these, model me missing thay ──
+    shift: {
+      type: String,
+      enum: ["Morning", "Evening"],
+      default: "Morning",
+    },
+
+    description: {
+      type: String,
+      default: "",
+      trim: true,
     },
 
     isActive: {
