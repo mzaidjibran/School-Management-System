@@ -12,12 +12,8 @@ function generateReceiptNumber() {
 // ─── Create Fee Record ────────────────────────────────────────────
 export const createFee = async (request, response) => {
   try {
-    const feeData = {
-      ...request.body,
-      createdBy: request.user._id,
-    };
-
-    const fee = await Fee.create(feeData);
+    // TODO: auth lagane par yahan createdBy: request.user._id add karna
+    const fee = await Fee.create(request.body);
 
     response.status(201).json({
       success: true,
@@ -26,7 +22,6 @@ export const createFee = async (request, response) => {
       data: fee,
     });
   } catch (error) {
-    // Duplicate fee (same student, type, month, year)
     if (error.code === 11000) {
       return response.status(409).json({
         success: false,
@@ -54,7 +49,6 @@ export const getStudentFees = async (request, response) => {
 
     const fees = await Fee.find(filter).sort({ year: -1, month: -1 });
 
-    // Total summary
     const totalAmount = fees.reduce((sum, f) => sum + f.amount, 0);
     const totalPaid = fees.reduce((sum, f) => sum + f.paidAmount, 0);
     const totalDue = totalAmount - totalPaid;
@@ -75,7 +69,7 @@ export const getStudentFees = async (request, response) => {
   }
 };
 
-// ─── Get Pending Fees (Overdue/Pending) ───────────────────────────
+// ─── Get Pending Fees ─────────────────────────────────────────────
 export const getPendingFees = async (request, response) => {
   try {
     const fees = await Fee.find({
@@ -100,7 +94,37 @@ export const getPendingFees = async (request, response) => {
   }
 };
 
-// ─── Pay Fee ──────────────────────────────────────────────────────
+// ─── Get All Fee Records ──────────────────────────────────────────
+export const getAllFees = async (request, response) => {
+  try {
+    const { status, month, year } = request.query;
+
+    const filter = {};
+    if (status) filter.status = status;
+    if (month) filter.month = Number(month);
+    if (year) filter.year = Number(year);
+
+    const fees = await Fee.find(filter)
+      .populate("student", "firstName lastName rollNumber class section")  // ← yeh already tha
+      .sort({ year: -1, month: -1, dueDate: 1 });
+
+    response.status(200).json({
+      success: true,
+      error: false,
+      message: "All fees fetched successfully",
+      data: fees,
+      total: fees.length,
+    });
+  } catch (error) {
+    response.status(500).json({
+      success: false,
+      error: true,
+      message: error.message,
+    });
+  }
+};
+
+// ─── Pay Fee ─────────────────────────────────────────────────────
 export const payFee = async (request, response) => {
   try {
     const { id } = request.params;
@@ -123,15 +147,13 @@ export const payFee = async (request, response) => {
       });
     }
 
-    // Amount update karo
     fee.paidAmount += Number(payingAmount);
     fee.paymentMethod = paymentMethod;
     fee.paidDate = new Date();
 
-    // Status update karo
     if (fee.paidAmount >= fee.amount) {
       fee.status = "paid";
-      fee.paidAmount = fee.amount; // overpay nahi hoga
+      fee.paidAmount = fee.amount;
       fee.receiptNumber = generateReceiptNumber();
     } else {
       fee.status = "partial";

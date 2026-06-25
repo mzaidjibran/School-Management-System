@@ -17,13 +17,13 @@ const feeSchema = new mongoose.Schema(
     amount: {
       type: Number,
       required: [true, "Amount is mandatory"],
-      min: [0, "Amount cannot be nagative"],
+      min: [0, "Amount cannot be negative"],
     },
 
     paidAmount: {
       type: Number,
       default: 0,
-      min: [0, "Paid amount cannot be nagative"],
+      min: [0, "Paid amount cannot be negative"],
     },
 
     month: {
@@ -32,6 +32,7 @@ const feeSchema = new mongoose.Schema(
       max: 12,
       default: null,
     },
+
     year: {
       type: Number,
       required: [true, "Year is mandatory"],
@@ -70,10 +71,11 @@ const feeSchema = new mongoose.Schema(
       default: null,
     },
 
+    // TODO: auth lagane par required: true karna
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "Created by is mandatory"],
+      default: null,
     },
   },
   {

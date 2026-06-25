@@ -1,4 +1,4 @@
-import { getHeaders } from "./apiHelper.js";
+import { getHeaders } from "./Api_Helper.js";
 
 const API_BASE = "http://127.0.0.1:3000";
 
@@ -13,8 +13,23 @@ export const createFee = async (data) => {
   return response.json();
 };
 
+// ─── Get All Fee Records (with optional filters) ──────────────────
+export const getAllFees = async (filters = {}) => {
+  const params = new URLSearchParams();
+  if (filters.status) params.append("status", filters.status);
+  if (filters.month) params.append("month", filters.month);
+  if (filters.year) params.append("year", filters.year);
+
+  const url = `${API_BASE}/api/fee${[...params].length > 0 ? `?${params}` : ""}`;
+  const response = await fetch(url, {
+    method: "GET",
+    headers: getHeaders(),
+  });
+  if (!response.ok) throw new Error(`Get all fees failed: ${response.status}`);
+  return response.json();
+};
+
 // ─── Get Student Fees ─────────────────────────────────────────────
-// status aur year optional filters hain
 export const getStudentFees = async (studentId, status, year) => {
   let url = `${API_BASE}/api/fee/student/${studentId}`;
   const params = new URLSearchParams();
