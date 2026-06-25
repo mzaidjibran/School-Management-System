@@ -74,6 +74,16 @@ export const deleteExam = async (req, res) => {
 
 // ─── MARKS / RESULTS ─────────────────────────────────────────────────────────
 
+// Helper: percentage se grade calculate karta hai
+const calculateGrade = (percentage) => {
+  if (percentage >= 90) return "A+";
+  if (percentage >= 80) return "A";
+  if (percentage >= 70) return "B";
+  if (percentage >= 60) return "C";
+  if (percentage >= 50) return "D";
+  return "F";
+};
+
 export const enterMarks = async (req, res) => {
   try {
     const { examId } = req.params;
@@ -83,9 +93,26 @@ export const enterMarks = async (req, res) => {
       return res.status(400).json({ success: false, error: true, message: "Results array is mandatory" });
     }
 
+    // Exam fetch karo taake totalMarks/passingMarks mil sake
+    const exam = await Exam.findById(examId);
+    if (!exam) {
+      return res.status(404).json({ success: false, error: true, message: "Exam not found" });
+    }
+
     const saved = [];
     for (const r of results) {
-      const updateData = { ...r, exam: examId };
+      const obtainedMarks = Number(r.obtainedMarks);
+      const percentage = (obtainedMarks / exam.totalMarks) * 100;
+
+      // IMPORTANT: findOneAndUpdate Mongoose ke pre("save") hooks ko trigger NAHI karta,
+      // is liye status & grade yahan manually calculate karke save karna zaroori hai.
+      const updateData = {
+        ...r,
+        obtainedMarks,
+        exam: examId,
+        status: obtainedMarks >= exam.passingMarks ? "pass" : "fail",
+        grade: calculateGrade(percentage),
+      };
       if (req.user?._id) updateData.enteredBy = req.user._id;
 
       const result = await Result.findOneAndUpdate(

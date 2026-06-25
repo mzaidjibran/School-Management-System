@@ -38,7 +38,7 @@ export const getNoticeById = async (req, res) => {
 
 export const createNotice = async (req, res) => {
   try {
-    const notice = new Notice({ ...req.body, createdBy: req.user._id });
+    const notice = new Notice({ ...req.body});
     await notice.save();
     res.status(201).json({ success: true, message: "Notice created", notice });
   } catch (err) {

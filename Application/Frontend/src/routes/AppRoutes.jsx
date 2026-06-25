@@ -131,9 +131,13 @@ export default function AppRoutes() {
         </Route>
 
         {/* Notices */}
+        {/* CreateNotice.jsx already handles BOTH create and edit
+            (it checks useParams().id internally to switch modes),
+            so the edit route reuses the same component. */}
         <Route path="/notices" element={<NoticePage />}>
           <Route index element={<NoticeBoard />} />
           <Route path="create" element={<CreateNotice />} />
+          <Route path="edit/:id" element={<CreateNotice />} />
         </Route>
 
         {/* Users */}
