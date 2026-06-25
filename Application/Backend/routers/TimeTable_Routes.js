@@ -12,10 +12,10 @@ const router = express.Router();
 
 // Timetable routes
 
-router.post("/", protect, authorize("admin", "teacher"), createOrUpdateTimetable);              // POST   /api/timetable
-router.get("/teacher/:teacherId", protect, authorize("admin", "teacher"), getTeacherTimetable);  // GET    /api/timetable/teacher/:teacherId?session=
-router.get("/:classId/today", protect, authorize("admin", "teacher"), getTodayTimetable);        // GET    /api/timetable/:classId/today?session=
-router.get("/:classId", protect, authorize("admin", "teacher"), getClassTimetable);              // GET    /api/timetable/:classId?session=
-router.delete("/:id", protect, authorize("admin", "teacher"), deleteTimetable);                  // DELETE /api/timetable/:id
+router.post("/",createOrUpdateTimetable);              // POST   /api/timetable
+router.get("/teacher/:teacherId", getTeacherTimetable);  // GET    /api/timetable/teacher/:teacherId?session=
+router.get("/:classId/today", getTodayTimetable);        // GET    /api/timetable/:classId/today?session=
+router.get("/:classId", getClassTimetable);              // GET    /api/timetable/:classId?session=
+router.delete("/:id", deleteTimetable);                  // DELETE /api/timetable/:id
 
 export default router;

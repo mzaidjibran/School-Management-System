@@ -127,6 +127,7 @@ export default function AppRoutes() {
         <Route path="/timetable" element={<TimetablePage />}>
           <Route index element={<Timetable />} />
           <Route path="create" element={<CreateTimetable />} />
+          <Route path=":id" element={<CreateTimetable />} />
         </Route>
 
         {/* Notices */}

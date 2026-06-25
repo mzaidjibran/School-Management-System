@@ -10,6 +10,12 @@ import {
   FaPlus,
   FaTrash,
 } from "react-icons/fa";
+import {
+  createOrUpdateTimetable,
+  getClassTimetable,
+} from "../../api/Timetable_Api.js";
+
+const API_BASE = "http://127.0.0.1:3000";
 
 const DAYS = [
   "Monday",
@@ -19,26 +25,6 @@ const DAYS = [
   "Friday",
   "Saturday",
 ];
-const SUBJECTS = [
-  "Mathematics",
-  "Physics",
-  "Chemistry",
-  "Biology",
-  "English",
-  "Urdu",
-  "Islamiyat",
-  "Computer Science",
-];
-const TEACHERS = [
-  "Mr. Ahmed",
-  "Dr. Sana",
-  "Ms. Fatima",
-  "Mr. Imran",
-  "Ms. Ayesha",
-  "Prof. Ali",
-  "Ms. Hina",
-];
-const ROOMS = ["101", "102", "103", "Lab 1", "Lab 2", "Auditorium", "Library"];
 
 const DEFAULT_SLOTS = [
   "08:00-09:00",
@@ -49,7 +35,7 @@ const DEFAULT_SLOTS = [
   "13:00-14:00",
 ];
 
-// Build empty grid from given slots array
+// Build empty grid
 const buildGrid = (slots) => {
   const grid = {};
   DAYS.forEach((day) => {
@@ -59,6 +45,52 @@ const buildGrid = (slots) => {
     });
   });
   return grid;
+};
+
+// Backend array → frontend grid
+// backend: [{day, periods:[{startTime,endTime,subject,teacher,room}]}]
+const backendToGrid = (timetableArr = [], slots) => {
+  const grid = buildGrid(slots);
+  timetableArr.forEach(({ day, periods = [] }) => {
+    periods.forEach((p) => {
+      const slot = `${p.startTime}-${p.endTime}`;
+      if (grid[day]) {
+        grid[day][slot] = {
+          subject: p.subject || "",
+          teacher: p.teacher?.name || p.teacher || "",
+          room: p.room || "",
+        };
+      }
+    });
+  });
+  return grid;
+};
+
+// Frontend grid → backend format (array of day documents)
+// One document per day, only days that have at least one filled period
+const gridToBackend = (grid, slots, classId, session) => {
+  const result = [];
+  DAYS.forEach((day, dayIdx) => {
+    const periods = [];
+    slots.forEach((slot, idx) => {
+      const cell = grid[day]?.[slot];
+      if (!cell || !cell.subject) return;
+      const [startTime, endTime] = slot.split("-");
+      periods.push({
+        periodNumber: idx + 1,
+        subject: cell.subject,
+        teacher: cell.teacher || undefined,   // teacher ID or name
+        startTime,
+        endTime,
+        room: cell.room || undefined,
+        type: "lecture",
+      });
+    });
+    if (periods.length > 0) {
+      result.push({ class: classId, day, periods, session });
+    }
+  });
+  return result;
 };
 
 const printStyles = `
@@ -80,49 +112,102 @@ export default function CreateTimetable() {
   const [slotError, setSlotError] = useState("");
   const [timetable, setTimetable] = useState(() => buildGrid(DEFAULT_SLOTS));
   const [form, setForm] = useState({
+    classId: isEdit ? id : "",
     className: "",
     section: "",
     academicYear: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
   });
+
   const [loading, setLoading] = useState(false);
+  const [fetchLoading, setFetchLoading] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
-  const [toast, setToast] = useState("");
+  const [toast, setToast] = useState({ msg: "", type: "success" });
 
+  // Dropdowns
+  const [classes, setClasses] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+  const [loadingDropdowns, setLoadingDropdowns] = useState(true);
+
+  // ── Load classes, subjects, teachers ──────────────────────────
   useEffect(() => {
-    if (isEdit) {
-      const dummy = {
-        className: "10th",
-        section: "A",
-        academicYear: "2025-2026",
-        slots: ["08:00-09:00", "09:00-10:00", "10:00-11:00"],
-        timetable: {
-          Monday: {
-            "08:00-09:00": {
-              subject: "Math",
-              teacher: "Mr. Ahmed",
-              room: "101",
-            },
-          },
-        },
-      };
-      const loadedSlots = dummy.slots || DEFAULT_SLOTS;
-      setForm({
-        className: dummy.className,
-        section: dummy.section,
-        academicYear: dummy.academicYear,
-      });
-      setSlots(loadedSlots);
-      const merged = buildGrid(loadedSlots);
-      Object.keys(dummy.timetable).forEach((day) =>
-        Object.assign(merged[day], dummy.timetable[day]),
-      );
-      setTimetable(merged);
-    }
-  }, [isEdit]);
+    const fetchDropdowns = async () => {
+      setLoadingDropdowns(true);
+      try {
+        const [classRes, subjectRes, teacherRes] = await Promise.all([
+          fetch(`${API_BASE}/api/classes`, {
+            headers: { "Content-Type": "application/json" },
+          }),
+          fetch(`${API_BASE}/api/subjects`, {
+            headers: { "Content-Type": "application/json" },
+          }),
+          fetch(`${API_BASE}/api/teachers`, {
+            headers: { "Content-Type": "application/json" },
+          }),
+        ]);
+        const classJson = await classRes.json();
+        const subjectJson = await subjectRes.json();
+        const teacherJson = await teacherRes.json();
 
-  const showToast = (msg) => {
-    setToast(msg);
-    setTimeout(() => setToast(""), 3000);
+        setClasses(classJson.data || classJson.classes || []);
+        setSubjects(subjectJson.data || subjectJson.subjects || []);
+        setTeachers(teacherJson.data || teacherJson.teachers || []);
+      } catch (err) {
+        showToast("Dropdowns load error: " + err.message, "error");
+      } finally {
+        setLoadingDropdowns(false);
+      }
+    };
+    fetchDropdowns();
+  }, []);
+
+  // ── If edit mode: load existing timetable for this class ──────
+  useEffect(() => {
+    if (!isEdit) return;
+    const loadExisting = async () => {
+      setFetchLoading(true);
+      try {
+        const res = await getClassTimetable(id);
+        const existing = res.timetable || [];
+
+        // Derive unique slots from existing periods
+        const existingSlots = [
+          ...new Set(
+            existing.flatMap(({ periods = [] }) =>
+              periods.map((p) => `${p.startTime}-${p.endTime}`)
+            )
+          ),
+        ].sort();
+
+        const mergedSlots =
+          existingSlots.length > 0 ? existingSlots : DEFAULT_SLOTS;
+        setSlots(mergedSlots);
+
+        const grid = backendToGrid(existing, mergedSlots);
+        setTimetable(grid);
+
+        // Set class info from first entry
+        if (existing[0]) {
+          setForm((prev) => ({
+            ...prev,
+            classId: id,
+            className: existing[0].class?.name || "",
+            section: existing[0].class?.section || "",
+            academicYear: existing[0].session || prev.academicYear,
+          }));
+        }
+      } catch (err) {
+        showToast("Timetable load error: " + err.message, "error");
+      } finally {
+        setFetchLoading(false);
+      }
+    };
+    loadExisting();
+  }, [isEdit, id]);
+
+  const showToast = (msg, type = "success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast({ msg: "", type: "success" }), 3000);
   };
 
   // ── Slot management ──────────────────────────────────────────
@@ -131,28 +216,18 @@ export default function CreateTimetable() {
 
   const addSlot = () => {
     const s = newSlot.trim();
-    if (!s) {
-      setSlotError("Enter a time slot");
-      return;
-    }
+    if (!s) { setSlotError("Enter a time slot"); return; }
     if (!validateSlotFormat(s)) {
       setSlotError("Format: HH:MM-HH:MM  e.g. 14:00-15:00");
       return;
     }
-    if (slots.includes(s)) {
-      setSlotError("Slot already exists");
-      return;
-    }
+    if (slots.includes(s)) { setSlotError("Slot already exists"); return; }
     const updated = [...slots, s].sort();
     setSlots(updated);
-    // add new slot to existing grid without clearing filled cells
     setTimetable((prev) => {
       const next = { ...prev };
       DAYS.forEach((day) => {
-        next[day] = {
-          ...next[day],
-          [s]: { subject: "", teacher: "", room: "" },
-        };
+        next[day] = { ...next[day], [s]: { subject: "", teacher: "", room: "" } };
       });
       return next;
     });
@@ -161,10 +236,7 @@ export default function CreateTimetable() {
   };
 
   const removeSlot = (slot) => {
-    if (slots.length <= 1) {
-      showToast("At least one slot required");
-      return;
-    }
+    if (slots.length <= 1) { showToast("At least one slot required", "error"); return; }
     const updated = slots.filter((s) => s !== slot);
     setSlots(updated);
     setTimetable((prev) => {
@@ -178,27 +250,62 @@ export default function CreateTimetable() {
     });
   };
 
-  // ── Cell ─────────────────────────────────────────────────────
+  // ── Cell change ───────────────────────────────────────────────
   const handleCellChange = (day, slot, field, value) => {
     setTimetable((prev) => ({
       ...prev,
-      [day]: { ...prev[day], [slot]: { ...prev[day][slot], [field]: value } },
+      [day]: {
+        ...prev[day],
+        [slot]: { ...prev[day][slot], [field]: value },
+      },
     }));
   };
 
-  const handleFormChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "classId") {
+      const selected = classes.find((c) => c._id === value);
+      setForm((prev) => ({
+        ...prev,
+        classId: value,
+        className: selected?.name || "",
+        section: selected?.section || "",
+      }));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
+  };
 
+  // ── Save ─────────────────────────────────────────────────────
   const handleSave = async () => {
-    if (!form.className || !form.section) {
-      showToast("Please fill class and section");
+    if (!form.classId) {
+      showToast("Please select a class", "error");
       return;
     }
+
+    const entries = gridToBackend(
+      timetable,
+      slots,
+      form.classId,
+      form.academicYear
+    );
+
+    if (entries.length === 0) {
+      showToast("Koi bhi subject assign nahi kiya", "error");
+      return;
+    }
+
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setLoading(false);
-    showToast("Timetable saved successfully!");
-    if (!isEdit) setTimeout(() => navigate("/timetable"), 1500);
+    try {
+      // Save each day separately (backend: upsert per class+day+session)
+      await Promise.all(entries.map((entry) => createOrUpdateTimetable(entry)));
+      showToast("Timetable saved successfully!");
+      setTimeout(() => navigate("/timetable"), 1500);
+    } catch (err) {
+      showToast("Save error: " + err.message, "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePrint = () => {
@@ -210,8 +317,13 @@ export default function CreateTimetable() {
   };
 
   const handleDuplicate = () => {
-    setForm({ className: "", section: "", academicYear: form.academicYear });
-    showToast("Grid copied. Fill class & section to save as new.");
+    setForm((prev) => ({
+      ...prev,
+      classId: "",
+      className: "",
+      section: "",
+    }));
+    showToast("Grid copied. Select a new class to save as new timetable.");
   };
 
   const handleReset = () => {
@@ -219,6 +331,7 @@ export default function CreateTimetable() {
       setSlots([...DEFAULT_SLOTS]);
       setTimetable(buildGrid(DEFAULT_SLOTS));
       setForm({
+        classId: "",
         className: "",
         section: "",
         academicYear: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
@@ -228,6 +341,14 @@ export default function CreateTimetable() {
 
   const cellSelect =
     "w-full px-1.5 py-1 text-xs border border-slate-200 rounded bg-white focus:outline-none focus:ring-1 focus:ring-indigo-300 leading-tight";
+
+  if (fetchLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-slate-400 text-sm">
+        Loading timetable...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4 sm:px-6 lg:px-8">
@@ -268,7 +389,8 @@ export default function CreateTimetable() {
               disabled={loading}
               className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors"
             >
-              <FaSave className="text-xs" /> {loading ? "Saving…" : "Save"}
+              <FaSave className="text-xs" />
+              {loading ? "Saving…" : "Save"}
             </button>
             <button
               onClick={handlePrint}
@@ -302,31 +424,61 @@ export default function CreateTimetable() {
           <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
             Class Information
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {[
-              { label: "Class *", name: "className", placeholder: "e.g. 10th" },
-              { label: "Section *", name: "section", placeholder: "e.g. A" },
-              {
-                label: "Academic Year",
-                name: "academicYear",
-                placeholder: "2025-2026",
-              },
-            ].map((f) => (
-              <div key={f.name}>
+          {loadingDropdowns ? (
+            <div className="text-sm text-slate-400">Loading classes...</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Class dropdown */}
+              <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                  {f.label}
+                  Class <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  name="classId"
+                  value={form.classId}
+                  onChange={handleFormChange}
+                  disabled={isEdit}
+                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 disabled:bg-slate-50"
+                >
+                  <option value="">Select Class…</option>
+                  {classes.map((c) => (
+                    <option key={c._id} value={c._id}>
+                      {c.name}{c.section ? ` - ${c.section}` : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Section — auto filled from class */}
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                  Section
                 </label>
                 <input
                   type="text"
-                  name={f.name}
-                  value={form[f.name]}
+                  value={form.section}
+                  readOnly
+                  placeholder="Auto-filled from class"
+                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl bg-slate-50 text-slate-500 cursor-not-allowed"
+                />
+              </div>
+
+              {/* Academic Year */}
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                  Academic Year
+                </label>
+                <input
+                  type="text"
+                  name="academicYear"
+                  value={form.academicYear}
                   onChange={handleFormChange}
-                  placeholder={f.placeholder}
+                  placeholder="2025-2026"
                   className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"
                 />
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Time Slots Manager */}
@@ -362,7 +514,9 @@ export default function CreateTimetable() {
                   }}
                   onKeyDown={(e) => e.key === "Enter" && addSlot()}
                   placeholder="HH:MM-HH:MM  e.g. 14:00-15:00"
-                  className={`h-8 px-3 text-xs border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 w-56 ${slotError ? "border-rose-400" : "border-slate-200"}`}
+                  className={`h-8 px-3 text-xs border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 w-56 ${
+                    slotError ? "border-rose-400" : "border-slate-200"
+                  }`}
                 />
                 <button
                   onClick={addSlot}
@@ -416,7 +570,9 @@ export default function CreateTimetable() {
                   slots.map((slot, si) => (
                     <tr
                       key={slot}
-                      className={`border-b border-slate-100 ${si % 2 === 0 ? "" : "bg-slate-50/50"}`}
+                      className={`border-b border-slate-100 ${
+                        si % 2 === 0 ? "" : "bg-slate-50/50"
+                      }`}
                     >
                       <td className="py-2 px-3 align-middle">
                         <div className="flex items-center justify-between gap-1">
@@ -442,66 +598,53 @@ export default function CreateTimetable() {
                         return (
                           <td
                             key={day}
-                            className={`py-1.5 px-1.5 align-top ${filled ? "bg-indigo-50/40" : ""}`}
+                            className={`py-1.5 px-1.5 align-top ${
+                              filled ? "bg-indigo-50/40" : ""
+                            }`}
                           >
                             <div className="space-y-1">
+                              {/* Subject dropdown from API */}
                               <select
                                 value={cell.subject}
                                 onChange={(e) =>
-                                  handleCellChange(
-                                    day,
-                                    slot,
-                                    "subject",
-                                    e.target.value,
-                                  )
+                                  handleCellChange(day, slot, "subject", e.target.value)
                                 }
                                 className={cellSelect}
                               >
                                 <option value="">— Subject</option>
-                                {SUBJECTS.map((s) => (
-                                  <option key={s} value={s}>
-                                    {s}
+                                {subjects.map((s) => (
+                                  <option key={s._id} value={s.name}>
+                                    {s.name}
                                   </option>
                                 ))}
                               </select>
+
+                              {/* Teacher dropdown from API */}
                               <select
                                 value={cell.teacher}
                                 onChange={(e) =>
-                                  handleCellChange(
-                                    day,
-                                    slot,
-                                    "teacher",
-                                    e.target.value,
-                                  )
+                                  handleCellChange(day, slot, "teacher", e.target.value)
                                 }
                                 className={cellSelect}
                               >
                                 <option value="">— Teacher</option>
-                                {TEACHERS.map((t) => (
-                                  <option key={t} value={t}>
-                                    {t}
+                                {teachers.map((t) => (
+                                  <option key={t._id} value={t._id}>
+                                    {t.name}
                                   </option>
                                 ))}
                               </select>
-                              <select
+
+                              {/* Room — free text */}
+                              <input
+                                type="text"
                                 value={cell.room}
                                 onChange={(e) =>
-                                  handleCellChange(
-                                    day,
-                                    slot,
-                                    "room",
-                                    e.target.value,
-                                  )
+                                  handleCellChange(day, slot, "room", e.target.value)
                                 }
+                                placeholder="Room"
                                 className={cellSelect}
-                              >
-                                <option value="">— Room</option>
-                                {ROOMS.map((r) => (
-                                  <option key={r} value={r}>
-                                    {r}
-                                  </option>
-                                ))}
-                              </select>
+                              />
                             </div>
                           </td>
                         );
@@ -525,35 +668,23 @@ export default function CreateTimetable() {
           <div className="max-w-5xl mx-auto">
             <div className="text-center border-b pb-4">
               <div className="w-12 h-12 mx-auto bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                P
+                S
               </div>
-              <h2 className="text-lg font-bold mt-2">
-                Punjab Public High School
-              </h2>
-              <p className="text-xs text-slate-500">Lahore, Pakistan</p>
+              <h2 className="text-lg font-bold mt-2">School Management System</h2>
+              <p className="text-xs text-slate-500">Timetable</p>
             </div>
             <div className="grid grid-cols-2 gap-2 my-4 text-sm">
-              <div>
-                <strong>Class:</strong> {form.className}
-              </div>
-              <div>
-                <strong>Section:</strong> {form.section}
-              </div>
-              <div>
-                <strong>Academic Year:</strong> {form.academicYear}
-              </div>
-              <div>
-                <strong>Generated:</strong> {new Date().toLocaleDateString()}
-              </div>
+              <div><strong>Class:</strong> {form.className}</div>
+              <div><strong>Section:</strong> {form.section}</div>
+              <div><strong>Academic Year:</strong> {form.academicYear}</div>
+              <div><strong>Generated:</strong> {new Date().toLocaleDateString()}</div>
             </div>
             <table className="w-full border-collapse border text-xs">
               <thead>
                 <tr className="bg-slate-100">
                   <th className="border p-2">Time</th>
                   {DAYS.map((d) => (
-                    <th key={d} className="border p-2">
-                      {d}
-                    </th>
+                    <th key={d} className="border p-2">{d}</th>
                   ))}
                 </tr>
               </thead>
@@ -570,8 +701,10 @@ export default function CreateTimetable() {
                         </div>
                         {timetable[day]?.[slot]?.subject && (
                           <div className="text-slate-400">
-                            {timetable[day]?.[slot]?.teacher} /{" "}
-                            {timetable[day]?.[slot]?.room}
+                            {teachers.find(
+                              (t) => t._id === timetable[day][slot].teacher
+                            )?.name || timetable[day][slot].teacher}{" "}
+                            / {timetable[day]?.[slot]?.room}
                           </div>
                         )}
                       </td>
@@ -585,9 +718,13 @@ export default function CreateTimetable() {
       )}
 
       {/* Toast */}
-      {toast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-emerald-500 text-white text-sm px-5 py-3 rounded-xl shadow-lg">
-          {toast}
+      {toast.msg && (
+        <div
+          className={`fixed bottom-6 right-6 z-50 text-white text-sm px-5 py-3 rounded-xl shadow-lg ${
+            toast.type === "error" ? "bg-rose-500" : "bg-emerald-500"
+          }`}
+        >
+          {toast.msg}
         </div>
       )}
     </div>

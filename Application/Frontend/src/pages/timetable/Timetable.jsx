@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FaEye,
   FaCopy,
@@ -11,6 +12,13 @@ import {
   FaLayerGroup,
   FaTimes,
 } from "react-icons/fa";
+import {
+  getClassTimetable,
+  deleteTimetable,
+  createOrUpdateTimetable,
+} from "../../api/Timetable_Api.js";
+
+const API_BASE = "http://127.0.0.1:3000";
 
 const DAYS = [
   "Monday",
@@ -19,52 +27,6 @@ const DAYS = [
   "Thursday",
   "Friday",
   "Saturday",
-];
-
-const initialTimetables = [
-  {
-    id: 1,
-    className: "10th",
-    section: "A",
-    academicYear: "2025-2026",
-    createdAt: "2025-01-15",
-    timetable: {
-      Monday: {
-        "08:00-09:00": { subject: "Math", teacher: "Mr. Ahmed", room: "101" },
-        "09:00-10:00": {
-          subject: "Physics",
-          teacher: "Dr. Sana",
-          room: "Lab 1",
-        },
-      },
-      Tuesday: {
-        "08:00-09:00": {
-          subject: "English",
-          teacher: "Ms. Fatima",
-          room: "102",
-        },
-      },
-      Wednesday: {},
-      Thursday: {},
-      Friday: {},
-      Saturday: {},
-    },
-  },
-  {
-    id: 2,
-    className: "9th",
-    section: "B",
-    academicYear: "2025-2026",
-    createdAt: "2025-01-20",
-    timetable: {
-      Monday: {},
-      Tuesday: {},
-      Wednesday: {},
-      Thursday: {},
-      Friday: {},
-      Saturday: {},
-    },
-  },
 ];
 
 const printStyles = `
@@ -76,19 +38,37 @@ const printStyles = `
   }
 `;
 
-// ---------- View Modal ----------
+// ─── Helper: backend timetable array → grid format ───────────────
+// Backend returns: [ { day, periods: [{startTime, endTime, subject, teacher, room, ...}] } ]
+// Frontend needs: { Monday: { "08:00-09:00": { subject, teacher, room } } }
+const backendToGrid = (timetableArr = []) => {
+  const grid = {};
+  DAYS.forEach((d) => (grid[d] = {}));
+  timetableArr.forEach(({ day, periods = [] }) => {
+    periods.forEach((p) => {
+      const slot = `${p.startTime}-${p.endTime}`;
+      grid[day][slot] = {
+        subject: p.subject || "",
+        teacher: p.teacher?.name || p.teacher || "",
+        room: p.room || "",
+      };
+    });
+  });
+  return grid;
+};
+
+// ─── View Modal ───────────────────────────────────────────────────
 const ViewModal = ({ tt, onClose }) => {
   if (!tt) return null;
 
-  // collect all unique slots across all days
+  const grid = backendToGrid(tt.timetableData || []);
   const allSlots = [
-    ...new Set(DAYS.flatMap((day) => Object.keys(tt.timetable[day] || {}))),
+    ...new Set(DAYS.flatMap((day) => Object.keys(grid[day] || {}))),
   ].sort();
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-        {/* Header */}
         <div className="flex justify-between items-center px-6 py-4 border-b shrink-0">
           <div>
             <h3 className="text-base font-bold text-slate-800">
@@ -106,7 +86,6 @@ const ViewModal = ({ tt, onClose }) => {
           </button>
         </div>
 
-        {/* Grid */}
         <div className="overflow-auto p-4">
           {allSlots.length === 0 ? (
             <div className="text-center py-12 text-slate-400 text-sm">
@@ -139,7 +118,7 @@ const ViewModal = ({ tt, onClose }) => {
                       {slot}
                     </td>
                     {DAYS.map((day) => {
-                      const cell = tt.timetable[day]?.[slot];
+                      const cell = grid[day]?.[slot];
                       return (
                         <td
                           key={day}
@@ -181,56 +160,130 @@ const ViewModal = ({ tt, onClose }) => {
   );
 };
 
-// ---------- Main ----------
+// ─── Main ─────────────────────────────────────────────────────────
 export default function TimetableList() {
-  const [timetables, setTimetables] = useState(initialTimetables);
-  const [filtered, setFiltered] = useState(initialTimetables);
+  const navigate = useNavigate();
+  const [timetables, setTimetables] = useState([]);   // grouped by class+section
+  const [filtered, setFiltered] = useState([]);
   const [searchClass, setSearchClass] = useState("");
   const [searchSection, setSearchSection] = useState("");
   const [viewTimetable, setViewTimetable] = useState(null);
   const [printTimetable, setPrintTimetable] = useState(null);
-  const [toast, setToast] = useState("");
+  const [toast, setToast] = useState({ msg: "", type: "success" });
+  const [loading, setLoading] = useState(true);
 
+  // ── fetch all classes, then fetch timetable for each ──────────
+  const fetchAll = useCallback(async () => {
+    setLoading(true);
+    try {
+      const classRes = await fetch(`${API_BASE}/api/classes`, {
+        headers: { "Content-Type": "application/json" },
+      });
+      const classJson = await classRes.json();
+      const classes = classJson.data || classJson.classes || [];
+
+      // For each class, fetch its timetable
+      const results = await Promise.all(
+        classes.map(async (cls) => {
+          try {
+            const res = await getClassTimetable(cls._id);
+            return {
+              _id: cls._id,
+              className: cls.name,
+              section: cls.section || "—",
+              academicYear:
+                res.timetable?.[0]?.session ||
+                `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
+              createdAt: res.timetable?.[0]?.createdAt
+                ? new Date(res.timetable[0].createdAt).toLocaleDateString()
+                : "—",
+              timetableData: res.timetable || [],   // raw backend array
+            };
+          } catch {
+            return {
+              _id: cls._id,
+              className: cls.name,
+              section: cls.section || "—",
+              academicYear: "—",
+              createdAt: "—",
+              timetableData: [],
+            };
+          }
+        })
+      );
+
+      setTimetables(results);
+      setFiltered(results);
+    } catch (err) {
+      showToast("Data load karne mein error: " + err.message, "error");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
+
+  // ── Filter ────────────────────────────────────────────────────
   useEffect(() => {
     let result = timetables;
     if (searchClass)
       result = result.filter((t) =>
-        t.className.toLowerCase().includes(searchClass.toLowerCase()),
+        t.className.toLowerCase().includes(searchClass.toLowerCase())
       );
     if (searchSection)
       result = result.filter((t) =>
-        t.section.toLowerCase().includes(searchSection.toLowerCase()),
+        t.section.toLowerCase().includes(searchSection.toLowerCase())
       );
     setFiltered(result);
   }, [searchClass, searchSection, timetables]);
 
-  const showToast = (msg) => {
-    setToast(msg);
-    setTimeout(() => setToast(""), 3000);
+  const showToast = (msg, type = "success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast({ msg: "", type: "success" }), 3000);
   };
 
-  const handleDuplicate = (id) => {
-    const original = timetables.find((t) => t.id === id);
-    const newId = Math.max(...timetables.map((t) => t.id)) + 1;
-    setTimetables([
-      ...timetables,
-      {
-        ...original,
-        id: newId,
-        className: `${original.className} (Copy)`,
-        createdAt: new Date().toISOString().split("T")[0],
-      },
-    ]);
-    showToast("Timetable duplicated!");
-  };
-
-  const handleDelete = (id) => {
-    if (window.confirm("Delete this timetable?")) {
-      setTimetables(timetables.filter((t) => t.id !== id));
-      showToast("Timetable deleted.");
+  // ── Duplicate: copy all periods of a class timetable ─────────
+  const handleDuplicate = async (tt) => {
+    if (!tt.timetableData.length) {
+      showToast("Is class ka koi timetable nahi hai duplicate karne ke liye.", "error");
+      return;
+    }
+    try {
+      // Duplicate each day's timetable entry (class stays same, just re-save)
+      await Promise.all(
+        tt.timetableData.map((entry) =>
+          createOrUpdateTimetable({
+            class: tt._id,
+            day: entry.day,
+            session: entry.session,
+            periods: entry.periods,
+          })
+        )
+      );
+      showToast("Timetable duplicated!");
+      fetchAll();
+    } catch (err) {
+      showToast("Duplicate error: " + err.message, "error");
     }
   };
 
+  // ── Delete all timetable entries for a class ─────────────────
+  const handleDelete = async (tt) => {
+    if (!window.confirm("Is class ka sara timetable delete karen?")) return;
+    try {
+      await Promise.all(
+        tt.timetableData.map((entry) => deleteTimetable(entry._id))
+      );
+      showToast("Timetable deleted.");
+      fetchAll();
+    } catch (err) {
+      showToast("Delete error: " + err.message, "error");
+    }
+  };
+
+  // ── Print ─────────────────────────────────────────────────────
   const handlePrint = (tt) => {
     setPrintTimetable(tt);
     setTimeout(() => {
@@ -241,13 +294,14 @@ export default function TimetableList() {
 
   const uniqueClasses = [...new Set(timetables.map((t) => t.className))];
   const uniqueSections = [...new Set(timetables.map((t) => t.section))];
+
   const inputCls =
     "h-8 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full";
 
   const statCards = [
     {
       label: "Total Timetables",
-      value: timetables.length,
+      value: timetables.filter((t) => t.timetableData.length > 0).length,
       icon: <FaTable className="text-indigo-600" />,
       bg: "bg-indigo-50",
       text: "text-indigo-700",
@@ -261,7 +315,9 @@ export default function TimetableList() {
     },
     {
       label: "Academic Year",
-      value: timetables[0]?.academicYear ?? "—",
+      value:
+        timetables.find((t) => t.academicYear !== "—")?.academicYear ||
+        `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
       icon: <FaCalendarAlt className="text-blue-600" />,
       bg: "bg-blue-50",
       text: "text-blue-700",
@@ -274,7 +330,10 @@ export default function TimetableList() {
       <div className="max-w-7xl mx-auto">
         {/* Breadcrumb */}
         <nav className="flex mb-5 text-sm text-slate-500">
-          <span className="hover:text-indigo-600 cursor-pointer">
+          <span
+            className="hover:text-indigo-600 cursor-pointer"
+            onClick={() => navigate("/")}
+          >
             Dashboard
           </span>
           <span className="mx-2">/</span>
@@ -293,12 +352,12 @@ export default function TimetableList() {
               Manage all class timetables
             </p>
           </div>
-          <a
-            href="/timetable/create"
+          <button
+            onClick={() => navigate("/timetable/create")}
             className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors no-print"
           >
             <FaPlus className="text-xs" /> Create Timetable
-          </a>
+          </button>
         </div>
 
         {/* Stats */}
@@ -364,151 +423,171 @@ export default function TimetableList() {
         {/* Table */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 border-b border-slate-200">
-                <tr>
-                  {[
-                    "#",
-                    "Class",
-                    "Section",
-                    "Academic Year",
-                    "Created At",
-                    "Actions",
-                  ].map((h) => (
-                    <th
-                      key={h}
-                      className="text-left py-3 px-4 text-xs font-semibold text-slate-600 whitespace-nowrap"
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.length === 0 ? (
+            {loading ? (
+              <div className="py-12 text-center text-sm text-slate-400">
+                Loading timetables...
+              </div>
+            ) : (
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <td
-                      colSpan="6"
-                      className="py-12 text-center text-sm text-slate-400"
-                    >
-                      No timetables found
-                    </td>
+                    {[
+                      "#",
+                      "Class",
+                      "Section",
+                      "Academic Year",
+                      "Created At",
+                      "Status",
+                      "Actions",
+                    ].map((h) => (
+                      <th
+                        key={h}
+                        className="text-left py-3 px-4 text-xs font-semibold text-slate-600 whitespace-nowrap"
+                      >
+                        {h}
+                      </th>
+                    ))}
                   </tr>
-                ) : (
-                  filtered.map((tt, idx) => (
-                    <tr
-                      key={tt.id}
-                      className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
-                    >
-                      <td className="py-2.5 px-4 text-slate-400">{idx + 1}</td>
-                      <td className="py-2.5 px-4 font-medium text-slate-800">
-                        {tt.className}
-                      </td>
-                      <td className="py-2.5 px-4 text-slate-600">
-                        {tt.section}
-                      </td>
-                      <td className="py-2.5 px-4 text-slate-600">
-                        {tt.academicYear}
-                      </td>
-                      <td className="py-2.5 px-4 text-slate-500">
-                        {tt.createdAt}
-                      </td>
-                      <td className="py-2.5 px-4">
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => setViewTimetable(tt)}
-                            title="View"
-                            className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                          >
-                            <FaEye className="text-sm" />
-                          </button>
-                          <button
-                            onClick={() => handleDuplicate(tt.id)}
-                            title="Duplicate"
-                            className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                          >
-                            <FaCopy className="text-sm" />
-                          </button>
-                          <button
-                            onClick={() => handlePrint(tt)}
-                            title="Print"
-                            className="p-1.5 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
-                          >
-                            <FaPrint className="text-sm" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(tt.id)}
-                            title="Delete"
-                            className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
-                          >
-                            <FaTrash className="text-sm" />
-                          </button>
-                        </div>
+                </thead>
+                <tbody>
+                  {filtered.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan="7"
+                        className="py-12 text-center text-sm text-slate-400"
+                      >
+                        No timetables found
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    filtered.map((tt, idx) => (
+                      <tr
+                        key={tt._id}
+                        className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+                      >
+                        <td className="py-2.5 px-4 text-slate-400">
+                          {idx + 1}
+                        </td>
+                        <td className="py-2.5 px-4 font-medium text-slate-800">
+                          {tt.className}
+                        </td>
+                        <td className="py-2.5 px-4 text-slate-600">
+                          {tt.section}
+                        </td>
+                        <td className="py-2.5 px-4 text-slate-600">
+                          {tt.academicYear}
+                        </td>
+                        <td className="py-2.5 px-4 text-slate-500">
+                          {tt.createdAt}
+                        </td>
+                        <td className="py-2.5 px-4">
+                          {tt.timetableData.length > 0 ? (
+                            <span className="px-2 py-0.5 text-xs bg-emerald-50 text-emerald-700 rounded-full font-medium">
+                              Active
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 text-xs bg-slate-100 text-slate-500 rounded-full font-medium">
+                              Not Set
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-2.5 px-4">
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => setViewTimetable(tt)}
+                              title="View"
+                              className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                            >
+                              <FaEye className="text-sm" />
+                            </button>
+                            <button
+                              onClick={() =>
+                                navigate(`/timetable/${tt._id}`)
+                              }
+                              title="Edit"
+                              className="p-1.5 text-amber-500 hover:bg-amber-50 rounded-lg transition-colors text-xs font-bold"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDuplicate(tt)}
+                              title="Duplicate"
+                              className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                            >
+                              <FaCopy className="text-sm" />
+                            </button>
+                            <button
+                              onClick={() => handlePrint(tt)}
+                              title="Print"
+                              className="p-1.5 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
+                            >
+                              <FaPrint className="text-sm" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(tt)}
+                              title="Delete"
+                              className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                              disabled={tt.timetableData.length === 0}
+                            >
+                              <FaTrash className="text-sm" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </div>
 
       {/* View Modal */}
-      <ViewModal tt={viewTimetable} onClose={() => setViewTimetable(null)} />
+      <ViewModal
+        tt={viewTimetable}
+        onClose={() => setViewTimetable(null)}
+      />
 
       {/* Print Area */}
-      {printTimetable && (
-        <div
-          id="print-area"
-          className="fixed top-0 left-0 w-full bg-white p-8"
-          style={{ zIndex: -1 }}
-        >
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center border-b pb-4">
-              <div className="w-12 h-12 mx-auto bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                P
+      {printTimetable && (() => {
+        const grid = backendToGrid(printTimetable.timetableData || []);
+        const slots = [
+          ...new Set(
+            DAYS.flatMap((day) => Object.keys(grid[day] || {}))
+          ),
+        ].sort();
+        return (
+          <div
+            id="print-area"
+            className="fixed top-0 left-0 w-full bg-white p-8"
+            style={{ zIndex: -1 }}
+          >
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center border-b pb-4">
+                <div className="w-12 h-12 mx-auto bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  S
+                </div>
+                <h2 className="text-lg font-bold mt-2">School Management System</h2>
+                <p className="text-xs text-slate-500">Timetable</p>
               </div>
-              <h2 className="text-lg font-bold mt-2">
-                Punjab Public High School
-              </h2>
-              <p className="text-xs text-slate-500">Lahore, Pakistan</p>
-            </div>
-            <div className="grid grid-cols-2 gap-2 my-4 text-sm">
-              <div>
-                <strong>Class:</strong> {printTimetable.className}
+              <div className="grid grid-cols-2 gap-2 my-4 text-sm">
+                <div><strong>Class:</strong> {printTimetable.className}</div>
+                <div><strong>Section:</strong> {printTimetable.section}</div>
+                <div><strong>Academic Year:</strong> {printTimetable.academicYear}</div>
+                <div><strong>Generated:</strong> {new Date().toLocaleDateString()}</div>
               </div>
-              <div>
-                <strong>Section:</strong> {printTimetable.section}
-              </div>
-              <div>
-                <strong>Academic Year:</strong> {printTimetable.academicYear}
-              </div>
-              <div>
-                <strong>Generated:</strong> {new Date().toLocaleDateString()}
-              </div>
-            </div>
-            <table className="w-full border-collapse border text-xs">
-              <thead>
-                <tr className="bg-slate-100">
-                  <th className="border p-2">Time</th>
-                  {DAYS.map((d) => (
-                    <th key={d} className="border p-2">
-                      {d}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  ...new Set(
-                    DAYS.flatMap((day) =>
-                      Object.keys(printTimetable.timetable[day] || {}),
-                    ),
-                  ),
-                ]
-                  .sort()
-                  .map((slot) => (
+              <table className="w-full border-collapse border text-xs">
+                <thead>
+                  <tr className="bg-slate-100">
+                    <th className="border p-2">Time</th>
+                    {DAYS.map((d) => (
+                      <th key={d} className="border p-2">{d}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {slots.map((slot) => (
                     <tr key={slot}>
                       <td className="border p-2 font-semibold text-indigo-700 bg-indigo-50">
                         {slot}
@@ -516,29 +595,33 @@ export default function TimetableList() {
                       {DAYS.map((day) => (
                         <td key={day} className="border p-2">
                           <div className="font-medium">
-                            {printTimetable.timetable[day]?.[slot]?.subject ||
-                              "—"}
+                            {grid[day]?.[slot]?.subject || "—"}
                           </div>
-                          {printTimetable.timetable[day]?.[slot]?.subject && (
+                          {grid[day]?.[slot]?.subject && (
                             <div className="text-slate-400">
-                              {printTimetable.timetable[day]?.[slot]?.teacher} /{" "}
-                              {printTimetable.timetable[day]?.[slot]?.room}
+                              {grid[day]?.[slot]?.teacher} /{" "}
+                              {grid[day]?.[slot]?.room}
                             </div>
                           )}
                         </td>
                       ))}
                     </tr>
                   ))}
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Toast */}
-      {toast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-emerald-500 text-white text-sm px-5 py-3 rounded-xl shadow-lg">
-          {toast}
+      {toast.msg && (
+        <div
+          className={`fixed bottom-6 right-6 z-50 text-white text-sm px-5 py-3 rounded-xl shadow-lg ${
+            toast.type === "error" ? "bg-rose-500" : "bg-emerald-500"
+          }`}
+        >
+          {toast.msg}
         </div>
       )}
     </div>

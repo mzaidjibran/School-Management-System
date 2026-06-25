@@ -1,4 +1,4 @@
-import { getHeaders } from "./apiHelper.js";
+import { getHeaders } from "./Api_Helper.js";
 
 const API_BASE = "http://127.0.0.1:3000";
 
@@ -9,12 +9,19 @@ export const createOrUpdateTimetable = async (data) => {
     headers: getHeaders(),
     body: JSON.stringify(data),
   });
-  if (!response.ok) throw new Error(`Save timetable failed: ${response.status}`);
-  return response.json();
+
+  const json = await response.json();
+
+  if (!response.ok) {
+    // Exact backend error console mein dikhega
+    console.error("❌ Timetable save error:", json);
+    throw new Error(json.message || `Save failed: ${response.status}`);
+  }
+
+  return json;
 };
 
 // ─── Get Class Timetable ───────────────────────────────────────────
-// session optional hai
 export const getClassTimetable = async (classId, session) => {
   let url = `${API_BASE}/api/timetable/${classId}`;
   if (session) url += `?session=${session}`;
@@ -23,8 +30,15 @@ export const getClassTimetable = async (classId, session) => {
     method: "GET",
     headers: getHeaders(),
   });
-  if (!response.ok) throw new Error(`Get class timetable failed: ${response.status}`);
-  return response.json();
+
+  const json = await response.json();
+
+  if (!response.ok) {
+    console.error("❌ Get class timetable error:", json);
+    throw new Error(json.message || `Get failed: ${response.status}`);
+  }
+
+  return json;
 };
 
 // ─── Get Today Timetable ───────────────────────────────────────────
@@ -36,8 +50,15 @@ export const getTodayTimetable = async (classId, session) => {
     method: "GET",
     headers: getHeaders(),
   });
-  if (!response.ok) throw new Error(`Get today timetable failed: ${response.status}`);
-  return response.json();
+
+  const json = await response.json();
+
+  if (!response.ok) {
+    console.error("❌ Get today timetable error:", json);
+    throw new Error(json.message || `Get failed: ${response.status}`);
+  }
+
+  return json;
 };
 
 // ─── Get Teacher Timetable ─────────────────────────────────────────
@@ -49,8 +70,15 @@ export const getTeacherTimetable = async (teacherId, session) => {
     method: "GET",
     headers: getHeaders(),
   });
-  if (!response.ok) throw new Error(`Get teacher timetable failed: ${response.status}`);
-  return response.json();
+
+  const json = await response.json();
+
+  if (!response.ok) {
+    console.error("❌ Get teacher timetable error:", json);
+    throw new Error(json.message || `Get failed: ${response.status}`);
+  }
+
+  return json;
 };
 
 // ─── Delete Timetable ──────────────────────────────────────────────
@@ -59,6 +87,13 @@ export const deleteTimetable = async (id) => {
     method: "DELETE",
     headers: getHeaders(),
   });
-  if (!response.ok) throw new Error(`Delete timetable failed: ${response.status}`);
-  return response.json();
+
+  const json = await response.json();
+
+  if (!response.ok) {
+    console.error("❌ Delete timetable error:", json);
+    throw new Error(json.message || `Delete failed: ${response.status}`);
+  }
+
+  return json;
 };
