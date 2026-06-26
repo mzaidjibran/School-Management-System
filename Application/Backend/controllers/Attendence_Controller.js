@@ -158,3 +158,34 @@ export const updateAttendance = async (request, response) => {
     });
   }
 };
+
+// ─── Get Today's Attendance Summary (Dashboard ke liye) ───────────
+export const getTodayAttendanceSummary = async (request, response) => {
+  try {
+    const today = new Date();
+    const start = new Date(today);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(today);
+    end.setHours(23, 59, 59, 999);
+
+    const records = await Attendance.find({
+      date: { $gte: start, $lte: end },
+    });
+
+    const summary = {
+      total:   records.length,
+      present: records.filter((r) => r.status === "present").length,
+      absent:  records.filter((r) => r.status === "absent").length,
+      late:    records.filter((r) => r.status === "late").length,
+      leave:   records.filter((r) => r.status === "leave").length,
+    };
+
+    response.status(200).json({
+      success: true,
+      error: false,
+      data: summary,
+    });
+  } catch (error) {
+    response.status(500).json({ success: false, error: true, message: error.message });
+  }
+};

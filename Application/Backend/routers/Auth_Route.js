@@ -1,13 +1,30 @@
 import express from "express";
-import { register, login, getMe } from "../controllers/Auth_Controller.js";
-import { protect } from "../middleware/Auth_Middleware.js";
+import {
+  SignUp,
+  SignIn,
+  LogOut,
+  RefreshAccessToken,
+  GetCurrentUser,
+  UpdateMyProfile,
+  ForgotPassword,
+  VerifyOtp,
+  ResetPassword,
+} from "../controllers/Auth_Controller.js";
+import { protect, authorize } from "../middleware/Auth_Middleware.js";
 
 const router = express.Router();
 
-// Auth routes
+// ── Public Routes ─────────────────────────────────────────────────
+router.post("/signup",          SignUp);
+router.post("/signin",          SignIn);
+router.post("/logout",          LogOut);
+router.post("/refresh-token",   RefreshAccessToken);
+router.post("/forgot-password", ForgotPassword);
+router.post("/verify-otp",      VerifyOtp);
+router.post("/reset-password",  ResetPassword);
 
-router.post("/register", register);   // POST  /api/auth/register
-router.post("/login", login);         // POST  /api/auth/login
-router.get("/me", protect, getMe);    // GET   /api/auth/me
+// ── Protected Routes (login zaruri) ──────────────────────────────
+router.put ("/me",              protect, UpdateMyProfile);
+router.get("/me", protect, GetCurrentUser);
 
 export default router;

@@ -1,6 +1,10 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "../pages/auth/useAuth.js";
 
 import MainLayout from "../components/layouts/MainLayout";
+
+// Auth
+import Login from "../pages/auth/Login";
 
 // Dashboard
 import Dashboard from "../pages/dashboard/Dashboard";
@@ -59,21 +63,27 @@ import UserPage from "../pages/users/UserPage";
 import UserList from "../pages/users/UserList";
 import RolesPermissions from "../pages/users/RolesPermissions";
 
-// Auth
-import Login from "../pages/auth/Login";
-import ForgotPassword from "../pages/auth/ForgotPassword";
-import ResetPassword from "../pages/auth/ResetPassword";
+// ── Protected Route — login nahi to /login pe bhejo ──────────────
+function ProtectedRoute({ children }) {
+  const { isLoggedIn } = useAuth();
+  if (!isLoggedIn) return <Navigate to="/login" replace />;
+  return children;
+}
 
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* Auth Routes */}
+      {/* Public Route — sirf login */}
       <Route path="/login" element={<Login />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
 
-      {/* Main Layout */}
-      <Route element={<MainLayout />}>
+      {/* Sab protected routes MainLayout ke andar */}
+      <Route
+        element={
+          <ProtectedRoute>
+            <MainLayout />
+          </ProtectedRoute>
+        }
+      >
         {/* Dashboard */}
         <Route path="/" element={<Dashboard />} />
 
@@ -131,21 +141,21 @@ export default function AppRoutes() {
         </Route>
 
         {/* Notices */}
-        {/* CreateNotice.jsx already handles BOTH create and edit
-            (it checks useParams().id internally to switch modes),
-            so the edit route reuses the same component. */}
         <Route path="/notices" element={<NoticePage />}>
           <Route index element={<NoticeBoard />} />
           <Route path="create" element={<CreateNotice />} />
           <Route path="edit/:id" element={<CreateNotice />} />
         </Route>
 
-        {/* Users */}
+        {/* Users — sirf admin dekhe */}
         <Route path="/users" element={<UserPage />}>
           <Route index element={<UserList />} />
           <Route path="roles" element={<RolesPermissions />} />
         </Route>
       </Route>
+
+      {/* Koi bhi unknown route — login pe bhejo */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }

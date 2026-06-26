@@ -4,6 +4,7 @@ import {
   getAttendanceByClassAndDate,
   getAttendanceByStudent,
   updateAttendance,
+  getTodayAttendanceSummary
 } from "../controllers/Attendence_Controller.js";
 import { protect, authorize } from "../middleware/Auth_Middleware.js";
 
@@ -15,5 +16,6 @@ router.post("/", markAttendance);                              // POST   /api/at
 router.get("/",getAttendanceByClassAndDate);                  // GET    /api/attendance?classId=&date=
 router.get("/student/:studentId",getAttendanceByStudent);     // GET    /api/attendance/student/:studentId
 router.put("/:id",updateAttendance);                          // PUT    /api/attendance/:id
+router.get("/today-summary", getTodayAttendanceSummary);
 
 export default router;

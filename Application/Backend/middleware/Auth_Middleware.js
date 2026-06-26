@@ -1,12 +1,11 @@
 import jwt from "jsonwebtoken";
-import User from "../models/User_Model.js";
+import User_Model from "../models/User_Model.js";
 
 // ─── Token Verify Karo ────────────────────────────────────────────
 export const protect = async (request, response, next) => {
   try {
     let token;
 
-    // Token header se lo
     if (
       request.headers.authorization &&
       request.headers.authorization.startsWith("Bearer")
@@ -22,11 +21,11 @@ export const protect = async (request, response, next) => {
       });
     }
 
-    // Token verify karo
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // JWT_ACCESS_SECRET use karo (JWT_SECRET nahi)
+    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
 
-    // User fetch karo (password exclude)
-    const user = await User.findById(decoded.id).select("-password");
+    // decoded.userId use karo (decoded.id nahi)
+    const user = await User_Model.findById(decoded.userId).select("-password");
 
     if (!user) {
       return response.status(401).json({
@@ -36,7 +35,7 @@ export const protect = async (request, response, next) => {
       });
     }
 
-    if (!user.isActive) {
+    if (user.isActive === false) {
       return response.status(403).json({
         success: false,
         error: true,
@@ -44,8 +43,9 @@ export const protect = async (request, response, next) => {
       });
     }
 
-    // request mein user set karo — controllers mein request.user se milega
-    request.user = user;
+    // request.userId set karo — controllers mein isi se access hota hai
+    request.userId = user._id;
+    request.user   = user;
     next();
   } catch (error) {
     return response.status(401).json({
@@ -57,7 +57,6 @@ export const protect = async (request, response, next) => {
 };
 
 // ─── Role Check Middleware ────────────────────────────────────────
-// Usage: authorize("admin") ya authorize("admin", "teacher")
 export const authorize = (...roles) => {
   return (request, response, next) => {
     if (!roles.includes(request.user.role)) {
