@@ -6,6 +6,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveAs } from "file-saver";
 import { getAllTeachers, updateTeacher, deleteTeacher } from "../../api/Teacher_Api.js";
+import toast from "react-hot-toast";
 
 const API_BASE = "http://127.0.0.1:3000";
 
@@ -639,9 +640,10 @@ export default function TeacherDataTable() {
     try {
       await deleteTeacher(deleteModal.teacher._id);
       setTeachers((prev) => prev.filter((t) => t._id !== deleteModal.teacher._id));
+      toast.success("Teacher deleted successfully!");
       setDeleteModal({ open: false, teacher: null });
     } catch (err) {
-      alert(err.message || "Delete failed.");
+      toast.error(err.message || "Failed to delete teacher");
     } finally {
       setIsDeleting(false);
     }

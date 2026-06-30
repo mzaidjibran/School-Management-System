@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaBook, FaSave, FaPlus, FaUndo, FaTimes } from "react-icons/fa";
 import { addSubject } from "../../api/Subject_Api.js";
+import toast from "react-hot-toast";
 
 const API_BASE = "http://127.0.0.1:3000";
 
@@ -91,7 +92,6 @@ export default function AddSubject() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [saveAnother, setSaveAnother] = useState(false);
-  const [toast, setToast] = useState({ msg: "", type: "success" });
 
   const [classes, setClasses] = useState([]);
   const [teachers, setTeachers] = useState([]);
@@ -110,7 +110,7 @@ export default function AddSubject() {
         setClasses(classJson.data || classJson.classes || []);
         setTeachers(teacherJson.data || teacherJson.teachers || []);
       } catch (err) {
-        showToast("Classes/Teachers load karne mein error: " + err.message, "error");
+        toast.error("Classes/Teachers load karne mein error: " + err.message);
       } finally {
         setLoadingDropdowns(false);
       }
@@ -118,10 +118,7 @@ export default function AddSubject() {
     fetchDropdowns();
   }, []);
 
-  const showToast = (msg, type = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast({ msg: "", type: "success" }), 3000);
-  };
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -172,11 +169,11 @@ export default function AddSubject() {
         status: form.status,
       });
 
-      showToast(addAnother ? "Subject saved! Add another." : "Subject created successfully!");
+      toast.success(addAnother ? "Subject saved! Add another." : "Subject created successfully!");
       if (addAnother) resetForm();
       else navigate("/subjects");
     } catch (err) {
-      showToast(err.message || "Subject create karne mein error aayi.", "error");
+      toast.error(err.message || "Subject create karne mein error aayi.");
     } finally {
       setLoading(false);
     }
@@ -388,16 +385,7 @@ export default function AddSubject() {
         </div>
       </div>
 
-      {/* Toast */}
-      {toast.msg && (
-        <div
-          className={`fixed bottom-6 right-6 z-50 text-white text-sm px-5 py-3 rounded-xl shadow-lg flex items-center gap-2 ${
-            toast.type === "error" ? "bg-rose-500" : "bg-emerald-500"
-          }`}
-        >
-          <FaSave className="text-xs" /> {toast.msg}
-        </div>
-      )}
+
     </div>
   );
 }

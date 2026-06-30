@@ -119,7 +119,6 @@ export default function Dashboard() {
         setNotices((noticeData?.data ?? []).slice(0, 3));
         setRecentFees((feeData?.data ?? []).slice(0, 4));
 
-        const attList = attData?.data ?? [];
         if (attData?.data) {
           setAttendance({
             present: attData.data.present,
@@ -183,7 +182,7 @@ export default function Dashboard() {
 
   const thClass =
     "text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide";
-  const tdClass = "py-2 px-3 text-sm text-slate-700";
+  const tdClass = "py-2 px-3 text-sm text-slate-750";
 
   const overviewStats = [
     {
@@ -286,273 +285,299 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-5">
-          <div>
-            <h1 className="text-xl font-bold text-slate-800">
-              {greeting}, {userName || "Admin"}
-            </h1>
-            <p className="text-xs text-slate-400 mt-0.5">
-              {formattedDate} &nbsp;|&nbsp; {formattedTime}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => navigate("/students/add")}
-              className="px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-xs font-medium transition flex items-center gap-1"
-            >
-              + Add Student
-            </button>
-            <button
-              onClick={() => navigate("/teachers/add")}
-              className="px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-xs font-medium transition flex items-center gap-1"
-            >
-              + Add Teacher
-            </button>
-            <button
-              onClick={() => navigate("/fees/collection")}
-              className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-xs font-medium transition flex items-center gap-1"
-            >
-              <DollarSign size={13} /> Collect Fee
-            </button>
-            <button
-              onClick={() => navigate("/notices/create")}
-              className="px-3 py-1.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 text-xs font-medium transition flex items-center gap-1"
-            >
-              <Megaphone size={13} /> Create Notice
-            </button>
-          </div>
+    <div className="min-h-screen bg-slate-50/50 py-6 px-4 sm:px-6 lg:px-8">
+      {/* Header Greeting */}
+      <div className="bg-white rounded-2xl border border-slate-100/80 shadow-sm p-6 mb-6 flex flex-col gap-1">
+        <div>
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider text-indigo-600 bg-indigo-50 uppercase">
+            Punjab Public High School
+          </span>
+          <h1 className="text-xl md:text-2xl font-black text-slate-800 mt-2 leading-tight">
+            {greeting}, {userName || "Admin"}
+          </h1>
+          <p className="text-xs text-slate-500 mt-1.5 font-medium flex items-center gap-2">
+            <Clock size={12} className="text-indigo-500" />
+            <span>{formattedDate}</span>
+            <span className="text-slate-300">•</span>
+            <span className="text-indigo-600 font-semibold">
+              {formattedTime}
+            </span>
+          </p>
         </div>
+      </div>
 
-        {/* Overview Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-          {overviewStats.map((stat, idx) => (
-            <div
-              key={idx}
-              className="bg-white rounded-xl border border-slate-100 shadow-sm px-4 py-3 flex items-center gap-3"
-            >
-              <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center shadow-sm shrink-0">
-                {stat.icon}
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Side: Main Content (2/3 width) */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Overview Stats */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {overviewStats.map((stat, idx) => (
+              <div
+                key={idx}
+                className="bg-white rounded-2xl border border-slate-100/80 shadow-sm p-4 flex items-center gap-3.5 hover:shadow-md transition duration-200"
+              >
+                <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center shadow-sm shrink-0">
+                  {stat.icon}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs text-slate-500 font-medium truncate">
+                    {stat.label}
+                  </p>
+                  <p className="text-lg font-extrabold text-slate-800 leading-tight mt-0.5">
+                    {stat.value}
+                  </p>
+                </div>
               </div>
-              <div className="min-w-0">
-                <p className="text-xs text-slate-500 truncate">{stat.label}</p>
-                <p className="text-lg font-bold text-slate-800 leading-tight">
-                  {stat.value}
-                </p>
-              </div>
+            ))}
+          </div>
+
+          {/* Recent Fees */}
+          <div className="bg-white rounded-2xl border border-slate-100/80 shadow-sm p-5 overflow-x-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-bold text-slate-800">
+                Recent Fee Collections
+              </h3>
+              <button
+                onClick={() => navigate("/fees")}
+                className="text-xs text-indigo-600 hover:text-indigo-700 font-semibold cursor-pointer"
+              >
+                View All
+              </button>
             </div>
-          ))}
-        </div>
-
-        {/* Attendance */}
-        <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4 mb-4">
-          <h3 className="text-sm font-semibold text-slate-700 mb-3">
-            Today's Attendance
-          </h3>
-          {attendance ? (
-            <>
-              <div className="grid grid-cols-4 gap-2 mb-3">
-                {[
-                  {
-                    label: "Present",
-                    val: attendance.present,
-                    color: "text-emerald-600 bg-emerald-50",
-                  },
-                  {
-                    label: "Absent",
-                    val: attendance.absent,
-                    color: "text-rose-600 bg-rose-50",
-                  },
-                  {
-                    label: "Leave",
-                    val: attendance.leave,
-                    color: "text-amber-600 bg-amber-50",
-                  },
-                  {
-                    label: "Late",
-                    val: attendance.late,
-                    color: "text-blue-600 bg-blue-50",
-                  },
-                ].map((a) => (
-                  <div
-                    key={a.label}
-                    className={`text-center p-2 rounded-lg ${a.color}`}
-                  >
-                    <p className="text-lg font-bold">{a.val}</p>
-                    <p className="text-xs">{a.label}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="text-center text-xs text-slate-500">
-                Attendance Rate:{" "}
-                <span className="text-base font-bold text-indigo-600">
-                  {attPct}%
-                </span>
-              </div>
-            </>
-          ) : (
-            <p className="text-xs text-slate-400 text-center py-4">
-              No attendance data for today
-            </p>
-          )}
-        </div>
-
-        {/* Recent Fees */}
-        <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4 mb-4 overflow-x-auto">
-          <h3 className="text-sm font-semibold text-slate-700 mb-3">
-            Recent Fee Collections
-          </h3>
-          {recentFees.length ? (
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-slate-100">
-                  <th className={thClass}>Student</th>
-                  <th className={thClass}>Class</th>
-                  <th className={thClass}>Amount</th>
-                  <th className={thClass}>Date</th>
-                  <th className={thClass}>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentFees.map((fee, i) => (
-                  <tr
-                    key={i}
-                    className="border-b border-slate-50 hover:bg-slate-50"
-                  >
-                    <td className={tdClass + " font-medium"}>
-                      {fee.studentId?.name || fee.studentName || "—"}
-                    </td>
-                    <td className={tdClass}>
-                      {fee.classId?.name || fee.className || "—"}
-                    </td>
-                    <td className={tdClass}>
-                      ₨ {fee.amount?.toLocaleString() || "—"}
-                    </td>
-                    <td className={tdClass}>
-                      {fee.date
-                        ? new Date(fee.date).toLocaleDateString("en-PK")
-                        : "—"}
-                    </td>
-                    <td className={tdClass}>
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-xs font-medium ${feeStatusColor(fee.status)}`}
-                      >
-                        {fee.status || "—"}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p className="text-xs text-slate-400 text-center py-4">
-              No fee records found
-            </p>
-          )}
-        </div>
-
-        {/* Upcoming Exams + Notices */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-          {/* Upcoming Exams */}
-          <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4 overflow-x-auto">
-            <h3 className="text-sm font-semibold text-slate-700 mb-3">
-              Upcoming Exams
-            </h3>
-            {exams.length ? (
+            {recentFees.length ? (
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-slate-100">
-                    <th className={thClass}>Exam</th>
-                    <th className={thClass}>Subject</th>
+                    <th className={thClass}>Student</th>
+                    <th className={thClass}>Class</th>
+                    <th className={thClass}>Amount</th>
                     <th className={thClass}>Date</th>
+                    <th className={thClass}>Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {exams.map((ex, i) => (
-                    <tr key={i} className="border-b border-slate-50">
-                      <td className={tdClass + " font-medium"}>
-                        {ex.title || ex.name || "—"}
+                  {recentFees.map((fee, i) => (
+                    <tr
+                      key={i}
+                      className="border-b border-slate-50 hover:bg-slate-50/80 transition-colors"
+                    >
+                      <td className={tdClass + " font-semibold text-slate-800"}>
+                        {fee.studentId?.name || fee.studentName || "—"}
                       </td>
                       <td className={tdClass}>
-                        {ex.subject?.name || ex.subjectName || "—"}
+                        {fee.classId?.name || fee.className || "—"}
+                      </td>
+                      <td className={tdClass + " font-semibold text-slate-900"}>
+                        ₨ {fee.amount?.toLocaleString() || "—"}
                       </td>
                       <td className={tdClass}>
-                        {ex.date
-                          ? new Date(ex.date).toLocaleDateString("en-PK")
+                        {fee.date
+                          ? new Date(fee.date).toLocaleDateString("en-PK")
                           : "—"}
+                      </td>
+                      <td className={tdClass}>
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${feeStatusColor(fee.status)}`}
+                        >
+                          {fee.status || "—"}
+                        </span>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             ) : (
-              <p className="text-xs text-slate-400 text-center py-4">
-                No upcoming exams
+              <p className="text-xs text-slate-400 text-center py-6">
+                No fee records found
               </p>
             )}
           </div>
 
-          {/* Notices */}
-          <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
-            <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
-              <Megaphone size={16} className="text-indigo-600" /> Notice Board
-            </h3>
-            {notices.length ? (
-              <div className="space-y-2">
-                {notices.map((n, i) => (
-                  <div
-                    key={i}
-                    className={`p-3 rounded-lg ${priorityStyle(n.priority)}`}
-                  >
-                    <div className="flex justify-between items-start gap-2">
-                      <span className="text-xs font-medium text-slate-700">
-                        {n.title}
-                      </span>
-                      <span
-                        className={`text-xs px-1.5 py-0.5 rounded-full font-medium whitespace-nowrap ${priorityBadge(n.priority)}`}
-                      >
-                        {n.priority || "Normal"}
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
-                      <Clock size={11} />{" "}
-                      {n.date
-                        ? new Date(n.date).toLocaleDateString("en-PK")
-                        : "—"}
-                    </p>
-                  </div>
-                ))}
+          {/* Upcoming Exams + Notices Side by Side */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Upcoming Exams */}
+            <div className="bg-white rounded-2xl border border-slate-100/80 shadow-sm p-5 overflow-x-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold text-slate-800">
+                  Upcoming Exams
+                </h3>
+                <button
+                  onClick={() => navigate("/exams")}
+                  className="text-xs text-indigo-600 hover:text-indigo-700 font-semibold cursor-pointer"
+                >
+                  View All
+                </button>
               </div>
-            ) : (
-              <p className="text-xs text-slate-400 text-center py-4">
-                No notices found
-              </p>
-            )}
+              {exams.length ? (
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-slate-100">
+                      <th className={thClass}>Exam</th>
+                      <th className={thClass}>Subject</th>
+                      <th className={thClass}>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {exams.map((ex, i) => (
+                      <tr
+                        key={i}
+                        className="border-b border-slate-50 hover:bg-slate-50/50"
+                      >
+                        <td
+                          className={tdClass + " font-semibold text-slate-800"}
+                        >
+                          {ex.title || ex.name || "—"}
+                        </td>
+                        <td className={tdClass}>
+                          {ex.subject?.name || ex.subjectName || "—"}
+                        </td>
+                        <td className={tdClass + " font-medium"}>
+                          {ex.date
+                            ? new Date(ex.date).toLocaleDateString("en-PK")
+                            : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="text-xs text-slate-400 text-center py-6">
+                  No upcoming exams
+                </p>
+              )}
+            </div>
+
+            {/* Notices */}
+            <div className="bg-white rounded-2xl border border-slate-100/80 shadow-sm p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                  <Megaphone size={16} className="text-indigo-600" /> Notice
+                  Board
+                </h3>
+                <button
+                  onClick={() => navigate("/notices")}
+                  className="text-xs text-indigo-600 hover:text-indigo-700 font-semibold cursor-pointer"
+                >
+                  View All
+                </button>
+              </div>
+              {notices.length ? (
+                <div className="space-y-2.5">
+                  {notices.map((n, i) => (
+                    <div
+                      key={i}
+                      className={`p-3 rounded-xl border border-slate-100/40 ${priorityStyle(n.priority)}`}
+                    >
+                      <div className="flex justify-between items-start gap-2">
+                        <span className="text-xs font-semibold text-slate-700 line-clamp-1">
+                          {n.title}
+                        </span>
+                        <span
+                          className={`text-[10px] px-2 py-0.5 rounded-full font-bold whitespace-nowrap ${priorityBadge(n.priority)}`}
+                        >
+                          {n.priority || "Normal"}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1 flex items-center gap-1 font-medium">
+                        <Clock size={11} />{" "}
+                        {n.date
+                          ? new Date(n.date).toLocaleDateString("en-PK")
+                          : "—"}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-slate-400 text-center py-6">
+                  No notices found
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Quick Links */}
-        <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
-          <h3 className="text-sm font-semibold text-slate-700 mb-3">
-            Quick Links
-          </h3>
-          <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-2">
-            {quickLinks.map((link) => (
-              <button
-                key={link.name}
-                onClick={() => navigate(link.path)}
-                className="flex flex-col items-center gap-1 p-2 bg-slate-50 rounded-lg hover:bg-indigo-50 transition group text-center"
-              >
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                  {link.icon}
+        {/* Right Side: Sidebar (1/3 width) */}
+        <div className="space-y-6">
+          {/* Today's Attendance */}
+          <div className="bg-white rounded-2xl border border-slate-100/80 shadow-sm p-5">
+            <h3 className="text-sm font-bold text-slate-800 mb-4">
+              Today's Attendance
+            </h3>
+            {attendance ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-2.5">
+                  {[
+                    {
+                      label: "Present",
+                      val: attendance.present,
+                      color:
+                        "text-emerald-700 bg-emerald-50 border-emerald-100",
+                    },
+                    {
+                      label: "Absent",
+                      val: attendance.absent,
+                      color: "text-rose-700 bg-rose-50 border-rose-100",
+                    },
+                    {
+                      label: "Leave",
+                      val: attendance.leave,
+                      color: "text-amber-700 bg-amber-50 border-amber-100",
+                    },
+                    {
+                      label: "Late",
+                      val: attendance.late,
+                      color: "text-blue-700 bg-blue-50 border-blue-100",
+                    },
+                  ].map((a) => (
+                    <div
+                      key={a.label}
+                      className={`text-center p-3 rounded-xl border ${a.color}`}
+                    >
+                      <p className="text-xl font-extrabold">{a.val}</p>
+                      <p className="text-xs font-semibold opacity-90 mt-0.5">
+                        {a.label}
+                      </p>
+                    </div>
+                  ))}
                 </div>
-                <span className="text-xs text-slate-600 group-hover:text-indigo-600 font-medium leading-tight">
-                  {link.name}
-                </span>
-              </button>
-            ))}
+                <div className="pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+                  <span className="text-slate-500 font-medium">
+                    Attendance Rate:
+                  </span>
+                  <span className="text-sm font-extrabold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full">
+                    {attPct}%
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <p className="text-xs text-slate-400 text-center py-6">
+                No attendance data for today
+              </p>
+            )}
+          </div>
+
+          {/* Quick Links */}
+          <div className="bg-white rounded-2xl border border-slate-100/80 shadow-sm p-5">
+            <h3 className="text-sm font-bold text-slate-800 mb-4">
+              Quick Links
+            </h3>
+            <div className="grid grid-cols-3 gap-2.5">
+              {quickLinks.map((link) => (
+                <button
+                  key={link.name}
+                  onClick={() => navigate(link.path)}
+                  className="flex flex-col items-center gap-1.5 p-2.5 bg-slate-50 border border-slate-100 rounded-xl hover:bg-indigo-50 hover:border-indigo-100 transition group text-center cursor-pointer"
+                >
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                    {link.icon}
+                  </div>
+                  <span className="text-[11px] text-slate-600 group-hover:text-indigo-600 font-bold leading-tight">
+                    {link.name}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

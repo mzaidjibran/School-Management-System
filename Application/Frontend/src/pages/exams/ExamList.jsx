@@ -6,6 +6,8 @@ import autoTable from "jspdf-autotable";
 import { saveAs } from "file-saver";
 import { getAllExams, deleteExam, updateExam } from "../../api/Exam_Api.js";
 import { getAllClasses } from "../../api/Class_Api.js";
+import toast from "react-hot-toast";
+import { confirmToast } from "../../utils/toastHelpers.jsx";
 
 const STATUS_MAP = {
   scheduled: { label: "Scheduled", style: "bg-blue-50 text-blue-700 border border-blue-200",    icon: <FaClock className="w-2.5 h-2.5" /> },
@@ -174,14 +176,20 @@ export default function ExamList() {
     completed: exams.filter((e) => e.status === "completed").length,
   };
 
-  const handleDelete = async (exam) => {
-    if (!window.confirm(`Delete "${exam.name}"?`)) return;
-    try {
-      await deleteExam(exam._id);
-      setExams((prev) => prev.filter((e) => e._id !== exam._id));
-    } catch (err) {
-      alert(err.message || "Delete fail ho gaya");
-    }
+  const handleDelete = (exam) => {
+    confirmToast(
+      `Delete "${exam.name}"? This action cannot be undone.`,
+      async () => {
+        try {
+          await deleteExam(exam._id);
+          setExams((prev) => prev.filter((e) => e._id !== exam._id));
+          toast.success("Exam deleted successfully!");
+        } catch (err) {
+          toast.error(err.message || "Failed to delete exam");
+        }
+      },
+      { confirmText: "Delete", confirmClass: "bg-rose-600 hover:bg-rose-700 shadow-rose-600/10 text-white" }
+    );
   };
 
   const handleSave = (updated) => {

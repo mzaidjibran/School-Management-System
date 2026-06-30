@@ -12,6 +12,7 @@ import {
   GetPrincipals,
 } from "../controllers/Auth_Controller.js";
 import { protect, authorize } from "../middleware/Auth_Middleware.js";
+import { upload } from "../middleware/Upload_Middleware.js";
 
 const router = express.Router();
 
@@ -26,7 +27,7 @@ router.post("/reset-password",  ResetPassword);
 router.get("/principals",       GetPrincipals);
 
 // ── Protected Routes (login zaruri) ──────────────────────────────
-router.put ("/me",              protect, UpdateMyProfile);
+router.put ("/me",              protect, upload.single("profileImage"), UpdateMyProfile);
 router.get("/me", protect, GetCurrentUser);
 
 export default router;

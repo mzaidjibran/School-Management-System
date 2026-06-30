@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 // ---------- Helpers ----------
-const avatarColors = ["#6366f1", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#3b82f6"];
+const avatarColors = ["bg-indigo-500", "bg-purple-500", "bg-pink-500", "bg-amber-500", "bg-emerald-500", "bg-blue-500"];
 const getBarColor  = (pct) =>
   pct >= 90 ? "linear-gradient(90deg,#10b981,#34d399)"
   : pct >= 75 ? "linear-gradient(90deg,#f59e0b,#fbbf24)"
@@ -26,13 +26,6 @@ const getPctBadge  = (pct) =>
   pct >= 90 ? { bg: "#d1fae5", color: "#065f46" }
   : pct >= 75 ? { bg: "#fef3c7", color: "#92400e" }
   : { bg: "#fee2e2", color: "#991b1b" };
-
-const inputStyle = {
-  height: 36, padding: "0 12px", fontSize: 13,
-  border: "1px solid #e2e8f0", borderRadius: 10,
-  background: "#fff", outline: "none", width: "100%",
-  color: "#374151", appearance: "none",
-};
 
 export default function AttendanceReport() {
   const [classes, setClasses]           = useState([]);
@@ -157,11 +150,11 @@ export default function AttendanceReport() {
   };
 
   const statCards = [
-    { label: "Overall",  value: `${overallPct}%`, icon: <TrendingUp className="w-5 h-5 text-white" />, bg: "linear-gradient(135deg,#6366f1,#8b5cf6)" },
-    { label: "Present",  value: totalPresent,      icon: <CheckCircle className="w-5 h-5 text-white" />, bg: "linear-gradient(135deg,#10b981,#34d399)" },
-    { label: "Absent",   value: totalAbsent,       icon: <XCircle className="w-5 h-5 text-white" />, bg: "linear-gradient(135deg,#ef4444,#f87171)" },
-    { label: "Leave",    value: totalLeave,        icon: <Briefcase className="w-5 h-5 text-white" />, bg: "linear-gradient(135deg,#f59e0b,#fbbf24)" },
-    { label: "Late",     value: totalLate,         icon: <Clock className="w-5 h-5 text-white" />, bg: "linear-gradient(135deg,#3b82f6,#60a5fa)" },
+    { label: "Overall",  value: `${overallPct}%`, color: "text-slate-800",   icon: <TrendingUp className="w-5 h-5 text-indigo-600" />, bg: "bg-indigo-50" },
+    { label: "Present",  value: totalPresent,      color: "text-emerald-600", icon: <CheckCircle className="w-5 h-5 text-emerald-600" />, bg: "bg-emerald-50" },
+    { label: "Absent",   value: totalAbsent,       color: "text-rose-600",    icon: <XCircle className="w-5 h-5 text-rose-600" />, bg: "bg-rose-50" },
+    { label: "Leave",    value: totalLeave,        color: "text-amber-600",   icon: <Briefcase className="w-5 h-5 text-amber-600" />, bg: "bg-amber-50" },
+    { label: "Late",     value: totalLate,         color: "text-blue-600",    icon: <Clock className="w-5 h-5 text-blue-600" />, bg: "bg-blue-50" },
   ];
 
   const months = ["01","02","03","04","05","06","07","08","09","10","11","12"];
@@ -169,116 +162,182 @@ export default function AttendanceReport() {
   const years = ["2024","2025","2026","2027"];
 
   return (
-    <div style={{ minHeight:"100vh", background:"#f1f5f9", fontFamily:"'Inter',system-ui,sans-serif" }}>
-      <div style={{ maxWidth:1140, margin:"0 auto", padding:"32px 20px" }}>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
 
-        {/* Header Banner */}
-        <div style={{ background:"linear-gradient(135deg,#0f172a,#1e1b4b,#312e81)", borderRadius:20, padding:"28px 32px", marginBottom:28, display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:16, position:"relative", overflow:"hidden" }}>
-          <div style={{ position:"absolute", top:-40, right:80, width:160, height:160, borderRadius:"50%", background:"rgba(99,102,241,0.25)", pointerEvents:"none" }} />
-          <div style={{ position:"relative" }}>
-            <div style={{ fontSize:11, fontWeight:600, color:"rgba(255,255,255,0.55)", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:6 }}>Dashboard / Reports</div>
-            <h1 style={{ fontSize:26, fontWeight:800, color:"#fff", margin:0 }}>Attendance Reports</h1>
-            <p style={{ fontSize:13, color:"rgba(255,255,255,0.6)", marginTop:4 }}>Monthly analytics and insights on student attendance</p>
+        {/* Breadcrumb */}
+        <nav className="flex mb-6 text-sm text-slate-500">
+          <span className="hover:text-indigo-600 cursor-pointer">Dashboard</span>
+          <span className="mx-2">/</span>
+          <span className="text-indigo-600 font-medium">Attendance Reports</span>
+        </nav>
+
+        {/* Header */}
+        <div className="flex flex-wrap justify-between items-start gap-3 mb-7">
+          <div>
+            <h1 className="text-2xl font-black text-slate-800 font-serif">Attendance Reports</h1>
+            <p className="text-slate-500 text-sm mt-0.5">Monthly analytics and insights on student attendance</p>
           </div>
-          <div style={{ display:"flex", gap:10, position:"relative" }}>
-            {[
-              { label:"CSV",   color:"#059669", bg:"#ecfdf5", border:"#6ee7b7", action:exportCSV   },
-              { label:"Excel", color:"#16a34a", bg:"#dcfce7", border:"#86efac", action:exportExcel },
-            ].map(({ label, color, bg, border, action }) => (
-              <button key={label} onClick={action} style={{ display:"flex", alignItems:"center", gap:6, padding:"9px 16px", background:bg, border:`1.5px solid ${border}`, borderRadius:10, color, fontWeight:600, fontSize:13, cursor:"pointer" }}>
-                {label}
-              </button>
-            ))}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={exportCSV}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition duration-150 cursor-pointer"
+            >
+              CSV
+            </button>
+            <button
+              onClick={exportExcel}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 transition duration-150 cursor-pointer"
+            >
+              Excel
+            </button>
           </div>
         </div>
 
         {/* Stat Cards */}
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))", gap:16, marginBottom:24 }}>
-          {statCards.map(({ label, value, icon, bg }) => (
-            <div key={label} style={{ background:bg, borderRadius:16, padding:"20px 22px", color:"#fff", boxShadow:"0 6px 24px rgba(0,0,0,0.13)" }}>
-              <div style={{ marginBottom:8, display:"flex", alignItems:"center", justifyContent:"flex-start" }}>{icon}</div>
-              <div style={{ fontSize:30, fontWeight:800, lineHeight:1 }}>{value}</div>
-              <div style={{ fontSize:13, fontWeight:600, opacity:0.9, marginTop:4 }}>{label}</div>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+          {statCards.map(({ label, value, color, icon, bg }) => (
+            <div
+              key={label}
+              className="bg-white rounded-2xl p-4 border border-slate-100/80 shadow-sm flex justify-between items-center h-22"
+            >
+              <div>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{label}</span>
+                <span className={`text-2xl font-black ${color} mt-1 block`}>{value}</span>
+              </div>
+              <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center shrink-0`}>
+                {icon}
+              </div>
             </div>
           ))}
         </div>
 
         {/* Filters */}
-        <div style={{ background:"#fff", borderRadius:16, padding:"18px 24px", marginBottom:20, boxShadow:"0 1px 8px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0" }}>
-          <div style={{ fontSize:11, fontWeight:700, color:"#94a3b8", letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:12 }}>Filter Records</div>
-          <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", gap:10 }}>
-            <input type="text" placeholder="Search name or roll no..." value={studentFilter} onChange={(e) => setStudentFilter(e.target.value)} style={{ ...inputStyle, background:"#f8fafc" }} />
-            <select value={classFilter} onChange={(e) => setClassFilter(e.target.value)} style={inputStyle}>
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 mb-6">
+          <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Filter Records</label>
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <input
+              type="text"
+              placeholder="Search name or roll no..."
+              value={studentFilter}
+              onChange={(e) => setStudentFilter(e.target.value)}
+              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:border-indigo-400 focus:bg-white outline-none transition font-semibold text-slate-700"
+            />
+            <select
+              value={classFilter}
+              onChange={(e) => setClassFilter(e.target.value)}
+              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-semibold text-slate-700 cursor-pointer"
+            >
               <option value="">All Classes</option>
-              {classes.map((c) => <option key={c._id} value={c._id}>{c.name} — {c.section}</option>)}
+              {classes.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.name} — Section {c.section}
+                </option>
+              ))}
             </select>
-            <select value={month} onChange={(e) => setMonth(e.target.value)} style={inputStyle}>
-              {months.map((m, i) => <option key={m} value={m}>{monthNames[i]}</option>)}
+            <select
+              value={month}
+              onChange={(e) => setMonth(e.target.value)}
+              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-semibold text-slate-700 cursor-pointer"
+            >
+              {months.map((m, i) => (
+                <option key={m} value={m}>
+                  {monthNames[i]}
+                </option>
+              ))}
             </select>
-            <select value={year} onChange={(e) => setYear(e.target.value)} style={inputStyle}>
-              {years.map((y) => <option key={y} value={y}>{y}</option>)}
+            <select
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
+              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-semibold text-slate-700 cursor-pointer"
+            >
+              {years.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
             </select>
           </div>
         </div>
 
         {/* Main Table */}
-        <div style={{ background:"#fff", borderRadius:16, overflow:"hidden", boxShadow:"0 1px 8px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginBottom:24 }}>
-          <div style={{ padding:"16px 24px", borderBottom:"1px solid #f1f5f9", display:"flex", justifyContent:"space-between", alignItems:"center", background:"linear-gradient(90deg,#fafbff,#f5f3ff)" }}>
-            <span style={{ fontWeight:700, fontSize:15, color:"#1e293b" }}>Student Attendance</span>
-            <span style={{ background:"#ede9fe", color:"#7c3aed", fontSize:12, fontWeight:600, padding:"3px 12px", borderRadius:99 }}>
-              {filteredData.length} students
+        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100/80 mb-6">
+          <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <span className="font-bold text-sm text-slate-800 font-serif">Student Attendance</span>
+            <span className="bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full">
+              {filteredData.length} Students
             </span>
           </div>
-          <div style={{ overflowX:"auto" }}>
-            <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
               <thead>
-                <tr style={{ background:"#f8fafc" }}>
-                  {["Roll No","Student","Present","Absent","Leave","Late","Attendance"].map((h) => (
-                    <th key={h} style={{ padding:"11px 16px", textAlign:"left", color:"#64748b", fontWeight:600, fontSize:11, letterSpacing:"0.05em", textTransform:"uppercase", borderBottom:"1px solid #e2e8f0", whiteSpace:"nowrap" }}>{h}</th>
+                <tr className="bg-slate-50 border-b border-slate-100">
+                  {["Roll No", "Student", "Present", "Absent", "Leave", "Late", "Attendance"].map((h) => (
+                    <th
+                      key={h}
+                      className="px-4 py-3 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider"
+                    >
+                      {h}
+                    </th>
                   ))}
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-slate-100">
                 {loading ? (
-                  <tr><td colSpan={7} style={{ padding:48, textAlign:"center", color:"#94a3b8" }}>
-                    <div style={{ marginBottom:8, display:"flex", justifyContent:"center" }}><Loader2 className="w-6 h-6 animate-spin text-indigo-600" /></div>Loading records...
-                  </td></tr>
+                  <tr>
+                    <td colSpan={7} className="px-6 py-12 text-center text-slate-400 font-medium">
+                      <div className="flex justify-center mb-2">
+                        <Loader2 className="w-6 h-6 animate-spin text-indigo-600" />
+                      </div>
+                      Loading records...
+                    </td>
+                  </tr>
                 ) : filteredData.length === 0 ? (
-                  <tr><td colSpan={7} style={{ padding:48, textAlign:"center", color:"#94a3b8" }}>
-                    <div style={{ marginBottom:8, display:"flex", justifyContent:"center" }}><Search className="w-6 h-6 text-slate-400" /></div>No records found
-                  </td></tr>
+                  <tr>
+                    <td colSpan={7} className="px-6 py-12 text-center text-slate-400 font-medium">
+                      <div className="flex justify-center mb-2">
+                        <Search className="w-6 h-6 text-slate-400" />
+                      </div>
+                      No records found
+                    </td>
+                  </tr>
                 ) : (
                   filteredData.map((s, i) => {
                     const badge = getPctBadge(s.percent);
                     return (
-                      <tr key={s._id} style={{ background: i % 2 === 0 ? "#fff" : "#fafbfc" }}
-                        onMouseEnter={(e) => (e.currentTarget.style.background = "#f5f3ff")}
-                        onMouseLeave={(e) => (e.currentTarget.style.background = i % 2 === 0 ? "#fff" : "#fafbfc")}
-                      >
-                        <td style={{ padding:"12px 16px", borderBottom:"1px solid #f1f5f9" }}>
-                          <code style={{ background:"#f1f5f9", padding:"2px 8px", borderRadius:6, fontSize:11, color:"#64748b" }}>{s.rollNumber || "—"}</code>
+                      <tr key={s._id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-4 py-3 text-xs">
+                          <span className="bg-slate-100 px-2 py-0.5 rounded-lg text-[10px] font-mono text-slate-500 font-bold border border-slate-200/50">
+                            {s.rollNumber || "—"}
+                          </span>
                         </td>
-                        <td style={{ padding:"12px 16px", borderBottom:"1px solid #f1f5f9" }}>
-                          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                            <div style={{ width:32, height:32, borderRadius:10, flexShrink:0, background:avatarColors[i % avatarColors.length], display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontWeight:700, fontSize:13 }}>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white font-bold text-xs ${avatarColors[i % avatarColors.length]}`}>
                               {s.firstName?.charAt(0)}
                             </div>
                             <div>
-                              <div style={{ fontWeight:600, color:"#1e293b" }}>{s.firstName} {s.lastName}</div>
-                              <div style={{ fontSize:11, color:"#94a3b8" }}>Total: {s.total} days</div>
+                              <div className="font-semibold text-slate-800 text-xs">{s.firstName} {s.lastName}</div>
+                              <div className="text-[10px] text-slate-400 font-medium">Total: {s.total} days</div>
                             </div>
                           </div>
                         </td>
-                        <td style={{ padding:"12px 16px", borderBottom:"1px solid #f1f5f9", color:"#059669", fontWeight:700, fontSize:14 }}>{s.present}</td>
-                        <td style={{ padding:"12px 16px", borderBottom:"1px solid #f1f5f9", color:"#dc2626", fontWeight:700, fontSize:14 }}>{s.absent}</td>
-                        <td style={{ padding:"12px 16px", borderBottom:"1px solid #f1f5f9", color:"#d97706", fontWeight:700, fontSize:14 }}>{s.leave}</td>
-                        <td style={{ padding:"12px 16px", borderBottom:"1px solid #f1f5f9", color:"#2563eb", fontWeight:700, fontSize:14 }}>{s.late}</td>
-                        <td style={{ padding:"12px 16px", borderBottom:"1px solid #f1f5f9" }}>
-                          <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                            <div style={{ width:56, height:6, background:"#e2e8f0", borderRadius:99, overflow:"hidden" }}>
-                              <div style={{ width:`${s.percent}%`, height:"100%", background:getBarColor(s.percent), borderRadius:99 }} />
+                        <td className="px-4 py-3 text-xs text-emerald-600 font-bold">{s.present}</td>
+                        <td className="px-4 py-3 text-xs text-rose-600 font-bold">{s.absent}</td>
+                        <td className="px-4 py-3 text-xs text-amber-600 font-bold">{s.leave}</td>
+                        <td className="px-4 py-3 text-xs text-blue-600 font-bold">{s.late}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200/40">
+                              <div
+                                className="h-full rounded-full"
+                                style={{ width: `${s.percent}%`, background: getBarColor(s.percent) }}
+                              />
                             </div>
-                            <span style={{ padding:"3px 10px", borderRadius:99, fontSize:11, fontWeight:700, background:badge.bg, color:badge.color }}>
+                            <span
+                              className="px-2.5 py-0.5 rounded-full text-[10px] font-bold"
+                              style={{ backgroundColor: badge.bg, color: badge.color }}
+                            >
                               {s.percent}%
                             </span>
                           </div>
@@ -293,67 +352,70 @@ export default function AttendanceReport() {
         </div>
 
         {/* Top & Low */}
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:20 }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Top Performers */}
-          <div style={{ background:"#fff", borderRadius:16, overflow:"hidden", boxShadow:"0 1px 8px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0" }}>
-            <div style={{ padding:"16px 20px", borderBottom:"1px solid #f1f5f9", background:"linear-gradient(90deg,#f0fdf4,#dcfce7)", display:"flex", alignItems:"center", gap:6 }}>
+          <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100/80">
+            <div className="px-4 py-3.5 border-b border-slate-100/80 bg-emerald-50/50 flex items-center gap-2 font-bold text-xs text-emerald-800 uppercase tracking-wider">
               <Award className="w-4 h-4 text-emerald-600" />
-              <span style={{ fontWeight:700, fontSize:14, color:"#065f46" }}>Top Performers ≥ 90%</span>
+              <span>Top Performers ≥ 90%</span>
             </div>
-            <div style={{ padding:"8px 0" }}>
-              {topPerformers.length ? topPerformers.map((s, i) => (
-                <div key={s._id} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 20px", borderBottom: i < topPerformers.length - 1 ? "1px solid #f1f5f9" : "none" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = "#f0fdf4")}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-                >
-                  <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                    <div style={{ width:28, height:28, borderRadius:8, background:avatarColors[i % avatarColors.length], display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontWeight:700, fontSize:12 }}>
-                      {s.firstName?.charAt(0)}
+            <div className="divide-y divide-slate-100">
+              {topPerformers.length ? (
+                topPerformers.map((s, i) => (
+                  <div key={s._id} className="flex justify-between items-center px-5 py-3 hover:bg-emerald-50/10 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white font-bold text-xs ${avatarColors[i % avatarColors.length]}`}>
+                        {s.firstName?.charAt(0)}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-slate-800 text-xs">{s.firstName} {s.lastName}</div>
+                        <div className="text-[10px] text-slate-400 font-medium">{s.rollNumber || "—"}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div style={{ fontWeight:600, fontSize:13, color:"#1e293b" }}>{s.firstName} {s.lastName}</div>
-                      <div style={{ fontSize:11, color:"#94a3b8" }}>{s.rollNumber}</div>
-                    </div>
+                    <span className="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-bold text-xs">
+                      {s.percent}%
+                    </span>
                   </div>
-                  <span style={{ background:"#d1fae5", color:"#065f46", padding:"4px 12px", borderRadius:99, fontWeight:700, fontSize:13 }}>{s.percent}%</span>
-                </div>
-              )) : (
-                <div style={{ padding:"32px 20px", textAlign:"center", color:"#94a3b8", fontSize:13 }}>No students in top range</div>
+                ))
+              ) : (
+                <div className="px-5 py-8 text-center text-slate-400 text-xs font-medium">No students in top range</div>
               )}
             </div>
           </div>
 
           {/* Low Attendance */}
-          <div style={{ background:"#fff", borderRadius:16, overflow:"hidden", boxShadow:"0 1px 8px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0" }}>
-            <div style={{ padding:"16px 20px", borderBottom:"1px solid #f1f5f9", background:"linear-gradient(90deg,#fff1f2,#fee2e2)", display:"flex", alignItems:"center", gap:6 }}>
+          <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100/80">
+            <div className="px-4 py-3.5 border-b border-slate-100/80 bg-rose-50/50 flex items-center gap-2 font-bold text-xs text-rose-800 uppercase tracking-wider">
               <AlertTriangle className="w-4 h-4 text-rose-600" />
-              <span style={{ fontWeight:700, fontSize:14, color:"#991b1b" }}>Low Attendance &lt; 75%</span>
+              <span>Low Attendance &lt; 75%</span>
             </div>
-            <div style={{ padding:"8px 0" }}>
-              {lowAttendance.length ? lowAttendance.map((s, i) => (
-                <div key={s._id} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 20px", borderBottom: i < lowAttendance.length - 1 ? "1px solid #f1f5f9" : "none" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = "#fff1f2")}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-                >
-                  <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                    <div style={{ width:28, height:28, borderRadius:8, background:"#fee2e2", display:"flex", alignItems:"center", justifyContent:"center", color:"#ef4444", fontWeight:700, fontSize:12 }}>
-                      {s.firstName?.charAt(0)}
+            <div className="divide-y divide-slate-100">
+              {lowAttendance.length ? (
+                lowAttendance.map((s, i) => (
+                  <div key={s._id} className="flex justify-between items-center px-5 py-3 hover:bg-rose-50/10 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600 font-bold text-xs">
+                        {s.firstName?.charAt(0)}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-slate-800 text-xs">{s.firstName} {s.lastName}</div>
+                        <div className="text-[10px] text-slate-400 font-medium">{s.rollNumber || "—"}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div style={{ fontWeight:600, fontSize:13, color:"#1e293b" }}>{s.firstName} {s.lastName}</div>
-                      <div style={{ fontSize:11, color:"#94a3b8" }}>{s.rollNumber}</div>
-                    </div>
+                    <span className="bg-rose-100 text-rose-800 px-3 py-1 rounded-full font-bold text-xs">
+                      {s.percent}%
+                    </span>
                   </div>
-                  <span style={{ background:"#fee2e2", color:"#991b1b", padding:"4px 12px", borderRadius:99, fontWeight:700, fontSize:13 }}>{s.percent}%</span>
-                </div>
-              )) : (
-                <div style={{ padding:"32px 20px", textAlign:"center", color:"#94a3b8", fontSize:13, display:"flex", alignItems:"center", justifyContent:"center", gap:6 }}>
+                ))
+              ) : (
+                <div className="px-5 py-8 text-center text-slate-400 text-xs font-medium flex items-center justify-center gap-1.5">
                   <Check className="w-4 h-4 text-emerald-600" /> All students have good attendance
                 </div>
               )}
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );

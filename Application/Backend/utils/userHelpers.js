@@ -15,5 +15,6 @@ export const toSafeUser = (user) => {
   if (!user) return null;
   const raw = user.toObject ? user.toObject() : user;
   const { password, ...safeRaw } = raw;
-  return { ...safeRaw, image: normalizeUserImage(raw.image) };
+  const normalizedImg = normalizeUserImage(raw.profileImage || raw.image);
+  return { ...safeRaw, image: normalizedImg, profileImage: normalizedImg };
 };

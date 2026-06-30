@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { confirmToast } from "../../utils/toastHelpers.jsx";
 import {
   FaSave,
   FaPrint,
@@ -121,7 +123,6 @@ export default function CreateTimetable() {
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
-  const [toast, setToast] = useState({ msg: "", type: "success" });
 
   // Dropdowns
   const [classes, setClasses] = useState([]);
@@ -153,7 +154,7 @@ export default function CreateTimetable() {
         setSubjects(subjectJson.data || subjectJson.subjects || []);
         setTeachers(teacherJson.data || teacherJson.teachers || []);
       } catch (err) {
-        showToast("Dropdowns load error: " + err.message, "error");
+        toast.error("Dropdowns load error: " + err.message);
       } finally {
         setLoadingDropdowns(false);
       }
@@ -197,7 +198,7 @@ export default function CreateTimetable() {
           }));
         }
       } catch (err) {
-        showToast("Timetable load error: " + err.message, "error");
+        toast.error("Timetable load error: " + err.message);
       } finally {
         setFetchLoading(false);
       }
@@ -205,10 +206,7 @@ export default function CreateTimetable() {
     loadExisting();
   }, [isEdit, id]);
 
-  const showToast = (msg, type = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast({ msg: "", type: "success" }), 3000);
-  };
+
 
   // ── Slot management ──────────────────────────────────────────
   const validateSlotFormat = (val) =>
@@ -236,7 +234,7 @@ export default function CreateTimetable() {
   };
 
   const removeSlot = (slot) => {
-    if (slots.length <= 1) { showToast("At least one slot required", "error"); return; }
+    if (slots.length <= 1) { toast.error("At least one slot required"); return; }
     const updated = slots.filter((s) => s !== slot);
     setSlots(updated);
     setTimetable((prev) => {
@@ -279,7 +277,7 @@ export default function CreateTimetable() {
   // ── Save ─────────────────────────────────────────────────────
   const handleSave = async () => {
     if (!form.classId) {
-      showToast("Please select a class", "error");
+      toast.error("Please select a class");
       return;
     }
 
@@ -291,7 +289,7 @@ export default function CreateTimetable() {
     );
 
     if (entries.length === 0) {
-      showToast("Koi bhi subject assign nahi kiya", "error");
+      toast.error("Koi bhi subject assign nahi kiya");
       return;
     }
 
@@ -299,10 +297,10 @@ export default function CreateTimetable() {
     try {
       // Save each day separately (backend: upsert per class+day+session)
       await Promise.all(entries.map((entry) => createOrUpdateTimetable(entry)));
-      showToast("Timetable saved successfully!");
-      setTimeout(() => navigate("/timetable"), 1500);
+      toast.success("Timetable saved successfully!");
+      navigate("/timetable");
     } catch (err) {
-      showToast("Save error: " + err.message, "error");
+      toast.error("Save error: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -323,11 +321,11 @@ export default function CreateTimetable() {
       className: "",
       section: "",
     }));
-    showToast("Grid copied. Select a new class to save as new timetable.");
+    toast.success("Grid copied. Select a new class to save as new timetable.");
   };
 
   const handleReset = () => {
-    if (window.confirm("Reset all unsaved changes?")) {
+    confirmToast("Reset all unsaved changes?", () => {
       setSlots([...DEFAULT_SLOTS]);
       setTimetable(buildGrid(DEFAULT_SLOTS));
       setForm({
@@ -336,7 +334,8 @@ export default function CreateTimetable() {
         section: "",
         academicYear: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
       });
-    }
+      toast.success("Grid reset.");
+    });
   };
 
   const cellSelect =
@@ -717,16 +716,7 @@ export default function CreateTimetable() {
         </div>
       )}
 
-      {/* Toast */}
-      {toast.msg && (
-        <div
-          className={`fixed bottom-6 right-6 z-50 text-white text-sm px-5 py-3 rounded-xl shadow-lg ${
-            toast.type === "error" ? "bg-rose-500" : "bg-emerald-500"
-          }`}
-        >
-          {toast.msg}
-        </div>
-      )}
+
     </div>
   );
 }

@@ -1,65 +1,33 @@
 import { NavLink } from "react-router-dom";
-import { Calendar } from "lucide-react";
 
 /**
-
- *
+ * TopHeader / TopTabs Navigation Component
+ * Styled as a clean white card containing only tab navigation links.
+ * 
  * @param {Array} tabs - Array of { path, label } objects for navigation
- * @param {string} schoolName - (Optional) Custom school name
- * @param {string} logoSrc - (Optional) Path to logo image
  */
-export default function TopHeader({
-  tabs = [],
-  schoolName = "Punjab Public High School",
-  logoSrc = null,
-}) {
+export default function TopHeader({ tabs = [] }) {
   return (
-    <div className="w-full bg-white shadow-sm border-b border-slate-100">
-      {/* Top Bar: Logo / School Name */}
-      <div className="px-6 py-3 flex items-center justify-between gap-4 border-b border-slate-50">
-        <div className="flex items-center gap-3 min-w-0">
-          {logoSrc && (
-            <img
-              src={logoSrc}
-              alt="School Logo"
-              className="h-10 w-auto object-contain"
-            />
-          )}
-          <div>
-            <h1 className="text-lg sm:text-xl font-bold text-slate-800 tracking-tight truncate">
-              {schoolName}
-            </h1>
-            <p className="text-xs text-slate-500 hidden sm:block">
-              Excellence in Education
-            </p>
-          </div>
-        </div>
-
-        {/* Optional: Right side content (e.g., profile, date) */}
-        <div className="text-sm text-slate-400">
-          📅 {new Date().toLocaleDateString()}
-        </div>
-      </div>
-
-      {/* Navigation Tabs (Original logic preserved) */}
+    <div className="bg-white rounded-2xl border border-slate-100/80 shadow-sm p-3 mb-6">
       <div className="w-full">
         {/* Horizontal scroll container – scrollbar hidden for clean mobile layout */}
-        <div className="flex gap-8 overflow-x-auto px-6 scrollbar-none">
+        <div className="flex flex-wrap gap-2 overflow-x-auto scrollbar-none">
           {tabs.map((tab) => (
             <NavLink
               key={tab.path}
               to={tab.path}
               end
               className={({ isActive }) =>
-                `relative py-3.5 text-sm font-medium whitespace-nowrap transition-all duration-200 ease-out border-b-2 -mb-[2px] outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-1 rounded-sm
+                `px-4 py-2 text-xs font-bold rounded-xl transition-all duration-200 whitespace-nowrap outline-none flex items-center gap-1.5
                 ${
                   isActive
-                    ? "border-blue-600 text-blue-700 font-semibold"
-                    : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
+                    ? "bg-indigo-50 text-indigo-700 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
                 }`
               }
             >
-              {tab.label}
+              {tab.icon && <span className="shrink-0">{tab.icon}</span>}
+              <span>{tab.label}</span>
             </NavLink>
           ))}
         </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaSave, FaPlus, FaUndo, FaTimes, FaPaperclip } from "react-icons/fa";
 import { createNotice, getNoticeById, updateNotice } from "../../api/Notice_Api.js";
+import toast from "react-hot-toast";
 
 // ── Backend enum values (lowercase) ──────────────────────────────
 const CATEGORIES  = ["general", "examination", "fee", "holiday", "events", "admission", "staff"];
@@ -85,12 +86,6 @@ export default function CreateNotice() {
   const [errors, setErrors]   = useState({});
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(false);
-  const [toast, setToast]     = useState({ msg: "", type: "success" });
-
-  const showToast = (msg, type = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast({ msg: "", type: "success" }), 3000);
-  };
 
   // ── Load existing notice in edit mode ─────────────────────────
   useEffect(() => {
@@ -110,7 +105,7 @@ export default function CreateNotice() {
           status:         n.status || "draft",
         });
       } catch (err) {
-        showToast("Notice load error: " + err.message, "error");
+        toast.error("Notice load error: " + err.message);
       } finally {
         setFetchLoading(false);
       }
@@ -154,20 +149,21 @@ export default function CreateNotice() {
       publishDate:    form.publishDate,
       expiryDate:     form.expiryDate || undefined,
       content:        form.content.trim(),
-      status:         saveAsDraft ? "draft" : form.status,
+      status:         saveAsDraft ? "draft" : "published",
     };
 
     try {
       if (isEdit) {
         await updateNotice(id, payload);
-        showToast("Notice updated successfully!");
+        toast.success("Notice updated successfully!");
+        navigate("/notices");
       } else {
         await createNotice(payload);
-        showToast(saveAsDraft ? "Saved as draft!" : "Notice published!");
+        toast.success(saveAsDraft ? "Saved as draft!" : "Notice published!");
+        navigate("/notices");
       }
-      setTimeout(() => navigate("/notices"), 1500);
     } catch (err) {
-      showToast(err.message || "Error saving notice.", "error");
+      toast.error(err.message || "Error saving notice.");
     } finally {
       setLoading(false);
     }
@@ -348,14 +344,6 @@ export default function CreateNotice() {
         </div>
       </div>
 
-      {/* Toast */}
-      {toast.msg && (
-        <div className={`fixed bottom-5 right-5 text-white text-sm px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2 z-50 ${
-          toast.type === "error" ? "bg-rose-500" : "bg-emerald-500"
-        }`}>
-          <FaSave className="w-3.5 h-3.5" /> {toast.msg}
-        </div>
-      )}
     </div>
   );
 }

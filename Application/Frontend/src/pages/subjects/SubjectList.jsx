@@ -9,6 +9,8 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveAs } from "file-saver";
 import { getAllSubjects, updateSubject, deleteSubject } from "../../api/Subject_Api.js";
+import toast from "react-hot-toast";
+import { confirmToast } from "../../utils/toastHelpers.jsx";
 
 const API_BASE = "http://127.0.0.1:3000";
 
@@ -299,7 +301,6 @@ export default function Subjects() {
   const [currentPage, setCurrentPage] = useState(1);
   const [viewSubject, setViewSubject] = useState(null);
   const [editSubject, setEditSubject] = useState(null);
-  const [toast, setToast] = useState({ msg: "", type: "success" });
 
   // Dropdown data for edit modal
   const [classes, setClasses] = useState([]);
@@ -361,25 +362,25 @@ export default function Subjects() {
     setCurrentPage(1);
   }, [search, classFilter, typeFilter, statusFilter, subjects]);
 
-  const showToast = (msg, type = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast({ msg: "", type: "success" }), 3000);
-  };
-
   const handleSaveEdit = (updated) => {
     setSubjects((prev) => prev.map((s) => (s._id === updated._id ? updated : s)));
-    showToast("Subject updated successfully!");
+    toast.success("Subject updated successfully!");
   };
 
-  const handleDelete = async (subject) => {
-    if (!window.confirm(`Delete "${subject.name}"?`)) return;
-    try {
-      await deleteSubject(subject._id);
-      setSubjects((prev) => prev.filter((s) => s._id !== subject._id));
-      showToast("Subject deleted.");
-    } catch (err) {
-      showToast(err.message || "Delete karne mein error aayi.", "error");
-    }
+  const handleDelete = (subject) => {
+    confirmToast(
+      `Delete "${subject.name}"? This action cannot be undone.`,
+      async () => {
+        try {
+          await deleteSubject(subject._id);
+          setSubjects((prev) => prev.filter((s) => s._id !== subject._id));
+          toast.success("Subject deleted.");
+        } catch (err) {
+          toast.error(err.message || "Failed to delete subject");
+        }
+      },
+      { confirmText: "Delete", confirmClass: "bg-rose-600 hover:bg-rose-700 shadow-rose-600/10 text-white" }
+    );
   };
 
   // Stats
@@ -581,12 +582,6 @@ export default function Subjects() {
       <ViewModal subject={viewSubject} onClose={() => setViewSubject(null)} onEdit={(s) => setEditSubject(s)} />
       <EditModal subject={editSubject} onClose={() => setEditSubject(null)} onSave={handleSaveEdit} classes={classes} teachers={teachers} />
 
-      {/* Toast */}
-      {toast.msg && (
-        <div className={`fixed bottom-6 right-6 z-50 text-white text-sm px-5 py-3 rounded-xl shadow-lg flex items-center gap-2 ${toast.type === "error" ? "bg-rose-500" : "bg-emerald-500"}`}>
-          <FaSave className="text-xs" /> {toast.msg}
-        </div>
-      )}
     </div>
   );
 }

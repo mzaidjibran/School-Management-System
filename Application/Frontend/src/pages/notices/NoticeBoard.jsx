@@ -13,10 +13,14 @@ import {
   FaCheckCircle,
   FaClock,
   FaExclamationTriangle,
+  FaCalendarAlt,
+  FaUser,
 } from "react-icons/fa";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { getAllNotices, deleteNotice } from "../../api/Notice_Api.js";
+import toast from "react-hot-toast";
+import { confirmToast } from "../../utils/toastHelpers.jsx";
 
 // ─── Helpers ──────────────────────────────────────────────────────
 const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : "");
@@ -138,13 +142,7 @@ export default function NoticeBoard() {
   const [statusFilter, setStatusFilter]   = useState("");
   const [currentPage, setCurrentPage]     = useState(1);
   const [selectedNotice, setSelectedNotice] = useState(null);
-  const [toast, setToast]                 = useState({ msg: "", type: "success" });
   const itemsPerPage = 9;
-
-  const showToast = (msg, type = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast({ msg: "", type: "success" }), 3000);
-  };
 
   // ── Fetch ──────────────────────────────────────────────────────
   const fetchNotices = useCallback(async () => {
@@ -186,15 +184,20 @@ export default function NoticeBoard() {
   );
 
   // ── Delete ─────────────────────────────────────────────────────
-  const handleDelete = async (notice) => {
-    if (!window.confirm(`Delete "${notice.title}"?`)) return;
-    try {
-      await deleteNotice(notice._id);
-      showToast("Notice deleted.");
-      fetchNotices();
-    } catch (err) {
-      showToast("Delete error: " + err.message, "error");
-    }
+  const handleDelete = (notice) => {
+    confirmToast(
+      `Delete "${notice.title}"? This action cannot be undone.`,
+      async () => {
+        try {
+          await deleteNotice(notice._id);
+          toast.success("Notice deleted.");
+          fetchNotices();
+        } catch (err) {
+          toast.error("Delete error: " + err.message);
+        }
+      },
+      { confirmText: "Delete", confirmClass: "bg-rose-600 hover:bg-rose-700 shadow-rose-600/10 text-white" }
+    );
   };
 
   // ── Print ──────────────────────────────────────────────────────
@@ -409,8 +412,8 @@ export default function NoticeBoard() {
                 </p>
 
                 <div className="flex items-center justify-between text-xs text-slate-400 mb-3">
-                  <span>📅 {formatDate(notice.publishDate)}</span>
-                  <span>👤 {notice.createdBy?.name || "—"}</span>
+                  <span className="flex items-center gap-1"><FaCalendarAlt className="text-slate-400 text-[11px]" /> {formatDate(notice.publishDate)}</span>
+                  <span className="flex items-center gap-1"><FaUser className="text-slate-400 text-[11px]" /> {notice.createdBy?.name || "—"}</span>
                 </div>
 
                 <div className="flex items-center gap-1 pt-2.5 border-t border-slate-100">
@@ -489,14 +492,6 @@ export default function NoticeBoard() {
         onPrint={handlePrint}
       />
 
-      {/* Toast */}
-      {toast.msg && (
-        <div className={`fixed bottom-6 right-6 z-50 text-white text-sm px-5 py-3 rounded-xl shadow-lg ${
-          toast.type === "error" ? "bg-rose-500" : "bg-emerald-500"
-        }`}>
-          {toast.msg}
-        </div>
-      )}
     </div>
   );
 }

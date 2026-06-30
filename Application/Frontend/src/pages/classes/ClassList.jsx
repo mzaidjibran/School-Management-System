@@ -14,6 +14,8 @@ import autoTable from "jspdf-autotable";
 import { saveAs } from "file-saver";
 import { getAllClasses, updateClass, deleteClass } from "../../api/Class_Api.js"; // path apne folder structure ke hisaab se adjust kar lein
 import { getAllTeachers } from "../../api/Teacher_Api.js"; // path apne folder structure ke hisaab se adjust kar lein
+import toast from "react-hot-toast";
+import { confirmToast } from "../../utils/toastHelpers.jsx";
 
 // ---------- Floating Input ----------
 const FloatingInput = ({
@@ -618,14 +620,20 @@ const handleSave = (updatedClass) => {
   );
   closeModal();
 };
-  const handleDelete = async (cls) => {
-    if (!window.confirm(`Delete ${cls.name}?`)) return;
-    try {
-      await deleteClass(cls._id);
-      setClasses((prev) => prev.filter((c) => c._id !== cls._id));
-    } catch (error) {
-      alert(error.message || "Class delete nahi ho saki");
-    }
+  const handleDelete = (cls) => {
+    confirmToast(
+      `Delete "${cls.name}"? This action cannot be undone.`,
+      async () => {
+        try {
+          await deleteClass(cls._id);
+          setClasses((prev) => prev.filter((c) => c._id !== cls._id));
+          toast.success("Class deleted successfully!");
+        } catch (error) {
+          toast.error(error.message || "Failed to delete class");
+        }
+      },
+      { confirmText: "Delete", confirmClass: "bg-rose-600 hover:bg-rose-700 shadow-rose-600/10 text-white" }
+    );
   };
 
   return (

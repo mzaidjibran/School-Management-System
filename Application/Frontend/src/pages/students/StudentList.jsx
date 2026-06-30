@@ -6,6 +6,8 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveAs } from "file-saver";
 import { getAllStudents, updateStudent, deleteStudent } from "../../Api/Student_Api";
+import toast from "react-hot-toast";
+import { confirmToast } from "../../utils/toastHelpers.jsx";
 
 // ---------- Floating Label Input ----------
 const Input = ({ label, type = "text", name, value, onChange, required = false, disabled = false, error, className = "" }) => {
@@ -519,14 +521,20 @@ export default function StudentList() {
     }
   };
 
-  const handleDeleteStudent = async (student) => {
-    if (!window.confirm(`"${student.name}" ko delete karna chahte hain?`)) return;
-    try {
-      await deleteStudent(student.id);
-      setStudents((prev) => prev.filter((s) => s.id !== student.id));
-    } catch (err) {
-      alert("Delete failed: " + err.message);
-    }
+  const handleDeleteStudent = (student) => {
+    confirmToast(
+      `Delete "${student.name}"? This action cannot be undone.`,
+      async () => {
+        try {
+          await deleteStudent(student.id);
+          setStudents((prev) => prev.filter((s) => s.id !== student.id));
+          toast.success("Student deleted successfully!");
+        } catch (err) {
+          toast.error(err.message || "Failed to delete student");
+        }
+      },
+      { confirmText: "Delete", confirmClass: "bg-rose-600 hover:bg-rose-700 shadow-rose-600/10 text-white" }
+    );
   };
 
   const columns = [

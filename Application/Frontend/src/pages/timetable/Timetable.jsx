@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { confirmToast } from "../../utils/toastHelpers.jsx";
 import {
   FaEye,
   FaCopy,
@@ -169,7 +171,6 @@ export default function TimetableList() {
   const [searchSection, setSearchSection] = useState("");
   const [viewTimetable, setViewTimetable] = useState(null);
   const [printTimetable, setPrintTimetable] = useState(null);
-  const [toast, setToast] = useState({ msg: "", type: "success" });
   const [loading, setLoading] = useState(true);
 
   // ── fetch all classes, then fetch timetable for each ──────────
@@ -215,7 +216,7 @@ export default function TimetableList() {
       setTimetables(results);
       setFiltered(results);
     } catch (err) {
-      showToast("Data load karne mein error: " + err.message, "error");
+      toast.error("Data load karne mein error: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -239,15 +240,12 @@ export default function TimetableList() {
     setFiltered(result);
   }, [searchClass, searchSection, timetables]);
 
-  const showToast = (msg, type = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast({ msg: "", type: "success" }), 3000);
-  };
+
 
   // ── Duplicate: copy all periods of a class timetable ─────────
   const handleDuplicate = async (tt) => {
     if (!tt.timetableData.length) {
-      showToast("Is class ka koi timetable nahi hai duplicate karne ke liye.", "error");
+      toast.error("Is class ka koi timetable nahi hai duplicate karne ke liye.");
       return;
     }
     try {
@@ -262,25 +260,30 @@ export default function TimetableList() {
           })
         )
       );
-      showToast("Timetable duplicated!");
+      toast.success("Timetable duplicated!");
       fetchAll();
     } catch (err) {
-      showToast("Duplicate error: " + err.message, "error");
+      toast.error("Duplicate error: " + err.message);
     }
   };
 
   // ── Delete all timetable entries for a class ─────────────────
-  const handleDelete = async (tt) => {
-    if (!window.confirm("Is class ka sara timetable delete karen?")) return;
-    try {
-      await Promise.all(
-        tt.timetableData.map((entry) => deleteTimetable(entry._id))
-      );
-      showToast("Timetable deleted.");
-      fetchAll();
-    } catch (err) {
-      showToast("Delete error: " + err.message, "error");
-    }
+  const handleDelete = (tt) => {
+    confirmToast(
+      "Is class ka sara timetable delete karen?",
+      async () => {
+        try {
+          await Promise.all(
+            tt.timetableData.map((entry) => deleteTimetable(entry._id))
+          );
+          toast.success("Timetable deleted.");
+          fetchAll();
+        } catch (err) {
+          toast.error("Delete error: " + err.message);
+        }
+      },
+      { confirmText: "Delete", confirmClass: "bg-rose-600 hover:bg-rose-700 shadow-rose-600/10 text-white" }
+    );
   };
 
   // ── Print ─────────────────────────────────────────────────────
@@ -614,16 +617,7 @@ export default function TimetableList() {
         );
       })()}
 
-      {/* Toast */}
-      {toast.msg && (
-        <div
-          className={`fixed bottom-6 right-6 z-50 text-white text-sm px-5 py-3 rounded-xl shadow-lg ${
-            toast.type === "error" ? "bg-rose-500" : "bg-emerald-500"
-          }`}
-        >
-          {toast.msg}
-        </div>
-      )}
+
     </div>
   );
 }

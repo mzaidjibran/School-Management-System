@@ -12,10 +12,14 @@
 main {
   width: 100% !important;
   max-width: 100% !important;
-  padding: 0 !important;
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
+  padding-left: 1.5rem !important;
+  padding-right: 1.5rem !important;
+  box-sizing: border-box;
 }
 
-/* Force all inner page wrappers to stretch 100% width and align margins/paddings */
+/* Force all inner page wrappers to stretch 100% width and remove internal paddings/margins */
 main div[class*="max-w-"]:not(.fixed):not(.absolute),
 main .max-w-7xl:not(.fixed):not(.absolute),
 main .max-w-6xl:not(.fixed):not(.absolute),
@@ -26,29 +30,24 @@ main .max-w-3xl:not(.fixed):not(.absolute) {
   width: 100% !important;
   margin-left: 0 !important;
   margin-right: 0 !important;
-  padding-left: 1.5rem !important;
-  padding-right: 1.5rem !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
 
-/* Default padding for direct children pages that don't have max-w classes, excluding TopTabs (bg-white) */
-main > div:not(.fixed):not(.absolute):not(.bg-white) {
-  padding-left: 1.5rem !important;
-  padding-right: 1.5rem !important;
+/* Exclude double padding from primary page container wrappers */
+main > div,
+main > .space-y-6,
+main > div[class*="max-w-"],
+main div[class*="min-h-screen"]:not(.fixed):not(.absolute) {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
 
 /* Mobile responsive view: optimize screen space by reducing side padding */
 @media (max-width: 640px) {
-  main div[class*="max-w-"]:not(.fixed):not(.absolute),
-  main .max-w-7xl:not(.fixed):not(.absolute),
-  main .max-w-6xl:not(.fixed):not(.absolute),
-  main .max-w-5xl:not(.fixed):not(.absolute),
-  main .max-w-4xl:not(.fixed):not(.absolute),
-  main .max-w-3xl:not(.fixed):not(.absolute) {
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
-  }
-
-  main > div:not(.fixed):not(.absolute):not(.bg-white) {
+  main {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
     padding-left: 0.5rem !important;
     padding-right: 0.5rem !important;
   }
