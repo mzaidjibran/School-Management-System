@@ -127,10 +127,14 @@ export default function ProHeader() {
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
 
-          {/* Logo */}
-          <div className="flex items-center shrink-0">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-xl flex items-center justify-center shadow-md">
+          {/* Logo & School Name */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-xl flex items-center justify-center shadow-md shrink-0">
               <span className="text-white text-lg font-bold">S</span>
+            </div>
+            <div className="flex flex-col select-none">
+              <span className="text-sm font-black text-slate-800 font-serif leading-none tracking-tight">Punjab Public</span>
+              <span className="text-[10px] font-bold text-indigo-600 tracking-widest uppercase mt-0.5">High School</span>
             </div>
           </div>
 

@@ -6,7 +6,7 @@ export default function MainLayout() {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <ProHeader />
-      <main className="flex-1 w-full">
+      <main className="flex-1 w-full px-2 sm:px-3 py-4">
         <Outlet />
       </main>
       <Footer />

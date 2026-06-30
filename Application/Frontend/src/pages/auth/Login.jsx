@@ -1136,6 +1136,8 @@ export default function Login() {
           box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2); 
           color: #1e293b;
           animation: modalEntrance 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+          max-height: 90vh;
+          overflow-y: auto;
         }
         @keyframes modalEntrance {
           0% { transform: scale(0.93) translateY(15px); opacity: 0; }
@@ -1342,6 +1344,25 @@ export default function Login() {
           }
           .dev-dashboard-modal {
             max-width: 400px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .signin-card {
+            margin: 0.75rem;
+            border-radius: 1.5rem;
+          }
+          .card-header-section {
+            padding: 2rem 1.5rem 1.5rem 1.5rem;
+          }
+          .card-body-section {
+            padding: 1.5rem 1.25rem 1.5rem 1.25rem;
+          }
+          .forgot-modal-card {
+            padding: 1.25rem;
+            border-radius: 1rem;
+          }
+          .forgot-modal-backdrop {
+            padding: 0.5rem;
           }
         }
       `}</style>
