@@ -3,6 +3,18 @@ import * as XLSX from "xlsx";
 import { getAllStudents } from "../../api/Student_Api.js";
 import { getAttendanceByStudent } from "../../api/Attendence_Api.js";
 import { getAllClasses } from "../../api/Class_Api.js";
+import {
+  TrendingUp,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Briefcase,
+  Search,
+  Award,
+  AlertTriangle,
+  Check,
+  Loader2,
+} from "lucide-react";
 
 // ---------- Helpers ----------
 const avatarColors = ["#6366f1", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#3b82f6"];
@@ -145,11 +157,11 @@ export default function AttendanceReport() {
   };
 
   const statCards = [
-    { label: "Overall",  value: `${overallPct}%`, icon: "📈", bg: "linear-gradient(135deg,#6366f1,#8b5cf6)" },
-    { label: "Present",  value: totalPresent,      icon: "✅", bg: "linear-gradient(135deg,#10b981,#34d399)" },
-    { label: "Absent",   value: totalAbsent,       icon: "❌", bg: "linear-gradient(135deg,#ef4444,#f87171)" },
-    { label: "Leave",    value: totalLeave,        icon: "🏖️", bg: "linear-gradient(135deg,#f59e0b,#fbbf24)" },
-    { label: "Late",     value: totalLate,         icon: "⏰", bg: "linear-gradient(135deg,#3b82f6,#60a5fa)" },
+    { label: "Overall",  value: `${overallPct}%`, icon: <TrendingUp className="w-5 h-5 text-white" />, bg: "linear-gradient(135deg,#6366f1,#8b5cf6)" },
+    { label: "Present",  value: totalPresent,      icon: <CheckCircle className="w-5 h-5 text-white" />, bg: "linear-gradient(135deg,#10b981,#34d399)" },
+    { label: "Absent",   value: totalAbsent,       icon: <XCircle className="w-5 h-5 text-white" />, bg: "linear-gradient(135deg,#ef4444,#f87171)" },
+    { label: "Leave",    value: totalLeave,        icon: <Briefcase className="w-5 h-5 text-white" />, bg: "linear-gradient(135deg,#f59e0b,#fbbf24)" },
+    { label: "Late",     value: totalLate,         icon: <Clock className="w-5 h-5 text-white" />, bg: "linear-gradient(135deg,#3b82f6,#60a5fa)" },
   ];
 
   const months = ["01","02","03","04","05","06","07","08","09","10","11","12"];
@@ -184,7 +196,7 @@ export default function AttendanceReport() {
         <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))", gap:16, marginBottom:24 }}>
           {statCards.map(({ label, value, icon, bg }) => (
             <div key={label} style={{ background:bg, borderRadius:16, padding:"20px 22px", color:"#fff", boxShadow:"0 6px 24px rgba(0,0,0,0.13)" }}>
-              <div style={{ fontSize:26, marginBottom:8 }}>{icon}</div>
+              <div style={{ marginBottom:8, display:"flex", alignItems:"center", justifyContent:"flex-start" }}>{icon}</div>
               <div style={{ fontSize:30, fontWeight:800, lineHeight:1 }}>{value}</div>
               <div style={{ fontSize:13, fontWeight:600, opacity:0.9, marginTop:4 }}>{label}</div>
             </div>
@@ -195,7 +207,7 @@ export default function AttendanceReport() {
         <div style={{ background:"#fff", borderRadius:16, padding:"18px 24px", marginBottom:20, boxShadow:"0 1px 8px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0" }}>
           <div style={{ fontSize:11, fontWeight:700, color:"#94a3b8", letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:12 }}>Filter Records</div>
           <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", gap:10 }}>
-            <input type="text" placeholder="🔍  Search name or roll no…" value={studentFilter} onChange={(e) => setStudentFilter(e.target.value)} style={{ ...inputStyle, background:"#f8fafc" }} />
+            <input type="text" placeholder="Search name or roll no..." value={studentFilter} onChange={(e) => setStudentFilter(e.target.value)} style={{ ...inputStyle, background:"#f8fafc" }} />
             <select value={classFilter} onChange={(e) => setClassFilter(e.target.value)} style={inputStyle}>
               <option value="">All Classes</option>
               {classes.map((c) => <option key={c._id} value={c._id}>{c.name} — {c.section}</option>)}
@@ -229,11 +241,11 @@ export default function AttendanceReport() {
               <tbody>
                 {loading ? (
                   <tr><td colSpan={7} style={{ padding:48, textAlign:"center", color:"#94a3b8" }}>
-                    <div style={{ fontSize:28, marginBottom:8 }}>⏳</div>Loading records…
+                    <div style={{ marginBottom:8, display:"flex", justifyContent:"center" }}><Loader2 className="w-6 h-6 animate-spin text-indigo-600" /></div>Loading records...
                   </td></tr>
                 ) : filteredData.length === 0 ? (
                   <tr><td colSpan={7} style={{ padding:48, textAlign:"center", color:"#94a3b8" }}>
-                    <div style={{ fontSize:28, marginBottom:8 }}>🔍</div>No records found
+                    <div style={{ marginBottom:8, display:"flex", justifyContent:"center" }}><Search className="w-6 h-6 text-slate-400" /></div>No records found
                   </td></tr>
                 ) : (
                   filteredData.map((s, i) => {
@@ -284,8 +296,9 @@ export default function AttendanceReport() {
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:20 }}>
           {/* Top Performers */}
           <div style={{ background:"#fff", borderRadius:16, overflow:"hidden", boxShadow:"0 1px 8px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0" }}>
-            <div style={{ padding:"16px 20px", borderBottom:"1px solid #f1f5f9", background:"linear-gradient(90deg,#f0fdf4,#dcfce7)" }}>
-              <span style={{ fontWeight:700, fontSize:14, color:"#065f46" }}>🏆 Top Performers ≥ 90%</span>
+            <div style={{ padding:"16px 20px", borderBottom:"1px solid #f1f5f9", background:"linear-gradient(90deg,#f0fdf4,#dcfce7)", display:"flex", alignItems:"center", gap:6 }}>
+              <Award className="w-4 h-4 text-emerald-600" />
+              <span style={{ fontWeight:700, fontSize:14, color:"#065f46" }}>Top Performers ≥ 90%</span>
             </div>
             <div style={{ padding:"8px 0" }}>
               {topPerformers.length ? topPerformers.map((s, i) => (
@@ -312,8 +325,9 @@ export default function AttendanceReport() {
 
           {/* Low Attendance */}
           <div style={{ background:"#fff", borderRadius:16, overflow:"hidden", boxShadow:"0 1px 8px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0" }}>
-            <div style={{ padding:"16px 20px", borderBottom:"1px solid #f1f5f9", background:"linear-gradient(90deg,#fff1f2,#fee2e2)" }}>
-              <span style={{ fontWeight:700, fontSize:14, color:"#991b1b" }}>⚠️ Low Attendance &lt; 75%</span>
+            <div style={{ padding:"16px 20px", borderBottom:"1px solid #f1f5f9", background:"linear-gradient(90deg,#fff1f2,#fee2e2)", display:"flex", alignItems:"center", gap:6 }}>
+              <AlertTriangle className="w-4 h-4 text-rose-600" />
+              <span style={{ fontWeight:700, fontSize:14, color:"#991b1b" }}>Low Attendance &lt; 75%</span>
             </div>
             <div style={{ padding:"8px 0" }}>
               {lowAttendance.length ? lowAttendance.map((s, i) => (
@@ -333,7 +347,9 @@ export default function AttendanceReport() {
                   <span style={{ background:"#fee2e2", color:"#991b1b", padding:"4px 12px", borderRadius:99, fontWeight:700, fontSize:13 }}>{s.percent}%</span>
                 </div>
               )) : (
-                <div style={{ padding:"32px 20px", textAlign:"center", color:"#94a3b8", fontSize:13 }}>✓ All students have good attendance</div>
+                <div style={{ padding:"32px 20px", textAlign:"center", color:"#94a3b8", fontSize:13, display:"flex", alignItems:"center", justifyContent:"center", gap:6 }}>
+                  <Check className="w-4 h-4 text-emerald-600" /> All students have good attendance
+                </div>
               )}
             </div>
           </div>

@@ -7,3 +7,50 @@
 .scrollbar-none::-webkit-scrollbar {
   display: none; /* Chrome/Safari */
 }
+
+/* ─── Global Full-Width and Responsive Layout Overrides ─── */
+main {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+}
+
+/* Force all inner page wrappers to stretch 100% width and align margins/paddings */
+main div[class*="max-w-"]:not(.fixed):not(.absolute),
+main .max-w-7xl:not(.fixed):not(.absolute),
+main .max-w-6xl:not(.fixed):not(.absolute),
+main .max-w-5xl:not(.fixed):not(.absolute),
+main .max-w-4xl:not(.fixed):not(.absolute),
+main .max-w-3xl:not(.fixed):not(.absolute) {
+  max-width: 100% !important;
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 1.5rem !important;
+  padding-right: 1.5rem !important;
+}
+
+/* Default padding for direct children pages that don't have max-w classes, excluding TopTabs (bg-white) */
+main > div:not(.fixed):not(.absolute):not(.bg-white) {
+  padding-left: 1.5rem !important;
+  padding-right: 1.5rem !important;
+}
+
+/* Mobile responsive view: optimize screen space by reducing side padding */
+@media (max-width: 640px) {
+  main div[class*="max-w-"]:not(.fixed):not(.absolute),
+  main .max-w-7xl:not(.fixed):not(.absolute),
+  main .max-w-6xl:not(.fixed):not(.absolute),
+  main .max-w-5xl:not(.fixed):not(.absolute),
+  main .max-w-4xl:not(.fixed):not(.absolute),
+  main .max-w-3xl:not(.fixed):not(.absolute) {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+
+  main > div:not(.fixed):not(.absolute):not(.bg-white) {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+}
+
