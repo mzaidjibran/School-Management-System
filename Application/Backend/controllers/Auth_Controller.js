@@ -255,3 +255,17 @@ export const ResetPassword = async (request, response) => {
     response.status(500).json({ success: false, error: true, message: error.message });
   }
 };
+
+// ── Get All Principals (Admins) ───────────────────────────────────────────────
+export const GetPrincipals = async (request, response) => {
+  try {
+    const principals = await User_Model.find({ role: "admin" }).select("-password");
+    return response.status(200).json({
+      success: true,
+      error: false,
+      data: principals,
+    });
+  } catch (error) {
+    response.status(500).json({ success: false, error: true, message: error.message });
+  }
+};

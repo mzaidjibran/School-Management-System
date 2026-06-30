@@ -12,7 +12,6 @@ import {
   ArrowRight,
   ShieldAlert,
   BookOpen,
-  Compass,
   Award,
   GraduationCap,
   Pencil,
@@ -24,6 +23,8 @@ import {
   resetPassword,
   signIn,
   verifyOtp,
+  signUp,
+  getPrincipals,
 } from "../../Api/Auth_Api.js";
 
 export default function Login() {
@@ -41,6 +42,83 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [spotlight, setSpotlight] = useState({ x: 0, y: 0 });
   const navigate = useNavigate();
+
+  // Developer Access States
+  const [devAccessOpen, setDevAccessOpen] = useState(false);
+  const [devVerified, setDevVerified] = useState(false);
+  const [devLoginForm, setDevLoginForm] = useState({
+    username: "",
+    password: "",
+  });
+  const [principalForm, setPrincipalForm] = useState({
+    Name: "",
+    email: "",
+    password: "",
+  });
+  const [principalsList, setPrincipalsList] = useState([]);
+  const [devLoading, setDevLoading] = useState(false);
+
+  function handleDevLoginChange(e) {
+    setDevLoginForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  }
+
+  function handlePrincipalChange(e) {
+    setPrincipalForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  }
+
+  async function loadPrincipals() {
+    try {
+      const data = await getPrincipals();
+      setPrincipalsList(data || []);
+    } catch (err) {
+      toast.error(err.message || "Failed to load principals list");
+    }
+  }
+
+  async function handleDevLoginSubmit(e) {
+    e.preventDefault();
+    if (
+      devLoginForm.username === "nullsatcksloutions@gmail.com" &&
+      devLoginForm.password === "Nullstack@nN"
+    ) {
+      setDevVerified(true);
+      toast.success("Developer credentials verified!");
+      await loadPrincipals();
+    } else {
+      toast.error("Invalid developer credentials!");
+    }
+  }
+
+  async function handleCreatePrincipalSubmit(e) {
+    e.preventDefault();
+    setDevLoading(true);
+    try {
+      await signUp({
+        Name: principalForm.Name,
+        email: principalForm.email,
+        password: principalForm.password,
+      });
+      toast.success("Principal user account created successfully!");
+      setPrincipalForm({ Name: "", email: "", password: "" });
+      await loadPrincipals();
+    } catch (err) {
+      toast.error(err.message || "Failed to create principal account");
+    } finally {
+      setDevLoading(false);
+    }
+  }
+
+  function openDevAccess() {
+    setDevLoginForm({ username: "", password: "" });
+    setPrincipalForm({ Name: "", email: "", password: "" });
+    setDevVerified(false);
+    setDevAccessOpen(true);
+  }
+
+  function closeDevAccess() {
+    setDevAccessOpen(false);
+    setDevVerified(false);
+  }
 
   function handleChange(e) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -92,7 +170,7 @@ export default function Login() {
     try {
       const result = await verifyOtp(
         forgotForm.email.trim(),
-        forgotForm.otp.trim()
+        forgotForm.otp.trim(),
       );
       setResetToken(result.resetToken);
       toast.success(result.message || "OTP verified!");
@@ -104,11 +182,15 @@ export default function Login() {
 
   async function handleResetPassword(event) {
     event.preventDefault();
-    if (!forgotForm.newPassword.trim()) return toast.error("Enter new password");
+    if (!forgotForm.newPassword.trim())
+      return toast.error("Enter new password");
     if (forgotForm.newPassword !== forgotForm.confirmPassword)
       return toast.error("Passwords do not match!");
     try {
-      const result = await resetPassword(resetToken, forgotForm.newPassword.trim());
+      const result = await resetPassword(
+        resetToken,
+        forgotForm.newPassword.trim(),
+      );
       toast.success(result.message || "Password reset successfully!");
       closeForgotPassword();
     } catch (err) {
@@ -133,16 +215,36 @@ export default function Login() {
 
       {/* Floating Academic Icons in Background */}
       <div className="floating-items-container">
-        <div className="floating-item item-1"><GraduationCap size={28} /></div>
-        <div className="floating-item item-2"><BookOpen size={24} /></div>
-        <div className="floating-item item-3"><Pencil size={20} /></div>
-        <div className="floating-item item-4"><School size={28} /></div>
-        <div className="floating-item item-5"><Ruler size={22} /></div>
-        <div className="floating-item item-6"><Award size={26} /></div>
-        <div className="floating-item item-7"><Brain size={24} /></div>
-        <div className="floating-item item-8"><BookOpen size={22} /></div>
-        <div className="floating-item item-9"><GraduationCap size={22} /></div>
-        <div className="floating-item item-10"><Pencil size={24} /></div>
+        <div className="floating-item item-1">
+          <GraduationCap size={28} />
+        </div>
+        <div className="floating-item item-2">
+          <BookOpen size={24} />
+        </div>
+        <div className="floating-item item-3">
+          <Pencil size={20} />
+        </div>
+        <div className="floating-item item-4">
+          <School size={28} />
+        </div>
+        <div className="floating-item item-5">
+          <Ruler size={22} />
+        </div>
+        <div className="floating-item item-6">
+          <Award size={26} />
+        </div>
+        <div className="floating-item item-7">
+          <Brain size={24} />
+        </div>
+        <div className="floating-item item-8">
+          <BookOpen size={22} />
+        </div>
+        <div className="floating-item item-9">
+          <GraduationCap size={22} />
+        </div>
+        <div className="floating-item item-10">
+          <Pencil size={24} />
+        </div>
       </div>
 
       <div className="signin-card">
@@ -248,24 +350,34 @@ export default function Login() {
             Secure login — Contact your administrator for access
           </p>
 
+          <div className="dev-access-trigger-container">
+            <button
+              type="button"
+              className="btn-dev-access"
+              onClick={openDevAccess}
+            >
+              Developer Access
+            </button>
+          </div>
+
           <div className="footer-credit">
             <span>Developed by </span>
             <a
-              href="https://nullstak.com"
+              href="https://nullstack.com"
               target="_blank"
               rel="noopener noreferrer"
               className="developer-link"
             >
-              Nullstak
+              Nullstack
             </a>
           </div>
         </div>
       </div>
 
       {/* Floating Brand Badge (Bottom Left) */}
-      <div className="nullstak-float-badge">
-        <div className="nullstak-badge-inner">N</div>
-        <span className="nullstak-badge-text">nullstak</span>
+      <div className="nullstack-float-badge">
+        <div className="nullstack-badge-inner">N</div>
+        <span className="nullstack-badge-text">nullstack</span>
       </div>
 
       {/* Forgot Password Modal */}
@@ -402,6 +514,174 @@ export default function Login() {
                   </button>
                 </div>
               </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Developer Access Modal */}
+      {devAccessOpen && (
+        <div className="forgot-modal-backdrop">
+          <div
+            className={`card forgot-modal-card ${devVerified ? "dev-dashboard-modal" : ""}`}
+          >
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h5 className="modal-title m-0">
+                {devVerified ? "Developer Dashboard" : "Developer Verification"}
+              </h5>
+              <button
+                type="button"
+                className="btn-sm-close"
+                onClick={closeDevAccess}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {!devVerified ? (
+              /* Verification Form */
+              <form onSubmit={handleDevLoginSubmit} className="signin-form">
+                <p className="body-subtitle mb-4" style={{ color: "#475569" }}>
+                  Please verify your credentials to access developer utilities.
+                </p>
+                <div className="form-group mb-3">
+                  <label className="form-label">Username</label>
+                  <div className="input-wrapper">
+                    <Mail className="input-icon" size={18} />
+                    <input
+                      name="username"
+                      type="text"
+                      className="form-control modal-input"
+                      value={devLoginForm.username}
+                      onChange={handleDevLoginChange}
+                      placeholder="Enter developer username"
+                      required
+                      autoFocus
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group mb-4">
+                  <label className="form-label">Password</label>
+                  <div className="input-wrapper">
+                    <Lock className="input-icon" size={18} />
+                    <input
+                      name="password"
+                      type="password"
+                      className="form-control modal-input"
+                      value={devLoginForm.password}
+                      onChange={handleDevLoginChange}
+                      placeholder="Enter developer password"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="d-flex gap-3">
+                  <button type="submit" className="btn-primary w-100">
+                    <span>Verify Credentials</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-outline-secondary w-100"
+                    onClick={closeDevAccess}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            ) : (
+              /* Unlocked Developer Dashboard: Dual-Column Layout */
+              <div className="dev-panel-content">
+                <div className="dev-panel-columns">
+                  {/* Left Column: Create Principal */}
+                  <div className="dev-panel-left">
+                    <h6 className="dev-section-title">
+                      Create Principal Account
+                    </h6>
+                    <form
+                      onSubmit={handleCreatePrincipalSubmit}
+                      className="signin-form"
+                    >
+                      <div className="form-group mb-3">
+                        <label className="form-label">Principal Name</label>
+                        <input
+                          name="Name"
+                          type="text"
+                          className="form-control modal-input"
+                          value={principalForm.Name}
+                          onChange={handlePrincipalChange}
+                          placeholder="e.g. Dr. John Doe"
+                          required
+                          autoFocus
+                        />
+                      </div>
+                      <div className="form-group mb-3">
+                        <label className="form-label">Email Address</label>
+                        <input
+                          name="email"
+                          type="email"
+                          className="form-control modal-input"
+                          value={principalForm.email}
+                          onChange={handlePrincipalChange}
+                          placeholder="principal@school.com"
+                          required
+                        />
+                      </div>
+                      <div className="form-group mb-4">
+                        <label className="form-label">Password</label>
+                        <input
+                          name="password"
+                          type="password"
+                          className="form-control modal-input"
+                          value={principalForm.password}
+                          onChange={handlePrincipalChange}
+                          placeholder="Min 6 characters"
+                          required
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        className="btn-primary w-100"
+                        disabled={devLoading}
+                      >
+                        {devLoading ? (
+                          <span className="d-flex align-items-center justify-content-center">
+                            <Loader2 className="spinner me-2" size={18} />
+                            Creating...
+                          </span>
+                        ) : (
+                          "Create Principal Account"
+                        )}
+                      </button>
+                    </form>
+                  </div>
+
+                  {/* Right Column: Principals List */}
+                  <div className="dev-panel-right">
+                    <h6 className="dev-section-title">Registered Principals</h6>
+                    <div className="principals-list-container">
+                      {principalsList.length === 0 ? (
+                        <div className="empty-list-text">
+                          No Principal accounts registered yet.
+                        </div>
+                      ) : (
+                        principalsList.map((p, idx) => (
+                          <div className="principal-item" key={p._id || idx}>
+                            <div className="principal-avatar">
+                              {p.Name ? p.Name.charAt(0).toUpperCase() : "P"}
+                            </div>
+                            <div className="principal-info">
+                              <div className="principal-name">{p.Name}</div>
+                              <div className="principal-email">{p.email}</div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -784,8 +1064,8 @@ export default function Login() {
           color: #4f46e5;
         }
 
-        /* Nullstak Floating Brand Badge (Bottom-Left) */
-        .nullstak-float-badge {
+        /* nullstack Floating Brand Badge (Bottom-Left) */
+        .nullstack-float-badge {
           position: fixed;
           bottom: 1.5rem;
           left: 1.5rem;
@@ -806,12 +1086,12 @@ export default function Login() {
           transition: all 0.3s;
           box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
-        .nullstak-float-badge:hover {
+        .nullstack-float-badge:hover {
           background: rgba(0, 0, 0, 0.85);
           border-color: rgba(99, 102, 241, 0.4);
           box-shadow: 0 0 15px rgba(99, 102, 241, 0.25);
         }
-        .nullstak-badge-inner {
+        .nullstack-badge-inner {
           width: 20px;
           height: 20px;
           border-radius: 50%;
@@ -823,7 +1103,7 @@ export default function Login() {
           font-weight: 800;
           font-size: 0.725rem;
         }
-        .nullstak-badge-text {
+        .nullstack-badge-text {
           letter-spacing: 0.02em;
         }
 
@@ -922,6 +1202,148 @@ export default function Login() {
         .justify-content-between { justify-content: space-between; }
         .justify-content-center { justify-content: center; }
         .align-items-center { align-items: center; }
+
+        /* Developer Access Panel Styles */
+        .dev-access-trigger-container {
+          display: flex;
+          justify-content: center;
+          margin-top: 0.5rem;
+          margin-bottom: 0.75rem;
+        }
+        .btn-dev-access {
+          background: none;
+          border: none;
+          color: #4f46e5;
+          font-size: 0.825rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+        }
+        .btn-dev-access:hover {
+          color: #3730a3;
+          text-shadow: 0 0 8px rgba(79, 70, 229, 0.15);
+        }
+        .dev-dashboard-modal {
+          max-width: 720px !important;
+          width: 100%;
+        }
+        .dev-panel-content {
+          margin-top: 1rem;
+        }
+        .dev-panel-columns {
+          display: flex;
+          gap: 2rem;
+          flex-direction: row;
+        }
+        .dev-panel-left {
+          flex: 1;
+        }
+        .dev-panel-right {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          border-left: 1px solid #cbd5e1;
+          padding-left: 2rem;
+        }
+        .dev-section-title {
+          font-size: 0.9rem;
+          font-weight: 700;
+          color: #1e293b;
+          margin: 0 0 1rem 0;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          border-bottom: 1.5px solid #f1f5f9;
+          padding-bottom: 0.5rem;
+        }
+        
+        .principals-list-container {
+          max-height: 250px;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+          padding-right: 0.5rem;
+        }
+        .principals-list-container::-webkit-scrollbar {
+          width: 6px;
+        }
+        .principals-list-container::-webkit-scrollbar-track {
+          background: #f1f5f9;
+          border-radius: 4px;
+        }
+        .principals-list-container::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 4px;
+        }
+        .principals-list-container::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
+        }
+        
+        .principal-item {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.6rem 0.8rem;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 0.5rem;
+          transition: all 0.2s;
+        }
+        .principal-item:hover {
+          background: #f1f5f9;
+          border-color: #cbd5e1;
+        }
+        .principal-avatar {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: #4f46e5;
+          color: #ffffff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 0.85rem;
+        }
+        .principal-info {
+          display: flex;
+          flex-direction: column;
+          text-align: left;
+        }
+        .principal-name {
+          font-size: 0.85rem;
+          font-weight: 700;
+          color: #0f172a;
+        }
+        .principal-email {
+          font-size: 0.75rem;
+          color: #64748b;
+        }
+        .empty-list-text {
+          font-size: 0.85rem;
+          color: #94a3b8;
+          text-align: center;
+          padding: 2rem 0;
+        }
+        
+        @media (max-width: 680px) {
+          .dev-panel-columns {
+            flex-direction: column;
+            gap: 1.5rem;
+          }
+          .dev-panel-right {
+            border-left: none;
+            border-top: 1px solid #cbd5e1;
+            padding-left: 0;
+            padding-top: 1.5rem;
+          }
+          .dev-dashboard-modal {
+            max-width: 400px !important;
+          }
+        }
       `}</style>
     </div>
   );

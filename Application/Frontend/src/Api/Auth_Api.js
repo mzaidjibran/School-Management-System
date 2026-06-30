@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE || "http://127.0.0.1:3000";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const decodeToken = (token) => {
@@ -191,4 +191,15 @@ export const resetPassword = async (resetToken, newPassword) => {
   const data = await response.json();
   if (!response.ok) throw new Error(data.message || "Password reset failed");
   return data;
+};
+
+// ── Get All Principals (Admins) ───────────────────────────────────────────────
+export const getPrincipals = async () => {
+  const response = await fetch(`${API_BASE}/api/auth/principals`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || "Failed to load principals");
+  return data.data;
 };

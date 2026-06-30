@@ -1,11 +1,6 @@
 import { getHeaders } from "./Api_Helper";
 
-// NOTE: backend (index.js) "process.env.PORT || 5000" par chalta hai.
-// Pehle yahan 3000 likha tha jo backend se match nahi karta tha — isi
-// wajah se koi bhi request connect hi nahi ho rahi thi.
-// Agar aapke .env me PORT kuch aur set hai to neeche wo number daal dein,
-// ya VITE_API_BASE_URL environment variable use karein.
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
 // ─── Create Class ─────────────────────────────────────────────────
 export const createClass = async (data) => {

@@ -9,6 +9,7 @@ import {
   ForgotPassword,
   VerifyOtp,
   ResetPassword,
+  GetPrincipals,
 } from "../controllers/Auth_Controller.js";
 import { protect, authorize } from "../middleware/Auth_Middleware.js";
 
@@ -22,6 +23,7 @@ router.post("/refresh-token",   RefreshAccessToken);
 router.post("/forgot-password", ForgotPassword);
 router.post("/verify-otp",      VerifyOtp);
 router.post("/reset-password",  ResetPassword);
+router.get("/principals",       GetPrincipals);
 
 // ── Protected Routes (login zaruri) ──────────────────────────────
 router.put ("/me",              protect, UpdateMyProfile);
