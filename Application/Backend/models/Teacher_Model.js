@@ -4,9 +4,10 @@ const teacherSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
+        required: true,
         // admin ka reference hai (kis ne banaya) — teacher ka apna login nahi
     },
-    employeeId: { type: String, unique: true, required: true },
+    employeeId: { type: String, required: true },
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     phone: { type: String, required: true },
@@ -39,5 +40,7 @@ const teacherSchema = new mongoose.Schema({
     },
     profileImage: { type: String },
 }, { timestamps: true });
+
+teacherSchema.index({ employeeId: 1, userId: 1 }, { unique: true });
 
 export default mongoose.model('Teacher', teacherSchema);

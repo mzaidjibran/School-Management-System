@@ -3,7 +3,7 @@ import Notice from "../models/Notice_Model.js";
 export const getAllNotices = async (req, res) => {
   try {
     const { status, priority, targetAudience, page = 1, limit = 20 } = req.query;
-    const filter = {};
+    const filter = { createdBy: req.userId };
     if (status) filter.status = status;
     if (priority) filter.priority = priority;
     if (targetAudience) filter.targetAudience = targetAudience;
@@ -24,8 +24,8 @@ export const getAllNotices = async (req, res) => {
 
 export const getNoticeById = async (req, res) => {
   try {
-    const notice = await Notice.findByIdAndUpdate(
-      req.params.id,
+    const notice = await Notice.findOneAndUpdate(
+      { _id: req.params.id, createdBy: req.userId },
       { $inc: { views: 1 } },
       { new: true }
     ).populate("createdBy", "name");
@@ -38,6 +38,7 @@ export const getNoticeById = async (req, res) => {
 
 export const createNotice = async (req, res) => {
   try {
+    req.body.createdBy = req.userId;
     const notice = new Notice({ ...req.body});
     await notice.save();
     res.status(201).json({ success: true, message: "Notice created", notice });
@@ -48,7 +49,7 @@ export const createNotice = async (req, res) => {
 
 export const updateNotice = async (req, res) => {
   try {
-    const notice = await Notice.findByIdAndUpdate(req.params.id, req.body, {
+    const notice = await Notice.findOneAndUpdate({ _id: req.params.id, createdBy: req.userId }, req.body, {
       new: true, runValidators: true,
     });
     if (!notice) return res.status(404).json({ success: false, message: "Notice not found" });
@@ -60,7 +61,8 @@ export const updateNotice = async (req, res) => {
 
 export const deleteNotice = async (req, res) => {
   try {
-    await Notice.findByIdAndDelete(req.params.id);
+    const deleted = await Notice.findOneAndDelete({ _id: req.params.id, createdBy: req.userId });
+    if (!deleted) return res.status(404).json({ success: false, message: "Notice not found" });
     res.json({ success: true, message: "Notice deleted" });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -71,6 +73,7 @@ export const getActiveNotices = async (req, res) => {
   try {
     const now = new Date();
     const notices = await Notice.find({
+      createdBy: req.userId,
       status: "published",
       publishDate: { $lte: now },
       $or: [{ expiryDate: { $gte: now } }, { expiryDate: null }],

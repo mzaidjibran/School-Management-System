@@ -12,6 +12,8 @@ import { upload } from "../middleware/Upload_Middleware.js";
 
 const router = express.Router();
 
+router.use(protect);
+
 // ─── Teacher CRUD ─────────────────────────────────────────────────
 router.post("/",upload.single("profileImage"), createTeacher);
 router.get("/",getAllTeachers);

@@ -9,9 +9,12 @@ import {
   deleteFee,
 } from "../controllers/Fee_Controller.js";
 
+import { protect } from "../middleware/Auth_Middleware.js";
+
 const router = express.Router();
 
-// TODO: auth lagane par protect aur authorize middleware wapas add karna
+router.use(protect);
+
 router.post("/", createFee);                          // POST   /api/fee
 router.get("/", getAllFees);                           // GET    /api/fee
 router.get("/pending", getPendingFees);               // GET    /api/fee/pending

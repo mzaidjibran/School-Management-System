@@ -1,5 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import createStudent from "../../Api/Student_Api";
+import { getAllClasses } from "../../Api/Class_Api";
+import toast from "react-hot-toast";
 
 // ---------- Floating Label Input ----------
 const Input = ({
@@ -76,11 +78,15 @@ const Select = ({
         focus:ring-2`}
     >
       <option value=""></option>
-      {options.map((opt) => (
-        <option key={opt} value={opt}>
-          {opt}
-        </option>
-      ))}
+      {options.map((o) => {
+        const val = typeof o === "object" ? o.value : o;
+        const lbl = typeof o === "object" ? o.label : o;
+        return (
+          <option key={val} value={val}>
+            {lbl}
+          </option>
+        );
+      })}
     </select>
     <label
       htmlFor={name}
@@ -155,6 +161,19 @@ export default function AddStudent() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [apiError, setApiError] = useState("");
+  const [classesList, setClassesList] = useState([]);
+
+  useEffect(() => {
+    const fetchClasses = async () => {
+      try {
+        const res = await getAllClasses();
+        setClassesList(res.data || []);
+      } catch (err) {
+        console.error("Failed to load classes:", err);
+      }
+    };
+    fetchClasses();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -276,8 +295,7 @@ export default function AddStudent() {
 
       await createStudent(fd);
 
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
+      toast.success("Student saved successfully!");
 
       if (addAnother) {
         setFormData(emptyForm);
@@ -288,7 +306,7 @@ export default function AddStudent() {
       }
     } catch (error) {
       console.error("Save error:", error);
-      setApiError(error.message || "Kuch ghalat hua, dobara koshish karein");
+      toast.error(error.message || "Kuch ghalat hua, dobara koshish karein");
     } finally {
       setIsSaving(false);
     }
@@ -471,7 +489,15 @@ export default function AddStudent() {
                 <div>
                   <SectionTitle title="Academic Information" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <Input label="Class" name="class" value={formData.class} onChange={handleInputChange} required error={errors.class} />
+                    <Select
+                      label="Class"
+                      name="class"
+                      options={classesList.map((c) => ({ value: c._id, label: `${c.name} (${c.section})` }))}
+                      value={formData.class}
+                      onChange={handleInputChange}
+                      required
+                      error={errors.class}
+                    />
                     <Input label="Roll Number" name="rollNumber" value={formData.rollNumber} onChange={handleInputChange} required error={errors.rollNumber} />
                     <Select label="Section" name="section" options={["A", "B", "C", "D"]} value={formData.section} onChange={handleInputChange} />
                     <Input label="Admission Date" type="date" name="admissionDate" value={formData.admissionDate} onChange={handleInputChange} required error={errors.admissionDate} />

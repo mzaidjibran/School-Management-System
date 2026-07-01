@@ -3,6 +3,7 @@ import {Class} from "../models/Class_Model.js";
 // ─── Create Class ─────────────────────────────────────────────────
 export const createClass = async (request, response) => {
   try {
+    request.body.createdBy = request.userId;
     const newClass = await Class.create(request.body);
 
     response.status(201).json({
@@ -31,7 +32,7 @@ export const createClass = async (request, response) => {
 export const getAllClasses = async (request, response) => {
   try {
     const { academicYear, isActive } = request.query;
-    const filter = {};
+    const filter = { createdBy: request.userId };
     if (academicYear) filter.academicYear = academicYear;
     if (isActive !== undefined) filter.isActive = isActive === "true";
 
@@ -58,7 +59,7 @@ export const getAllClasses = async (request, response) => {
 // ─── Get Single Class ─────────────────────────────────────────────
 export const getSingleClass = async (request, response) => {
   try {
-    const singleClass = await Class.findById(request.params.id).populate(
+    const singleClass = await Class.findOne({ _id: request.params.id, createdBy: request.userId }).populate(
       "classTeacher",
       "firstName lastName name email"
     );
@@ -89,8 +90,8 @@ export const getSingleClass = async (request, response) => {
 // ─── Update Class ─────────────────────────────────────────────────
 export const updateClass = async (request, response) => {
   try {
-    const updatedClass = await Class.findByIdAndUpdate(
-      request.params.id,
+    const updatedClass = await Class.findOneAndUpdate(
+      { _id: request.params.id, createdBy: request.userId },
       request.body,
       { new: true, runValidators: true }
     ).populate("classTeacher", "firstName lastName name email");
@@ -121,7 +122,7 @@ export const updateClass = async (request, response) => {
 // ─── Delete Class ─────────────────────────────────────────────────
 export const deleteClass = async (request, response) => {
   try {
-    const deletedClass = await Class.findByIdAndDelete(request.params.id);
+    const deletedClass = await Class.findOneAndDelete({ _id: request.params.id, createdBy: request.userId });
 
     if (!deletedClass) {
       return response.status(404).json({

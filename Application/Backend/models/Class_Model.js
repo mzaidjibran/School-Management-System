@@ -53,12 +53,18 @@ const classSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-classSchema.index({ name: 1, section: 1, academicYear: 1 }, { unique: true });
+classSchema.index({ name: 1, section: 1, academicYear: 1, createdBy: 1 }, { unique: true });
 
 export const Class = mongoose.model("Class", classSchema);

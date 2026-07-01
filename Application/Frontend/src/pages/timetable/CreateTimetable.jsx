@@ -17,7 +17,7 @@ import {
   getClassTimetable,
 } from "../../api/Timetable_Api.js";
 
-const API_BASE = "http://127.0.0.1:3000";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
 const DAYS = [
   "Monday",

@@ -8,7 +8,7 @@ import { saveAs } from "file-saver";
 import { getAllTeachers, updateTeacher, deleteTeacher } from "../../api/Teacher_Api.js";
 import toast from "react-hot-toast";
 
-const API_BASE = "http://127.0.0.1:3000";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
 // ─── Helpers ──────────────────────────────────────────────────────
 const getProfileImageUrl = (profileImage) => {

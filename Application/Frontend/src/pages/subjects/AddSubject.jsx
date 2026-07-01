@@ -4,7 +4,7 @@ import { FaBook, FaSave, FaPlus, FaUndo, FaTimes } from "react-icons/fa";
 import { addSubject } from "../../api/Subject_Api.js";
 import toast from "react-hot-toast";
 
-const API_BASE = "http://127.0.0.1:3000";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
 const SUBJECT_TYPES = ["theory", "practical", "both"];
 const STATUS_OPTS = ["active", "inactive"];

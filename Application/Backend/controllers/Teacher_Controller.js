@@ -53,11 +53,7 @@ function transformTeacherDoc(doc) {
 export const createTeacher = async (request, response) => {
   try {
     const teacherData = normalizePayload(request.body, request.file);
-
-    // Only set userId if auth middleware has populated request.user
-    if (request.user?._id) {
-      teacherData.userId = request.user._id;
-    }
+    teacherData.userId = request.userId;
 
     const teacher = await Teacher.create(teacherData);
     response.status(201).json({ success: true, error: false, message: "Teacher created successfully", data: transformTeacherDoc(teacher) });
@@ -68,7 +64,7 @@ export const createTeacher = async (request, response) => {
 
 export const getAllTeachers = async (request, response) => {
   try {
-    const teachers = await Teacher.find({});
+    const teachers = await Teacher.find({ userId: request.userId });
     response.status(200).json({ success: true, error: false, message: "Teachers fetched successfully", data: teachers.map(transformTeacherDoc) });
   } catch (error) {
     response.status(500).json({ success: false, error: true, message: error.message });
@@ -77,7 +73,7 @@ export const getAllTeachers = async (request, response) => {
 
 export const getSingleTeacher = async (request, response) => {
   try {
-    const teacher = await Teacher.findById(request.params.id);
+    const teacher = await Teacher.findOne({ _id: request.params.id, userId: request.userId });
     if (!teacher) return response.status(404).json({ success: false, error: true, message: "Teacher not found" });
     response.status(200).json({ success: true, error: false, message: "Teacher fetched successfully", data: transformTeacherDoc(teacher) });
   } catch (error) {
@@ -88,7 +84,7 @@ export const getSingleTeacher = async (request, response) => {
 export const updateTeacher = async (request, response) => {
   try {
     const updateData = normalizePayload(request.body, request.file);
-    const updatedTeacher = await Teacher.findByIdAndUpdate(request.params.id, updateData, { new: true, runValidators: true });
+    const updatedTeacher = await Teacher.findOneAndUpdate({ _id: request.params.id, userId: request.userId }, updateData, { new: true, runValidators: true });
     if (!updatedTeacher) return response.status(404).json({ success: false, error: true, message: "Teacher not found" });
     response.status(200).json({ success: true, error: false, message: "Teacher updated successfully", data: transformTeacherDoc(updatedTeacher) });
   } catch (error) {
@@ -98,7 +94,7 @@ export const updateTeacher = async (request, response) => {
 
 export const deleteTeacher = async (request, response) => {
   try {
-    const deletedTeacher = await Teacher.findByIdAndDelete(request.params.id);
+    const deletedTeacher = await Teacher.findOneAndDelete({ _id: request.params.id, userId: request.userId });
     if (!deletedTeacher) return response.status(404).json({ success: false, error: true, message: "Teacher not found" });
     response.status(200).json({ success: true, error: false, message: "Teacher deleted successfully", data: transformTeacherDoc(deletedTeacher) });
   } catch (error) {
@@ -109,7 +105,7 @@ export const deleteTeacher = async (request, response) => {
 export const assignClass = async (request, response) => {
   try {
     const { classId, subject } = request.body;
-    const teacher = await Teacher.findByIdAndUpdate(request.params.id, { $push: { assignedClasses: { classId, subject } } }, { new: true, runValidators: true });
+    const teacher = await Teacher.findOneAndUpdate({ _id: request.params.id, userId: request.userId }, { $push: { assignedClasses: { classId, subject } } }, { new: true, runValidators: true });
     if (!teacher) return response.status(404).json({ success: false, error: true, message: "Teacher not found" });
     response.status(200).json({ success: true, error: false, message: "Class assigned successfully", data: transformTeacherDoc(teacher) });
   } catch (error) {

@@ -38,10 +38,48 @@ const studentSchema = new mongoose.Schema(
       trim: true,
     },
     address: {
-      street: { type: String },
-      city:   { type: String },
-      state:  { type: String },
-      zip:    { type: String },
+      type: String,
+      trim: true,
+    },
+    city: {
+      type: String,
+      trim: true,
+    },
+    CNIC: {
+      type: String,
+      trim: true,
+    },
+    religion: {
+      type: String,
+      trim: true,
+    },
+    nationality: {
+      type: String,
+      trim: true,
+    },
+    previousSchool: {
+      type: String,
+      trim: true,
+    },
+    medicalInfo: {
+      type: String,
+      trim: true,
+    },
+    emergencyName: {
+      type: String,
+      trim: true,
+    },
+    emergencyPhone: {
+      type: String,
+      trim: true,
+    },
+    motherName: {
+      type: String,
+      trim: true,
+    },
+    bloodGroup: {
+      type: String,
+      trim: true,
     },
 
     guardian: {
@@ -54,12 +92,10 @@ const studentSchema = new mongoose.Schema(
 
     rollNumber: {
       type: String,
-      unique: true,
       sparse: true,
     },
     admissionNumber: {
       type: String,
-      unique: true,
     },
     admissionDate: {
       type: Date,
@@ -93,11 +129,15 @@ const studentSchema = new mongoose.Schema(
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
     },
   },
   {
     timestamps: true,
   }
 );
+
+studentSchema.index({ rollNumber: 1, createdBy: 1 }, { unique: true, sparse: true });
+studentSchema.index({ admissionNumber: 1, createdBy: 1 }, { unique: true, sparse: true });
 
 export const Student = mongoose.model("Student", studentSchema);

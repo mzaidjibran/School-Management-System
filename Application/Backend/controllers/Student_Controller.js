@@ -13,6 +13,12 @@ function normalizePayload(body, file) {
     delete data.Name;
   }
 
+  // Map class to currentClass
+  if (data.class) {
+    data.currentClass = data.class;
+    delete data.class;
+  }
+
   // CNIC
   if (data.cnic && !data.CNIC) {
     data.CNIC = data.cnic;
@@ -61,6 +67,7 @@ function transformStudentDoc(doc) {
     cnic: raw.CNIC || raw.cnic || "",
     dateofBirth: raw.dateOfBirth || null,
     dateOfJoining: raw.admissionDate || null,
+    class: raw.currentClass ? (typeof raw.currentClass === "object" ? raw.currentClass.name : raw.currentClass) : "",
     profileImage: raw.profileImage
       ? raw.profileImage.startsWith("/image/")
         ? raw.profileImage
@@ -73,12 +80,14 @@ function transformStudentDoc(doc) {
 export const createStudent = async (request, response) => {
   try {
     const studentData = normalizePayload(request.body, request.file);
+    studentData.createdBy = request.userId;
     const student = await Student.create(studentData);
+    const populated = await Student.findById(student._id).populate("currentClass");
     response.status(201).json({
       success: true,
       error: false,
       message: "Student created successfully",
-      data: transformStudentDoc(student),
+      data: transformStudentDoc(populated),
     });
   } catch (error) {
     console.log("Validation error:", error.message); 
@@ -93,7 +102,7 @@ export const createStudent = async (request, response) => {
 // ─── Get All Students ─────────────────────────────────────────────
 export const getAllStudents = async (request, response) => {
   try {
-    const students = await Student.find({});
+    const students = await Student.find({ createdBy: request.userId }).populate("currentClass");
     response.status(200).json({
       success: true,
       error: false,
@@ -112,7 +121,7 @@ export const getAllStudents = async (request, response) => {
 // ─── Get Single Student ───────────────────────────────────────────
 export const getSingleStudent = async (request, response) => {
   try {
-    const student = await Student.findById(request.params.id);
+    const student = await Student.findOne({ _id: request.params.id, createdBy: request.userId }).populate("currentClass");
     if (!student) {
       return response.status(404).json({
         success: false,
@@ -140,12 +149,11 @@ export const updateStudent = async (request, response) => {
   try {
     const updateData = normalizePayload(request.body, request.file);
 
-    // Ek hi query — agar student nahi mila to null milega
-    const updatedStudent = await Student.findByIdAndUpdate(
-      request.params.id,
+    const updatedStudent = await Student.findOneAndUpdate(
+      { _id: request.params.id, createdBy: request.userId },
       updateData,
       { new: true, runValidators: true }
-    );
+    ).populate("currentClass");
 
     if (!updatedStudent) {
       return response.status(404).json({
@@ -173,8 +181,7 @@ export const updateStudent = async (request, response) => {
 // ─── Delete Student ───────────────────────────────────────────────
 export const deleteStudent = async (request, response) => {
   try {
-    // Ek hi query — find + delete ek saath
-    const deletedStudent = await Student.findByIdAndDelete(request.params.id);
+    const deletedStudent = await Student.findOneAndDelete({ _id: request.params.id, createdBy: request.userId });
 
     if (!deletedStudent) {
       return response.status(404).json({

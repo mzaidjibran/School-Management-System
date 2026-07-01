@@ -11,9 +11,13 @@ import {
   getResultReport,
 } from "../controllers/Exam_Controller.js";
 
+import { protect } from "../middleware/Auth_Middleware.js";
+
 const router = express.Router();
 
-// Auth baad mein lagayenge — abhi sab open hain
+router.use(protect);
+
+// Auth routes
 router.post("/",                    createExam);         // POST   /api/exams
 router.get("/",                     getAllExams);         // GET    /api/exams
 router.get("/results/report",       getResultReport);    // GET    /api/exams/results/report

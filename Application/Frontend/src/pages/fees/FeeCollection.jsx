@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FaSearch, FaMoneyBillWave, FaPrint, FaSave } from "react-icons/fa";
 import { getStudentFees, payFee, createFee } from "../../api/Fee_Api.js";
 
-const API_BASE = "http://127.0.0.1:3000";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
 // ---------- Floating Input ----------
 const Input = ({ label, type = "text", name, value, onChange, required, error }) => {

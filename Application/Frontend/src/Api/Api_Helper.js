@@ -1,5 +1,5 @@
 // ─── Token Helper ─────────────────────────────────────────────────
-const getToken = () => localStorage.getItem("token");
+const getToken = () => localStorage.getItem("accessToken") || localStorage.getItem("token");
 
 // ─── JSON Headers (normal requests) ──────────────────────────────
 export const getHeaders = () => ({

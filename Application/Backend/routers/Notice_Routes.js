@@ -8,10 +8,13 @@ import {
   getActiveNotices,
 } from "../controllers/Notice_Controller.js";
 
+import { protect } from "../middleware/Auth_Middleware.js";
+
 const router = express.Router();
 
-// Notice routes
+router.use(protect);
 
+// Notice routes
 router.post("/",createNotice);          // POST   /api/notices
 router.get("/", getAllNotices);          // GET    /api/notices?status=&priority=&targetAudience=&page=&limit=
 router.get("/active", getActiveNotices); // GET    /api/notices/active

@@ -3,7 +3,7 @@ import Subject from "../models/Subject_Model.js";
 export const getAllSubjects = async (req, res) => {
   try {
     const { classId, status, search } = req.query;
-    const filter = {};
+    const filter = { createdBy: req.userId };
     if (classId) filter.class = classId;
     if (status) filter.status = status;
     if (search) filter.name = { $regex: search, $options: "i" };
@@ -27,7 +27,7 @@ export const getAllSubjects = async (req, res) => {
 
 export const getSubjectById = async (req, res) => {
   try {
-    const subject = await Subject.findById(req.params.id)
+    const subject = await Subject.findOne({ _id: req.params.id, createdBy: req.userId })
       .populate("class", "name section")
       .populate("teacher", "name");
     if (!subject)
@@ -40,9 +40,10 @@ export const getSubjectById = async (req, res) => {
 
 export const addSubject = async (req, res) => {
   try {
+    req.body.createdBy = req.userId;
     const subject = new Subject(req.body);
     await subject.save();
-    const populated = await Subject.findById(subject._id)
+    const populated = await Subject.findOne({ _id: subject._id, createdBy: req.userId })
       .populate("class", "name section")
       .populate("teacher", "name");
     res.status(201).json({
@@ -66,7 +67,7 @@ export const addSubject = async (req, res) => {
 
 export const updateSubject = async (req, res) => {
   try {
-    const subject = await Subject.findByIdAndUpdate(req.params.id, req.body, {
+    const subject = await Subject.findOneAndUpdate({ _id: req.params.id, createdBy: req.userId }, req.body, {
       new: true,
       runValidators: true,
     })
@@ -87,7 +88,7 @@ export const updateSubject = async (req, res) => {
 
 export const deleteSubject = async (req, res) => {
   try {
-    const deleted = await Subject.findByIdAndDelete(req.params.id);
+    const deleted = await Subject.findOneAndDelete({ _id: req.params.id, createdBy: req.userId });
     if (!deleted)
       return res.status(404).json({ success: false, error: true, message: "Subject not found" });
     res.json({

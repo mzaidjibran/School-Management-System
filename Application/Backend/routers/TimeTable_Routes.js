@@ -10,8 +10,9 @@ import { protect, authorize } from "../middleware/Auth_Middleware.js";
 
 const router = express.Router();
 
-// Timetable routes
+router.use(protect);
 
+// Timetable routes
 router.post("/",createOrUpdateTimetable);              // POST   /api/timetable
 router.get("/teacher/:teacherId", getTeacherTimetable);  // GET    /api/timetable/teacher/:teacherId?session=
 router.get("/:classId/today", getTodayTimetable);        // GET    /api/timetable/:classId/today?session=

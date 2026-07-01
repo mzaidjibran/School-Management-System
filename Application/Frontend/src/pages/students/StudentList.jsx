@@ -6,8 +6,11 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveAs } from "file-saver";
 import { getAllStudents, updateStudent, deleteStudent } from "../../Api/Student_Api";
+import { getAllClasses } from "../../Api/Class_Api";
 import toast from "react-hot-toast";
 import { confirmToast } from "../../utils/toastHelpers.jsx";
+
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
 // ---------- Floating Label Input ----------
 const Input = ({ label, type = "text", name, value, onChange, required = false, disabled = false, error, className = "" }) => {
@@ -38,10 +41,12 @@ const Input = ({ label, type = "text", name, value, onChange, required = false, 
 // ---------- Floating Label Select ----------
 const Select = ({ label, name, options = [], value, onChange, required = false, disabled = false, error, className = "" }) => {
   if (disabled) {
+    const selectedOpt = options.find(o => typeof o === "object" ? o.value === value : o === value);
+    const displayVal = selectedOpt ? (typeof selectedOpt === "object" ? selectedOpt.label : selectedOpt) : (value || "—");
     return (
       <div className={`relative ${className}`}>
         <div className="w-full px-3 pt-5 pb-1.5 border border-slate-200 rounded-lg bg-slate-50 text-sm text-slate-700 min-h-[44px]">
-          {value || "—"}
+          {displayVal}
         </div>
         <label className="absolute left-3 top-1 text-[10px] text-indigo-500 pointer-events-none">{label}</label>
       </div>
@@ -54,7 +59,11 @@ const Select = ({ label, name, options = [], value, onChange, required = false, 
           ${error ? "border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-indigo-400 focus:ring-indigo-100"}
           focus:ring-2`}>
         <option value=""></option>
-        {options.map((o) => <option key={o} value={o}>{o}</option>)}
+        {options.map((o) => {
+          const val = typeof o === "object" ? o.value : o;
+          const lbl = typeof o === "object" ? o.label : o;
+          return <option key={val} value={val}>{lbl}</option>;
+        })}
       </select>
       <label htmlFor={name} className={`absolute left-3 pointer-events-none transition-all duration-150
         ${value ? "top-1 text-[10px] text-indigo-500" : "top-3.5 text-sm text-slate-400"}
@@ -144,6 +153,20 @@ const StudentFormModal = ({ isOpen, onClose, student, mode, onSave }) => {
   const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef(null);
   const isViewOnly = mode === "view";
+  const [classesList, setClassesList] = useState([]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const fetchClasses = async () => {
+      try {
+        const res = await getAllClasses();
+        setClassesList(res.data || []);
+      } catch (err) {
+        console.error("Failed to load classes:", err);
+      }
+    };
+    fetchClasses();
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -163,7 +186,7 @@ const StudentFormModal = ({ isOpen, onClose, student, mode, onSave }) => {
         fatherName: student.fatherName || "",
         motherName: student.motherName || "",
         parentPhone: student.parentPhone || "",
-        class: student.class || "",
+        class: student.classId || "",
         rollNumber: student.rollNumber || "",
         section: student.section || "",
         admissionDate: student.admissionDate || "",
@@ -309,7 +332,16 @@ const StudentFormModal = ({ isOpen, onClose, student, mode, onSave }) => {
             <div>
               <SectionHeader title="Academic Information" />
               <div className="grid grid-cols-2 gap-3">
-                <Input label="Class" name="class" value={formData.class} onChange={handleChange} required error={errors.class} disabled={isViewOnly} />
+                <Select
+                  label="Class"
+                  name="class"
+                  options={classesList.map((c) => ({ value: c._id, label: `${c.name} (${c.section})` }))}
+                  value={formData.class}
+                  onChange={handleChange}
+                  required
+                  error={errors.class}
+                  disabled={isViewOnly}
+                />
                 <Input label="Roll Number" name="rollNumber" value={formData.rollNumber} onChange={handleChange} required error={errors.rollNumber} disabled={isViewOnly} />
                 <Select label="Section" name="section" options={["A", "B", "C", "D"]} value={formData.section} onChange={handleChange} disabled={isViewOnly} />
                 <Input label="Admission Date" type="date" name="admissionDate" value={formData.admissionDate} onChange={handleChange} disabled={isViewOnly} />
@@ -384,6 +416,19 @@ export default function StudentList() {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [apiError, setApiError] = useState("");
 
+  const parseDate = (d) => {
+    if (!d) return "";
+    try {
+      const date = new Date(d);
+      if (isNaN(date.getTime())) return "";
+      // Handle extreme years that would throw in toISOString
+      if (date.getFullYear() > 9999 || date.getFullYear() < 1000) return "";
+      return date.toISOString().split("T")[0];
+    } catch {
+      return "";
+    }
+  };
+
   const fetchStudents = async () => {
     setLoading(true);
     setApiError("");
@@ -393,9 +438,7 @@ export default function StudentList() {
         id: s._id,
         name: s.Name || `${s.firstName || ""} ${s.lastName || ""}`.trim(),
         gender: s.gender || "",
-        dateOfBirth: s.dateofBirth || s.dateOfBirth
-          ? new Date(s.dateofBirth || s.dateOfBirth).toISOString().split("T")[0]
-          : "",
+        dateOfBirth: s.dateofBirth || s.dateOfBirth ? parseDate(s.dateofBirth || s.dateOfBirth) : "",
         bloodGroup: s.bloodGroup || "",
         cnic: s.cnic || s.CNIC || "",
         religion: s.religion || "",
@@ -405,20 +448,19 @@ export default function StudentList() {
         address: s.address || "",
         city: s.city || "",
         fatherName: s.guardian?.name || "",
-        motherName: "",
+        motherName: s.motherName || "",
         parentPhone: s.guardian?.phone || "",
-        class: s.currentClass || s.class || "",
+        classId: s.currentClass?._id || s.currentClass || "",
+        class: s.currentClass?.name || s.class || "",
         rollNumber: s.rollNumber || "",
         section: s.section || "",
-        admissionDate: s.admissionDate
-          ? new Date(s.admissionDate).toISOString().split("T")[0]
-          : "",
+        admissionDate: s.admissionDate ? parseDate(s.admissionDate) : "",
         previousSchool: s.previousSchool || "",
         medicalInfo: s.medicalInfo || "",
         emergencyName: s.emergencyName || "",
         emergencyPhone: s.emergencyPhone || "",
         picture: s.profileImage
-          ? `http://127.0.0.1:3000${s.profileImage}`
+          ? `${API_BASE}${s.profileImage}`
           : `https://ui-avatars.com/api/?name=${encodeURIComponent(
               s.Name || s.firstName || "S"
             )}&background=3b82f6&color=fff`,
@@ -430,7 +472,7 @@ export default function StudentList() {
       setFilteredStudents(list);
     } catch (err) {
       console.error("Fetch error:", err);
-      setApiError("Students load nahi ho sake. Backend check karein.");
+      toast.error("Students load nahi ho sake: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -503,6 +545,7 @@ export default function StudentList() {
       fd.append("admissionDate", data.admissionDate || "");
       fd.append("guardian[name]", data.fatherName || "");
       fd.append("guardian[phone]", data.parentPhone || "");
+      fd.append("guardian[relationship]", data.fatherName ? "father" : "mother");
       if (data.dateOfBirth)    fd.append("dateOfBirth", data.dateOfBirth);
       if (data.bloodGroup)     fd.append("bloodGroup", data.bloodGroup);
       if (data.cnic)           fd.append("CNIC", data.cnic);
@@ -511,13 +554,19 @@ export default function StudentList() {
       if (data.medicalInfo)    fd.append("medicalInfo", data.medicalInfo);
       if (data.emergencyName)  fd.append("emergencyName", data.emergencyName);
       if (data.emergencyPhone) fd.append("emergencyPhone", data.emergencyPhone);
+      if (data.religion)       fd.append("religion", data.religion);
+      if (data.nationality)    fd.append("nationality", data.nationality);
+      if (data.address)        fd.append("address", data.address);
+      if (data.city)           fd.append("city", data.city);
+      if (data.motherName)     fd.append("motherName", data.motherName);
       if (imageFile)           fd.append("profileImage", imageFile);
 
       await updateStudent(data.id, fd);
+      toast.success("Student updated successfully!");
       await fetchStudents();
       closeModal();
     } catch (err) {
-      alert("Update failed: " + err.message);
+      toast.error("Update failed: " + err.message);
     }
   };
 

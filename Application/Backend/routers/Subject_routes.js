@@ -7,9 +7,12 @@ import {
   deleteSubject,
 } from "../controllers/Subject_Controller.js";
 
+import { protect } from "../middleware/Auth_Middleware.js";
+
 const router = express.Router();
 
-// TODO: auth lagane par protect aur authorize middleware wapas add karna
+router.use(protect);
+
 router.post("/", addSubject);         // POST   /api/subjects
 router.get("/", getAllSubjects);      // GET    /api/subjects?classId=&status=&search=
 router.get("/:id", getSubjectById);  // GET    /api/subjects/:id

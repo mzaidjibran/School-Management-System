@@ -12,7 +12,7 @@ import { getAllSubjects, updateSubject, deleteSubject } from "../../api/Subject_
 import toast from "react-hot-toast";
 import { confirmToast } from "../../utils/toastHelpers.jsx";
 
-const API_BASE = "http://127.0.0.1:3000";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
 const SUBJECT_TYPES = ["theory", "practical", "both"];
 const STATUS_OPTS = ["active", "inactive"];

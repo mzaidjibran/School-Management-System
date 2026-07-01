@@ -10,8 +10,9 @@ import { protect, authorize } from "../middleware/Auth_Middleware.js";
 
 const router = express.Router();
 
-// Attendance routes
+router.use(protect);
 
+// Attendance routes
 router.post("/", markAttendance);                              // POST   /api/attendance
 router.get("/",getAttendanceByClassAndDate);                  // GET    /api/attendance?classId=&date=
 router.get("/student/:studentId",getAttendanceByStudent);     // GET    /api/attendance/student/:studentId

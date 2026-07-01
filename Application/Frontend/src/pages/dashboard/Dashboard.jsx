@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 // ── API base ──────────────────────────────────────────────────────
-const API = import.meta.env.VITE_API_BASE || "http://127.0.0.1:3000";
+const API = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 const authHeaders = () => ({
   "Content-Type": "application/json",
   Authorization: `Bearer ${localStorage.getItem("accessToken")}`,

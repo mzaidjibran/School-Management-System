@@ -1,11 +1,12 @@
 import { Exam, Result } from "../models/Exam_Model.js";
+import mongoose from "mongoose";
 
 // ─── EXAMS ────────────────────────────────────────────────────────────────────
 
 export const getAllExams = async (req, res) => {
   try {
     const { classId, status, examType, session, page = 1, limit = 20 } = req.query;
-    const filter = {};
+    const filter = { createdBy: req.userId };
     if (classId)   filter.class    = classId;
     if (status)    filter.status   = status;
     if (examType)  filter.examType = examType;
@@ -26,7 +27,7 @@ export const getAllExams = async (req, res) => {
 
 export const getExamById = async (req, res) => {
   try {
-    const exam = await Exam.findById(req.params.id).populate("class", "name section");
+    const exam = await Exam.findOne({ _id: req.params.id, createdBy: req.userId }).populate("class", "name section");
     if (!exam) return res.status(404).json({ success: false, error: true, message: "Exam not found" });
     res.json({ success: true, error: false, message: "Exam fetched", data: exam });
   } catch (err) {
@@ -36,13 +37,12 @@ export const getExamById = async (req, res) => {
 
 export const createExam = async (req, res) => {
   try {
-    // createdBy optional hai — auth baad mein lagayenge
     const examData = { ...req.body };
-    if (req.user?._id) examData.createdBy = req.user._id;
+    examData.createdBy = req.userId;
 
     const exam = new Exam(examData);
     await exam.save();
-    const populated = await Exam.findById(exam._id).populate("class", "name section");
+    const populated = await Exam.findOne({ _id: exam._id, createdBy: req.userId }).populate("class", "name section");
     res.status(201).json({ success: true, error: false, message: "Exam created", data: populated });
   } catch (err) {
     res.status(400).json({ success: false, error: true, message: err.message });
@@ -51,7 +51,7 @@ export const createExam = async (req, res) => {
 
 export const updateExam = async (req, res) => {
   try {
-    const exam = await Exam.findByIdAndUpdate(req.params.id, req.body, {
+    const exam = await Exam.findOneAndUpdate({ _id: req.params.id, createdBy: req.userId }, req.body, {
       new: true, runValidators: true,
     }).populate("class", "name section");
     if (!exam) return res.status(404).json({ success: false, error: true, message: "Exam not found" });
@@ -63,9 +63,11 @@ export const updateExam = async (req, res) => {
 
 export const deleteExam = async (req, res) => {
   try {
+    const exam = await Exam.findOne({ _id: req.params.id, createdBy: req.userId });
+    if (!exam) return res.status(404).json({ success: false, error: true, message: "Exam not found" });
+
     await Result.deleteMany({ exam: req.params.id });
-    const deleted = await Exam.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ success: false, error: true, message: "Exam not found" });
+    await Exam.deleteOne({ _id: req.params.id });
     res.json({ success: true, error: false, message: "Exam and its results deleted" });
   } catch (err) {
     res.status(500).json({ success: false, error: true, message: err.message });
@@ -93,8 +95,7 @@ export const enterMarks = async (req, res) => {
       return res.status(400).json({ success: false, error: true, message: "Results array is mandatory" });
     }
 
-    // Exam fetch karo taake totalMarks/passingMarks mil sake
-    const exam = await Exam.findById(examId);
+    const exam = await Exam.findOne({ _id: examId, createdBy: req.userId });
     if (!exam) {
       return res.status(404).json({ success: false, error: true, message: "Exam not found" });
     }
@@ -104,16 +105,14 @@ export const enterMarks = async (req, res) => {
       const obtainedMarks = Number(r.obtainedMarks);
       const percentage = (obtainedMarks / exam.totalMarks) * 100;
 
-      // IMPORTANT: findOneAndUpdate Mongoose ke pre("save") hooks ko trigger NAHI karta,
-      // is liye status & grade yahan manually calculate karke save karna zaroori hai.
       const updateData = {
         ...r,
         obtainedMarks,
         exam: examId,
         status: obtainedMarks >= exam.passingMarks ? "pass" : "fail",
         grade: calculateGrade(percentage),
+        enteredBy: req.userId,
       };
-      if (req.user?._id) updateData.enteredBy = req.user._id;
 
       const result = await Result.findOneAndUpdate(
         { exam: examId, student: r.student },
@@ -130,6 +129,11 @@ export const enterMarks = async (req, res) => {
 
 export const getExamResults = async (req, res) => {
   try {
+    const examExists = await Exam.findOne({ _id: req.params.examId, createdBy: req.userId });
+    if (!examExists) {
+      return res.status(403).json({ success: false, error: true, message: "Aapko is exam ki access nahi hai" });
+    }
+
     const results = await Result.find({ exam: req.params.examId })
       .populate("student", "firstName lastName rollNumber");
 
@@ -152,6 +156,11 @@ export const getExamResults = async (req, res) => {
 
 export const getStudentResults = async (req, res) => {
   try {
+    const student = await mongoose.model("Student").findOne({ _id: req.params.studentId, createdBy: req.userId });
+    if (!student) {
+      return res.status(403).json({ success: false, error: true, message: "Aapko is student ki access nahi hai" });
+    }
+
     const results = await Result.find({ student: req.params.studentId })
       .populate("exam", "name examType examDate totalMarks passingMarks subject class");
     res.json({ success: true, error: false, message: "Student results fetched", data: results });
@@ -163,7 +172,7 @@ export const getStudentResults = async (req, res) => {
 export const getResultReport = async (req, res) => {
   try {
     const { classId, examType, session } = req.query;
-    const examFilter = {};
+    const examFilter = { createdBy: req.userId };
     if (classId)  examFilter.class    = classId;
     if (examType) examFilter.examType = examType;
     if (session)  examFilter.session  = session;

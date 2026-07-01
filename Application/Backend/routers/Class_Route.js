@@ -7,14 +7,11 @@ import {
   deleteClass,
 } from "../controllers/Class_Controller.js";
 
+import { protect } from "../middleware/Auth_Middleware.js";
+
 const router = express.Router();
 
-// Class routes
-// NOTE: Authentication abhi temporarily hata di hai (login flow abhi
-// implement nahi hua). Jab wapis apply karni ho to upar
-// `import { protect, authorize } from "../middleware/Auth_Middleware.js";`
-// dobara add kar dena aur har route mein protect/authorize wapis lagana,
-// jaise pehle tha.
+router.use(protect);
 
 router.post("/", createClass);            // POST   /api/classes
 router.get("/", getAllClasses);           // GET    /api/classes

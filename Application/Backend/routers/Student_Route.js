@@ -11,9 +11,11 @@ import { upload } from "../middleware/Upload_Middleware.js";
 
 const router = express.Router();
 
-// Student routes
+router.use(protect);
 
+// Student routes
 router.get("/", getAllStudents);
+router.get("/:id", getSingleStudent);
 router.post("/", upload.single("profileImage"), createStudent);
 router.put("/:id", upload.single("profileImage"), updateStudent);
 router.delete("/:id", deleteStudent);

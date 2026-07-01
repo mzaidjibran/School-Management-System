@@ -12,7 +12,7 @@ function generateReceiptNumber() {
 // ─── Create Fee Record ────────────────────────────────────────────
 export const createFee = async (request, response) => {
   try {
-    // TODO: auth lagane par yahan createdBy: request.user._id add karna
+    request.body.createdBy = request.userId;
     const fee = await Fee.create(request.body);
 
     response.status(201).json({
@@ -43,7 +43,7 @@ export const getStudentFees = async (request, response) => {
     const { studentId } = request.params;
     const { status, year } = request.query;
 
-    const filter = { student: studentId };
+    const filter = { student: studentId, createdBy: request.userId };
     if (status) filter.status = status;
     if (year) filter.year = Number(year);
 
@@ -73,6 +73,7 @@ export const getStudentFees = async (request, response) => {
 export const getPendingFees = async (request, response) => {
   try {
     const fees = await Fee.find({
+      createdBy: request.userId,
       status: { $in: ["pending", "partial", "overdue"] },
     })
       .populate("student", "firstName lastName rollNumber")
@@ -99,7 +100,7 @@ export const getAllFees = async (request, response) => {
   try {
     const { status, month, year } = request.query;
 
-    const filter = {};
+    const filter = { createdBy: request.userId };
     if (status) filter.status = status;
     if (month) filter.month = Number(month);
     if (year) filter.year = Number(year);
@@ -130,7 +131,7 @@ export const payFee = async (request, response) => {
     const { id } = request.params;
     const { payingAmount, paymentMethod } = request.body;
 
-    const fee = await Fee.findById(id);
+    const fee = await Fee.findOne({ _id: id, createdBy: request.userId });
     if (!fee) {
       return response.status(404).json({
         success: false,
@@ -182,8 +183,8 @@ export const payFee = async (request, response) => {
 // ─── Update Fee Record ────────────────────────────────────────────
 export const updateFee = async (request, response) => {
   try {
-    const updated = await Fee.findByIdAndUpdate(
-      request.params.id,
+    const updated = await Fee.findOneAndUpdate(
+      { _id: request.params.id, createdBy: request.userId },
       request.body,
       { new: true, runValidators: true }
     );
@@ -214,7 +215,7 @@ export const updateFee = async (request, response) => {
 // ─── Delete Fee Record ────────────────────────────────────────────
 export const deleteFee = async (request, response) => {
   try {
-    const deleted = await Fee.findByIdAndDelete(request.params.id);
+    const deleted = await Fee.findOneAndDelete({ _id: request.params.id, createdBy: request.userId });
 
     if (!deleted) {
       return response.status(404).json({

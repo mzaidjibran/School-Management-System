@@ -4,9 +4,10 @@ import TimeTable from "../models/TimeTable_model.js";
 export const createOrUpdateTimetable = async (req, res) => {
   try {
     const { class: classId, day, session } = req.body;
+    req.body.createdBy = req.userId;
 
     const timetable = await TimeTable.findOneAndUpdate(
-      { class: classId, day, session },
+      { class: classId, day, session, createdBy: req.userId },
       { ...req.body },
       { upsert: true, new: true, runValidators: true }
     );
@@ -27,7 +28,7 @@ export const getClassTimetable = async (req, res) => {
     const { classId } = req.params;
     const { session } = req.query;
 
-    const filter = { class: classId, isActive: true };
+    const filter = { class: classId, isActive: true, createdBy: req.userId };
     if (session) filter.session = session;
 
     const timetable = await TimeTable.find(filter)
@@ -61,7 +62,7 @@ export const getTodayTimetable = async (req, res) => {
     const today = days[new Date().getDay()];
     const { session } = req.query;
 
-    const filter = { class: classId, day: today, isActive: true };
+    const filter = { class: classId, day: today, isActive: true, createdBy: req.userId };
     if (session) filter.session = session;
 
     const timetable = await TimeTable.findOne(filter).populate(
@@ -106,7 +107,7 @@ export const getTeacherTimetable = async (req, res) => {
     const { teacherId } = req.params;
     const { session } = req.query;
 
-    const filter = { "periods.teacher": teacherId, isActive: true };
+    const filter = { "periods.teacher": teacherId, isActive: true, createdBy: req.userId };
     if (session) filter.session = session;
 
     const timetables = await TimeTable.find(filter).populate(
@@ -123,7 +124,7 @@ export const getTeacherTimetable = async (req, res) => {
 // ─── Delete A Timetable Entry By ID ──────────────────────────────
 export const deleteTimetable = async (req, res) => {
   try {
-    const deleted = await TimeTable.findByIdAndDelete(req.params.id);
+    const deleted = await TimeTable.findOneAndDelete({ _id: req.params.id, createdBy: req.userId });
     if (!deleted) {
       return res
         .status(404)

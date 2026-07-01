@@ -146,6 +146,9 @@ export default function NoticeBoard() {
 
   // ── Fetch ──────────────────────────────────────────────────────
   const fetchNotices = useCallback(async () => {
+    const token = localStorage.getItem("accessToken") || localStorage.getItem("token");
+    if (!token) return;
+
     setLoading(true);
     try {
       const res = await getAllNotices();
@@ -153,7 +156,7 @@ export default function NoticeBoard() {
       setNotices(data);
       setFiltered(data);
     } catch (err) {
-      showToast("Notices load error: " + err.message, "error");
+      toast.error("Notices load error: " + err.message);
     } finally {
       setLoading(false);
     }
