@@ -216,9 +216,11 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
       if (profileImage) payload.append("profileImage", profileImage);
 
       const result = await updateTeacher(teacher._id || teacher.id, payload);
+      toast.success("Teacher updated successfully!");
       onSave(result.data);
       onClose();
     } catch (err) {
+      toast.error(err.message || "Update failed. Please try again.");
       setSaveError(err.message || "Update failed. Please try again.");
     } finally {
       setIsSaving(false);
@@ -554,6 +556,7 @@ export default function TeacherDataTable() {
       setTeachers(result.data || []);
       setFilteredTeachers(result.data || []);
     } catch (err) {
+      toast.error(err.message || "Failed to load teachers.");
       setFetchError(err.message || "Failed to load teachers.");
     } finally {
       setLoading(false);

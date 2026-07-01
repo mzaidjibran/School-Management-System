@@ -269,10 +269,12 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave, teachers }) => {
 
     try {
       const result = await updateClass(cls._id, payload);
+      toast.success("Class updated successfully!");
       setIsSaving(false);
       onSave(result.data);
       // onClose();
     } catch (error) {
+      toast.error(error.message || "Update failed.");
       setIsSaving(false);
       setErrors((prev) => ({ ...prev, submit: error.message || "Update fail ho gaya" }));
     }
@@ -487,6 +489,7 @@ export default function ClassList() {
         setFiltered(result.data || []);
       } catch (error) {
         console.error(error);
+        toast.error("Failed to load classes: " + error.message);
         setClasses([]);
         setFiltered([]);
       } finally {

@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import createTeacher from "../../api/Teacher_Api.js";
+import toast from "react-hot-toast";
 
 // ---------- Floating Label Input ----------
 const Input = ({
@@ -240,8 +241,7 @@ export default function AddTeacherPage() {
 
       await createTeacher(payload);
 
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
+      toast.success("Teacher saved successfully!");
 
       if (addAnother) {
         setFormData(emptyForm);
@@ -253,6 +253,7 @@ export default function AddTeacherPage() {
         navigate("/teachers");
       }
     } catch (err) {
+      toast.error(err.message || "Something went wrong. Please try again.");
       setSubmitError(err.message || "Something went wrong. Please try again.");
     } finally {
       setIsSaving(false);

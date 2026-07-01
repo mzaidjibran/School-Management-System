@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaBook, FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
 import { createClass } from "../../api/Class_Api.js"; // path apne folder structure ke hisaab se adjust kar lein
 import { getAllTeachers } from "../../api/Teacher_Api.js"; // path apne folder structure ke hisaab se adjust kar lein
+import toast from "react-hot-toast";
 
 // ---------- Floating Input ----------
 const FloatingInput = ({
@@ -192,12 +193,12 @@ export default function AddClass() {
     try {
       await createClass(payload);
       setLoading(false);
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+      toast.success("Class created successfully!");
       if (addAnother) resetForm();
       else navigate(-1);
     } catch (error) {
       setLoading(false);
+      toast.error(error.message || "Class create nahi ho saki");
       setApiError(error.message || "Class create nahi ho saki");
     }
   };
