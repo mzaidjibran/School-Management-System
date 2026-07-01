@@ -19,6 +19,12 @@ const attendanceSchema = new mongoose.Schema(
       required: [true, "Date is mandatory"],
     },
 
+    section: {
+      type: String,
+      enum: ["girls", "boys"],
+      required: false,
+    },
+
     status: {
       type: String,
       enum: ["present", "absent", "late", "leave"],

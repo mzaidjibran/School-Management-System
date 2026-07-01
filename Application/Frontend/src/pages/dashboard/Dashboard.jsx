@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/useAuth.js";
+import toast from "react-hot-toast";
 import {
   GraduationCap,
   Users,
@@ -129,6 +130,7 @@ export default function Dashboard() {
         }
       } catch (err) {
         console.error("Dashboard fetch error:", err);
+        toast.error("Dashboard data load nahi ho saka: " + err.message);
       } finally {
         setLoading(false);
       }

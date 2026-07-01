@@ -316,6 +316,7 @@ export default function Subjects() {
       setSubjects(res.data || []);
       setFiltered(res.data || []);
     } catch (err) {
+      toast.error("Subjects load karne mein error: " + err.message);
       setError("Subjects load karne mein error: " + err.message);
     } finally {
       setLoading(false);

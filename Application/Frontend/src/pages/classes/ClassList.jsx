@@ -17,6 +17,8 @@ import { getAllTeachers } from "../../api/Teacher_Api.js"; // path apne folder s
 import toast from "react-hot-toast";
 import { confirmToast } from "../../utils/toastHelpers.jsx";
 
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
+
 // ---------- Floating Input ----------
 const FloatingInput = ({
   label,
@@ -177,15 +179,35 @@ const StatusBadge = ({ status }) => (
 
 // ---------- Teacher Avatar ----------
 const TeacherAvatar = ({ teacher }) => {
+  const [imgError, setImgError] = useState(false);
   if (!teacher) {
     return <span className="text-xs text-slate-400 italic">Not Assigned</span>;
   }
-  const name = teacher.name || `${teacher.firstName || ""} ${teacher.lastName || ""}`.trim() || "—";
+  const name = teacher.name || `${teacher.firstName || ""} ${teacher.lastName || ""}`.trim() || "-";
+  const initials = name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+
+  const getProfileImageUrl = (img) => {
+    if (!img) return null;
+    if (img.startsWith("http")) return img;
+    return `${API_BASE}${img.startsWith("/") ? "" : "/"}${img}`;
+  };
+
+  const src = getProfileImageUrl(teacher.profileImage);
+
   return (
     <div className="flex items-center gap-2">
-      <div className="w-7 h-7 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 flex items-center justify-center text-white text-xs font-medium">
-        {name.charAt(0)}
-      </div>
+      {src && !imgError ? (
+        <img
+          src={src}
+          alt={name}
+          onError={() => setImgError(true)}
+          className="w-7 h-7 rounded-full object-cover ring-1 ring-slate-200"
+        />
+      ) : (
+        <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-[10px] font-bold ring-1 ring-slate-200">
+          {initials}
+        </div>
+      )}
       <span className="text-sm font-medium text-slate-700">{name}</span>
     </div>
   );

@@ -102,7 +102,14 @@ export const createStudent = async (request, response) => {
 // ─── Get All Students ─────────────────────────────────────────────
 export const getAllStudents = async (request, response) => {
   try {
-    const students = await Student.find({ createdBy: request.userId }).populate("currentClass");
+    const query = { createdBy: request.userId };
+    if (request.query.currentClass) {
+      query.currentClass = request.query.currentClass;
+    }
+    if (request.query.section) {
+      query.section = request.query.section;
+    }
+    const students = await Student.find(query).populate("currentClass");
     response.status(200).json({
       success: true,
       error: false,

@@ -70,9 +70,11 @@ const EditModal = ({ exam, classes, onClose, onSave }) => {
       const result = await updateExam(exam._id, {
         ...form, totalMarks: Number(form.totalMarks), passingMarks: Number(form.passingMarks),
       });
+      toast.success("Exam updated successfully!");
       onSave(result.data);
       onClose();
     } catch (error) {
+      toast.error(error.message || "Update failed.");
       setErr(error.message || "Update fail ho gaya");
     } finally {
       setSaving(false);
@@ -149,6 +151,7 @@ export default function ExamList() {
         setClasses(classRes.data || []);
       } catch (e) {
         console.error(e);
+        toast.error("Failed to load exams: " + e.message);
       } finally {
         setLoading(false);
       }

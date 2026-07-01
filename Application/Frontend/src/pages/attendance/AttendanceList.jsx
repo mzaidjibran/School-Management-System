@@ -6,6 +6,7 @@ import autoTable from "jspdf-autotable";
 import { saveAs } from "file-saver";
 import { getAllClasses } from "../../api/Class_Api.js";
 import { getAttendanceByClassAndDate } from "../../api/Attendence_Api.js";
+import toast from "react-hot-toast";
 
 // ---------- Skeleton ----------
 const TableSkeleton = () => (
@@ -61,6 +62,7 @@ export default function AttendanceList() {
   );
   const [search, setSearch]           = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [selectedSection, setSelectedSection] = useState("girls");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -72,6 +74,7 @@ export default function AttendanceList() {
         setClasses(result.data || []);
       } catch (e) {
         console.error(e);
+        toast.error("Failed to load classes: " + e.message);
       } finally {
         setLoadingClasses(false);
       }
@@ -79,9 +82,9 @@ export default function AttendanceList() {
     fetch();
   }, []);
 
-  // ── Load attendance jab class ya date change ho ───────────────
+  // ── Load attendance jab class, date ya section change ho ───────────
   useEffect(() => {
-    if (!selectedClass || !selectedDate) {
+    if (!selectedClass || !selectedDate || !selectedSection) {
       setRecords([]);
       setFiltered([]);
       return;
@@ -89,17 +92,18 @@ export default function AttendanceList() {
     const fetch = async () => {
       setLoading(true);
       try {
-        const result = await getAttendanceByClassAndDate(selectedClass, selectedDate);
+        const result = await getAttendanceByClassAndDate(selectedClass, selectedDate, selectedSection);
         setRecords(result.data || []);
       } catch (e) {
         console.error(e);
+        toast.error("Failed to load attendance records: " + e.message);
         setRecords([]);
       } finally {
         setLoading(false);
       }
     };
     fetch();
-  }, [selectedClass, selectedDate]);
+  }, [selectedClass, selectedDate, selectedSection]);
 
   // ── Client-side filters ───────────────────────────────────────
   useEffect(() => {
@@ -201,7 +205,7 @@ export default function AttendanceList() {
 
         {/* Class + Date selector */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-medium text-slate-500 mb-1.5">Select Class</label>
               <select
@@ -216,6 +220,17 @@ export default function AttendanceList() {
                     {c.name} — Section {c.section}
                   </option>
                 ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-500 mb-1.5">Select Section</label>
+              <select
+                value={selectedSection}
+                onChange={(e) => setSelectedSection(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                <option value="girls">Girls</option>
+                <option value="boys">Boys</option>
               </select>
             </div>
             <div>

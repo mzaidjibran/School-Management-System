@@ -499,7 +499,7 @@ export default function AddStudent() {
                       error={errors.class}
                     />
                     <Input label="Roll Number" name="rollNumber" value={formData.rollNumber} onChange={handleInputChange} required error={errors.rollNumber} />
-                    <Select label="Section" name="section" options={["A", "B", "C", "D"]} value={formData.section} onChange={handleInputChange} />
+                    <Select label="Section" name="section" options={[{ value: "girls", label: "Girls" }, { value: "boys", label: "Boys" }]} value={formData.section} onChange={handleInputChange} />
                     <Input label="Admission Date" type="date" name="admissionDate" value={formData.admissionDate} onChange={handleInputChange} required error={errors.admissionDate} />
                     <Input label="Previous School" name="previousSchool" value={formData.previousSchool} onChange={handleInputChange} />
                   </div>

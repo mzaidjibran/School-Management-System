@@ -37,7 +37,7 @@ export const getAllClasses = async (request, response) => {
     if (isActive !== undefined) filter.isActive = isActive === "true";
 
     const classes = await Class.find(filter)
-      .populate("classTeacher", "firstName lastName name email")
+      .populate("classTeacher", "firstName lastName name email profileImage")
       .sort({ name: 1, section: 1 });
 
     response.status(200).json({
@@ -61,7 +61,7 @@ export const getSingleClass = async (request, response) => {
   try {
     const singleClass = await Class.findOne({ _id: request.params.id, createdBy: request.userId }).populate(
       "classTeacher",
-      "firstName lastName name email"
+      "firstName lastName name email profileImage"
     );
 
     if (!singleClass) {
@@ -94,7 +94,7 @@ export const updateClass = async (request, response) => {
       { _id: request.params.id, createdBy: request.userId },
       request.body,
       { new: true, runValidators: true }
-    ).populate("classTeacher", "firstName lastName name email");
+    ).populate("classTeacher", "firstName lastName name email profileImage");
 
     if (!updatedClass) {
       return response.status(404).json({

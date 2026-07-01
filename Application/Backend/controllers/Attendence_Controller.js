@@ -50,7 +50,7 @@ export const markAttendance = async (request, response) => {
 // Ek class ki ek din ki poori hazri
 export const getAttendanceByClassAndDate = async (request, response) => {
   try {
-    const { classId, date } = request.query;
+    const { classId, date, section } = request.query;
 
     if (!classId || !date) {
       return response.status(400).json({
@@ -75,10 +75,15 @@ export const getAttendanceByClassAndDate = async (request, response) => {
     const end = new Date(date);
     end.setHours(23, 59, 59, 999);
 
-    const records = await Attendance.find({
+    const query = {
       class: classId,
       date: { $gte: start, $lte: end },
-    }).populate("student", "firstName lastName rollNumber profileImage");
+    };
+    if (section) {
+      query.section = section;
+    }
+
+    const records = await Attendance.find(query).populate("student", "firstName lastName rollNumber profileImage");
 
     response.status(200).json({
       success: true,

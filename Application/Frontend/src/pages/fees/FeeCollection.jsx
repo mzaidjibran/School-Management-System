@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FaSearch, FaMoneyBillWave, FaPrint, FaSave } from "react-icons/fa";
 import { getStudentFees, payFee, createFee } from "../../api/Fee_Api.js";
+import toast from "react-hot-toast";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
@@ -196,7 +197,8 @@ export default function CollectFee() {
         try {
           const feesJson = await getStudentFees(student._id);
           setStudentFees(feesJson.data || []);
-        } catch {
+        } catch (err) {
+          toast.error("Failed to load student fees: " + err.message);
           setStudentFees([]);
         }
       }
@@ -266,6 +268,7 @@ export default function CollectFee() {
       };
 
       setReceipt(receiptData);
+      toast.success("Fee payment processed successfully!");
 
       // Form reset karo
       setForm({
@@ -284,6 +287,7 @@ export default function CollectFee() {
       const feesJson = await getStudentFees(selectedStudent._id);
       setStudentFees(feesJson.data || []);
     } catch (err) {
+      toast.error(err.message || "Fee collect karne mein error aayi.");
       setError(err.message || "Fee collect karne mein error aayi.");
     } finally {
       setSubmitting(false);

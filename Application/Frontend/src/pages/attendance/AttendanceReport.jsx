@@ -3,6 +3,7 @@ import * as XLSX from "xlsx";
 import { getAllStudents } from "../../api/Student_Api.js";
 import { getAttendanceByStudent } from "../../api/Attendence_Api.js";
 import { getAllClasses } from "../../api/Class_Api.js";
+import toast from "react-hot-toast";
 import {
   TrendingUp,
   CheckCircle,
@@ -36,6 +37,7 @@ export default function AttendanceReport() {
 
   const [classFilter, setClassFilter]     = useState("");
   const [studentFilter, setStudentFilter] = useState("");
+  const [sectionFilter, setSectionFilter] = useState("girls");
 
   // Current month default
   const now = new Date();
@@ -46,16 +48,24 @@ export default function AttendanceReport() {
   useEffect(() => {
     getAllClasses()
       .then((r) => setClasses(r.data || []))
-      .catch(console.error);
+      .catch((err) => {
+        console.error(err);
+        toast.error("Failed to load classes: " + err.message);
+      });
   }, []);
 
-  // ── Load students jab class filter change ho ──────────────────
+  // ── Load students jab class ya section filter change ho ────────
   useEffect(() => {
-    const params = classFilter ? { currentClass: classFilter } : {};
+    const params = {};
+    if (classFilter) params.currentClass = classFilter;
+    if (sectionFilter) params.section = sectionFilter;
     getAllStudents(params)
       .then((r) => setStudents(r.data || []))
-      .catch(console.error);
-  }, [classFilter]);
+      .catch((err) => {
+        console.error(err);
+        toast.error("Failed to load students: " + err.message);
+      });
+  }, [classFilter, sectionFilter]);
 
   // ── Build report: har student ki attendance summary ───────────
   useEffect(() => {
@@ -65,37 +75,42 @@ export default function AttendanceReport() {
       return;
     }
     setLoading(true);
-
     const fetchAll = async () => {
-      const results = await Promise.allSettled(
-        students.map((s) =>
-          getAttendanceByStudent(s._id, parseInt(month), parseInt(year))
-        )
-      );
+      try {
+        const results = await Promise.allSettled(
+          students.map((s) =>
+            getAttendanceByStudent(s._id, parseInt(month), parseInt(year))
+          )
+        );
 
-      const data = students.map((s, i) => {
-        const res = results[i];
-        if (res.status === "rejected") {
-          return { ...s, present: 0, absent: 0, leave: 0, late: 0, total: 0, percent: 0 };
-        }
-        const summary = res.value.summary || {};
-        const total   = summary.total || 0;
-        const present = summary.present || 0;
-        const percent = total ? parseFloat(((present / total) * 100).toFixed(1)) : 0;
-        return {
-          ...s,
-          present,
-          absent:  summary.absent || 0,
-          leave:   summary.leave  || 0,
-          late:    summary.late   || 0,
-          total,
-          percent,
-        };
-      });
+        const data = students.map((s, i) => {
+          const res = results[i];
+          if (res.status === "rejected") {
+            return { ...s, present: 0, absent: 0, leave: 0, late: 0, total: 0, percent: 0 };
+          }
+          const summary = res.value.summary || {};
+          const total   = summary.total || 0;
+          const present = summary.present || 0;
+          const percent = total ? parseFloat(((present / total) * 100).toFixed(1)) : 0;
+          return {
+            ...s,
+            present,
+            absent:  summary.absent || 0,
+            leave:   summary.leave  || 0,
+            late:    summary.late   || 0,
+            total,
+            percent,
+          };
+        });
 
-      setReportData(data);
-      setFilteredData(data);
-      setLoading(false);
+        setReportData(data);
+        setFilteredData(data);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to compile attendance reports: " + err.message);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchAll();
@@ -215,7 +230,7 @@ export default function AttendanceReport() {
         {/* Filters */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 mb-6">
           <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Filter Records</label>
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
             <input
               type="text"
               placeholder="Search name or roll no..."
@@ -234,6 +249,14 @@ export default function AttendanceReport() {
                   {c.name} — Section {c.section}
                 </option>
               ))}
+            </select>
+            <select
+              value={sectionFilter}
+              onChange={(e) => setSectionFilter(e.target.value)}
+              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-semibold text-slate-700 cursor-pointer"
+            >
+              <option value="girls">Girls</option>
+              <option value="boys">Boys</option>
             </select>
             <select
               value={month}

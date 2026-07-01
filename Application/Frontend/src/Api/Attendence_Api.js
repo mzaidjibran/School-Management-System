@@ -14,14 +14,13 @@ export const markAttendance = async (records) => {
 };
 
 // ─── Get Attendance By Class and Date ────────────────────────────
-export const getAttendanceByClassAndDate = async (classId, date) => {
-  const response = await fetch(
-    `${API_BASE}/api/attendance?classId=${classId}&date=${date}`,
-    {
-      method: "GET",
-      headers: getHeaders(),
-    }
-  );
+export const getAttendanceByClassAndDate = async (classId, date, section) => {
+  let url = `${API_BASE}/api/attendance?classId=${classId}&date=${date}`;
+  if (section) url += `&section=${section}`;
+  const response = await fetch(url, {
+    method: "GET",
+    headers: getHeaders(),
+  });
   if (!response.ok) throw new Error(`Get attendance failed: ${response.status}`);
   return response.json();
 };

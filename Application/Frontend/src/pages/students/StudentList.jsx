@@ -343,7 +343,7 @@ const StudentFormModal = ({ isOpen, onClose, student, mode, onSave }) => {
                   disabled={isViewOnly}
                 />
                 <Input label="Roll Number" name="rollNumber" value={formData.rollNumber} onChange={handleChange} required error={errors.rollNumber} disabled={isViewOnly} />
-                <Select label="Section" name="section" options={["A", "B", "C", "D"]} value={formData.section} onChange={handleChange} disabled={isViewOnly} />
+                <Select label="Section" name="section" options={[{ value: "girls", label: "Girls" }, { value: "boys", label: "Boys" }]} value={formData.section} onChange={handleChange} disabled={isViewOnly} />
                 <Input label="Admission Date" type="date" name="admissionDate" value={formData.admissionDate} onChange={handleChange} disabled={isViewOnly} />
                 <Input label="Previous School" name="previousSchool" value={formData.previousSchool} onChange={handleChange} disabled={isViewOnly} />
               </div>

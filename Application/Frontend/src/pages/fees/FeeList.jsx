@@ -8,6 +8,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveAs } from "file-saver";
 import { getAllFees, updateFee, payFee } from "../../api/Fee_Api.js";
+import toast from "react-hot-toast";
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
@@ -135,9 +136,11 @@ const FeeRecordModal = ({ record, mode, onClose, onSave }) => {
         paidAmount: formData.paidAmount,
         remarks: formData.remarks,
       });
+      toast.success("Fee details updated successfully!");
       onSave(res.data);
       onClose();
     } catch (err) {
+      toast.error(err.message || "Update failed.");
       setError(err.message || "Update karne mein error aayi.");
     } finally {
       setIsSaving(false);
@@ -345,6 +348,7 @@ export default function FeeRecords() {
       setRecords(res.data || []);
       setFiltered(res.data || []);
     } catch (err) {
+      toast.error("Fees load karne mein error aayi: " + err.message);
       setError("Fees load karne mein error aayi: " + err.message);
     } finally {
       setLoading(false);

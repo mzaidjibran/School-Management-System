@@ -8,6 +8,7 @@ import {
 } from "react-icons/fa";
 import { getAllClasses } from "../../api/Class_Api.js";
 import { markAttendance } from "../../api/Attendence_Api.js";
+import toast from "react-hot-toast";
 
 // ─── Student fetch by classId ─────────────────────────────────────
 // Students real API se aayenge — Student_Api ka getAllStudents use karo
@@ -53,6 +54,7 @@ export default function MarkAttendance() {
   const [saving, setSaving]                 = useState(false);
   const [success, setSuccess]               = useState(false);
   const [apiError, setApiError]             = useState("");
+  const [selectedSection, setSelectedSection] = useState("girls");
 
   // ── Classes fetch ──────────────────────────────────────────────
   useEffect(() => {
@@ -62,6 +64,7 @@ export default function MarkAttendance() {
         setClasses(result.data || []);
       } catch (e) {
         console.error(e);
+        toast.error("Failed to load classes: " + e.message);
       } finally {
         setLoadingClasses(false);
       }
@@ -69,9 +72,9 @@ export default function MarkAttendance() {
     fetch();
   }, []);
 
-  // ── Students fetch jab class change ho ────────────────────────
+  // ── Students fetch jab class ya section change ho ───────────────
   useEffect(() => {
-    if (!selectedClass) {
+    if (!selectedClass || !selectedSection) {
       setStudents([]);
       setAttendance({});
       return;
@@ -79,8 +82,8 @@ export default function MarkAttendance() {
     const fetch = async () => {
       setLoadingStudents(true);
       try {
-        // currentClass filter use karo
-        const result = await getAllStudents({ currentClass: selectedClass });
+        // currentClass aur section filter use karo
+        const result = await getAllStudents({ currentClass: selectedClass, section: selectedSection });
         const list = result.data || [];
         setStudents(list);
         // Default sab Present
@@ -89,13 +92,14 @@ export default function MarkAttendance() {
         setAttendance(init);
       } catch (e) {
         console.error(e);
+        toast.error("Failed to load students: " + e.message);
         setStudents([]);
       } finally {
         setLoadingStudents(false);
       }
     };
     fetch();
-  }, [selectedClass]);
+  }, [selectedClass, selectedSection]);
 
   const handleStatusChange = (studentId, status) =>
     setAttendance((prev) => ({ ...prev, [studentId]: status }));
@@ -115,30 +119,29 @@ export default function MarkAttendance() {
   // ── Save ──────────────────────────────────────────────────────
   const handleSave = async () => {
     if (!selectedClass) {
-      setApiError("Pehle class select karo");
+      toast.error("Pehle class select karo");
       return;
     }
     if (students.length === 0) {
-      setApiError("Is class mein koi student nahi");
+      toast.error("Is class mein koi student nahi");
       return;
     }
     setSaving(true);
-    setApiError("");
     try {
       const records = students.map((s) => ({
         student:     s._id,
         class:       selectedClass,
         date:        selectedDate,
+        section:     selectedSection,
         // backend lowercase expect karta hai
         status:      attendance[s._id]?.toLowerCase() || "present",
         lateMinutes: 0,
         remarks:     "",
       }));
       await markAttendance(records);
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+      toast.success("Attendance saved successfully!");
     } catch (e) {
-      setApiError(e.message || "Attendance save nahi ho saki");
+      toast.error(e.message || "Attendance save nahi ho saki");
     } finally {
       setSaving(false);
     }
@@ -169,7 +172,7 @@ export default function MarkAttendance() {
 
         {/* Filters */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-medium text-slate-500 mb-1.5">
                 Select Class <span className="text-rose-500">*</span>
@@ -188,6 +191,19 @@ export default function MarkAttendance() {
                     {c.name} — Section {c.section}
                   </option>
                 ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                Select Section <span className="text-rose-500">*</span>
+              </label>
+              <select
+                value={selectedSection}
+                onChange={(e) => setSelectedSection(e.target.value)}
+                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-white text-sm outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                <option value="girls">Girls</option>
+                <option value="boys">Boys</option>
               </select>
             </div>
             <div>
@@ -322,20 +338,6 @@ export default function MarkAttendance() {
           </div>
         )}
 
-        {/* Error Toast */}
-        {apiError && (
-          <div className="fixed bottom-6 right-6 bg-rose-500 text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 z-50">
-            <span>{apiError}</span>
-          </div>
-        )}
-
-        {/* Success Toast */}
-        {success && (
-          <div className="fixed bottom-6 right-6 bg-emerald-500 text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 z-50">
-            <FaCheckCircle className="w-5 h-5" />
-            <span>Attendance saved successfully!</span>
-          </div>
-        )}
       </div>
     </div>
   );

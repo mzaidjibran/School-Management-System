@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaBook, FaSave, FaPlus, FaUndo, FaTimes } from "react-icons/fa";
 import { createExam } from "../../api/Exam_Api.js";
 import { getAllClasses } from "../../api/Class_Api.js";
+import toast from "react-hot-toast";
 
 const FloatingInput = ({ label, name, type = "text", value, onChange, required, error }) => (
   <div className="relative">
@@ -67,7 +68,12 @@ export default function AddExam() {
   const [apiError, setApiError] = useState("");
 
   useEffect(() => {
-    getAllClasses().then((r) => setClasses(r.data || [])).catch(console.error);
+    getAllClasses()
+      .then((r) => setClasses(r.data || []))
+      .catch((err) => {
+        console.error(err);
+        toast.error("Failed to load classes: " + err.message);
+      });
   }, []);
 
   const classOptions = classes.map((c) => ({ value: c._id, label: `${c.name} — Section ${c.section}` }));
@@ -119,12 +125,12 @@ export default function AddExam() {
     try {
       await createExam(payload);
       setLoading(false);
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+      toast.success("Exam created successfully!");
       if (addAnother) resetForm();
       else navigate("/exams");
     } catch (err) {
       setLoading(false);
+      toast.error(err.message || "Exam create nahi ho saka");
       setApiError(err.message || "Exam create nahi ho saka");
     }
   };
