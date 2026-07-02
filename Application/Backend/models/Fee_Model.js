@@ -77,6 +77,16 @@ const feeSchema = new mongoose.Schema(
       ref: "User",
       default: null,
     },
+    branch: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Branch",
+      default: null,
+    },
+    schoolSection: {
+      type: String,
+      enum: ["girls", "boys"],
+      default: null,
+    },
   },
   {
     timestamps: true,

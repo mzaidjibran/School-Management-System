@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FaSearch, FaFileCsv, FaFileExcel, FaFilePdf } from "react-icons/fa";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveAs } from "file-saver";
 import { getAllClasses } from "../../api/Class_Api.js";
-import { getAttendanceByClassAndDate } from "../../api/Attendence_Api.js";
+import { getAttendanceByClassAndDate, markAttendance } from "../../api/Attendence_Api.js";
+import { getAllStudents } from "../../api/Student_Api.js";
 import toast from "react-hot-toast";
 
 // ---------- Skeleton ----------
@@ -154,6 +155,133 @@ export default function AttendanceList() {
       "attendance.csv"
     );
   };
+
+  const parseCSV = (text) => {
+    const lines = [];
+    let row = [""];
+    let inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      const nextChar = text[i + 1];
+      if (char === '"') {
+        if (inQuotes && nextChar === '"') {
+          row[row.length - 1] += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        row.push('');
+      } else if ((char === '\r' || char === '\n') && !inQuotes) {
+        if (char === '\r' && nextChar === '\n') i++;
+        lines.push(row);
+        row = [''];
+      } else {
+        row[row.length - 1] += char;
+      }
+    }
+    if (row.length > 1 || row[0] !== '') lines.push(row);
+    const headers = lines[0].map(h => h.trim());
+    const data = [];
+    for (let i = 1; i < lines.length; i++) {
+      const r = lines[i];
+      if (r.length === 0 || (r.length === 1 && !r[0])) continue;
+      const obj = {};
+      headers.forEach((h, idx) => {
+        obj[h] = (r[idx] !== undefined) ? r[idx].trim() : "";
+      });
+      data.push(obj);
+    }
+    return data;
+  };
+
+  const csvFileInputRef = useRef(null);
+
+  const handleBackupData = () => {
+    const headers = ["rollNumber", "studentName", "date", "className", "schoolSection", "status", "remarks"];
+    const rows = records.map((r) => [
+      r.student?.rollNumber || "",
+      `${r.student?.firstName || ""} ${r.student?.lastName || ""}`.trim(),
+      r.date ? r.date.split("T")[0] : "",
+      r.class?.name || "",
+      r.schoolSection || r.section || "",
+      r.status || "present",
+      r.remarks || ""
+    ]);
+    const csvContent = [headers.join(","), ...rows.map(row => row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(","))].join("\n");
+    saveAs(new Blob([csvContent], { type: "text/csv;charset=utf-8;" }), "attendance_backup.csv");
+    toast.success("Attendance backup downloaded successfully!");
+  };
+
+  const handleUploadCSV = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const text = evt.target.result;
+        const parsed = parseCSV(text);
+        if (parsed.length === 0) {
+          toast.error("CSV file is empty");
+          return;
+        }
+        const [classesRes, studentsRes] = await Promise.all([
+          getAllClasses(),
+          getAllStudents()
+        ]);
+        const classesList = classesRes.data || [];
+        const studentsList = studentsRes.data || [];
+        let successCount = 0;
+        let failCount = 0;
+        const loadingToastId = toast.loading("Uploading attendance...");
+        const markPayload = [];
+        for (const row of parsed) {
+          try {
+            const matchedClass = classesList.find(c => c.name.toLowerCase() === (row.className || "").toLowerCase());
+            const matchedStudent = studentsList.find(s => s.rollNumber === row.rollNumber);
+            if (!matchedStudent) {
+              console.warn(`Student with roll number ${row.rollNumber} not found.`);
+              failCount++;
+              continue;
+            }
+            markPayload.push({
+              student: matchedStudent._id,
+              class: matchedClass ? matchedClass._id : matchedStudent.class?._id || matchedStudent.class,
+              date: row.date || new Date().toISOString().split("T")[0],
+              section: (row.schoolSection || "girls").toLowerCase(),
+              status: (row.status || "present").toLowerCase(),
+              remarks: row.remarks || "",
+              lateMinutes: 0
+            });
+            successCount++;
+          } catch (err) {
+            console.error("Failed to map attendance CSV row:", row, err);
+            toast.error(`Roll# ${row.rollNumber}: ${err.message}`);
+            failCount++;
+          }
+        }
+        if (markPayload.length > 0) {
+          await markAttendance(markPayload);
+        }
+        toast.dismiss(loadingToastId);
+        if (successCount > 0) {
+          toast.success(`${successCount} attendance records uploaded successfully!`);
+          if (selectedClass && selectedDate && selectedSection) {
+            const result = await getAttendanceByClassAndDate(selectedClass, selectedDate, selectedSection);
+            setRecords(result.data || []);
+          }
+        }
+        if (failCount > 0) {
+          toast.error(`${failCount} rows failed to upload. Check console.`);
+        }
+      } catch (err) {
+        toast.error("Failed to parse CSV: " + err.message);
+      } finally {
+        if (csvFileInputRef.current) csvFileInputRef.current.value = "";
+      }
+    };
+    reader.readAsText(file);
+  };
   const exportExcel = () => {
     const ws = XLSX.utils.json_to_sheet(flatRows());
     const wb = XLSX.utils.book_new();
@@ -190,10 +318,10 @@ export default function AttendanceList() {
             <h1 className="text-2xl font-bold text-slate-800">Attendance Records</h1>
             <p className="text-slate-500 text-sm mt-0.5">Class aur date select karke records dekho</p>
           </div>
-          <div className="flex items-center gap-2">
-            <button onClick={exportCSV}   className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition">
-              <FaFileCsv className="text-sm" /> CSV
-            </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <input type="file" accept=".csv" ref={csvFileInputRef} className="hidden" onChange={handleUploadCSV} />
+            <button type="button" onClick={() => csvFileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold transition">Upload CSV</button>
+            <button type="button" onClick={handleBackupData} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition">Backup Data</button>
             <button onClick={exportExcel} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 transition">
               <FaFileExcel className="text-sm" /> Excel
             </button>

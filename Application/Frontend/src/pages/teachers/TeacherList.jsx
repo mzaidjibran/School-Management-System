@@ -5,7 +5,7 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveAs } from "file-saver";
-import { getAllTeachers, updateTeacher, deleteTeacher } from "../../api/Teacher_Api.js";
+import createTeacher, { getAllTeachers, updateTeacher, deleteTeacher } from "../../api/Teacher_Api.js";
 import toast from "react-hot-toast";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
@@ -115,7 +115,8 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
     maritalStatus: "", phone: "", alternatePhone: "", email: "", address: "",
     city: "", subject: "", qualification: "", specialization: "", university: "",
     passingYear: "", employeeId: "", joiningDate: "", experience: "", salary: "",
-    employmentStatus: "", notes: "", emergencyName: "", emergencyPhone: "",
+    employmentStatus: "", schoolSection: localStorage.getItem("activeSection") || "girls",
+    notes: "", emergencyName: "", emergencyPhone: "",
   };
 
   const [formData, setFormData] = useState(emptyForm);
@@ -156,6 +157,7 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
         experience: teacher.experience || "",
         salary: teacher.salary ? String(teacher.salary) : "",
         employmentStatus: teacher.employmentStatus || "",
+        schoolSection: teacher.schoolSection || "",
         notes: teacher.notes || "",
         emergencyName: teacher.emergencyName || "",
         emergencyPhone: teacher.emergencyPhone || "",
@@ -436,6 +438,7 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
                         <FI label="Experience (years)" name="experience" type="number" />
                         <FI label="Salary (PKR)" name="salary" type="number" />
                         <FS label="Employment Status" name="employmentStatus" options={["Permanent", "Contract", "Probation", "Part-time"]} required />
+                        <FS label="School Section" name="schoolSection" options={[{value:"girls",label:"Girls Section"},{value:"boys",label:"Boys Section"}]} required />
                       </div>
                     </div>
                     <div>
@@ -563,7 +566,13 @@ export default function TeacherDataTable() {
     }
   };
 
-  useEffect(() => { fetchTeachers(); }, []);
+  useEffect(() => {
+    fetchTeachers();
+    window.addEventListener("branch-changed", fetchTeachers);
+    return () => {
+      window.removeEventListener("branch-changed", fetchTeachers);
+    };
+  }, []);
 
   // ─── Filter logic ──────────────────────────────────────────────
   useEffect(() => {
@@ -625,6 +634,128 @@ export default function TeacherDataTable() {
       headStyles: { fillColor: [79, 70, 229] },
     });
     doc.save("teachers.pdf");
+  };
+
+  const parseCSV = (text) => {
+    const lines = [];
+    let row = [""];
+    let inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      const nextChar = text[i + 1];
+      if (char === '"') {
+        if (inQuotes && nextChar === '"') {
+          row[row.length - 1] += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        row.push('');
+      } else if ((char === '\r' || char === '\n') && !inQuotes) {
+        if (char === '\r' && nextChar === '\n') i++;
+        lines.push(row);
+        row = [''];
+      } else {
+        row[row.length - 1] += char;
+      }
+    }
+    if (row.length > 1 || row[0] !== '') lines.push(row);
+    const headers = lines[0].map(h => h.trim());
+    const data = [];
+    for (let i = 1; i < lines.length; i++) {
+      const r = lines[i];
+      if (r.length === 0 || (r.length === 1 && !r[0])) continue;
+      const obj = {};
+      headers.forEach((h, idx) => {
+        obj[h] = (r[idx] !== undefined) ? r[idx].trim() : "";
+      });
+      data.push(obj);
+    }
+    return data;
+  };
+
+  const csvFileInputRef = useRef(null);
+
+  const handleBackupData = () => {
+    const headers = [
+      "firstName", "lastName", "gender", "email", "phone", "qualification",
+      "experience", "subject", "salary", "address", "joiningDate", "status", "schoolSection"
+    ];
+    const rows = teachers.map((t) => [
+      t.firstName || t.name?.split(" ")[0] || "",
+      t.lastName || t.name?.split(" ").slice(1).join(" ") || "",
+      t.gender || "",
+      t.email || "",
+      t.phone || "",
+      t.qualification || "",
+      t.experience || "",
+      t.subject || "",
+      t.salary || "",
+      t.address || "",
+      t.joiningDate ? t.joiningDate.split("T")[0] : "",
+      t.status || "active",
+      t.schoolSection || ""
+    ]);
+    const csvContent = [headers.join(","), ...rows.map(r => r.map(val => `"${String(val).replace(/"/g, '""')}"`).join(","))].join("\n");
+    saveAs(new Blob([csvContent], { type: "text/csv;charset=utf-8;" }), "teachers_backup.csv");
+    toast.success("Teachers backup downloaded successfully!");
+  };
+
+  const handleUploadCSV = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const text = evt.target.result;
+        const parsed = parseCSV(text);
+        if (parsed.length === 0) {
+          toast.error("CSV file is empty");
+          return;
+        }
+        let successCount = 0;
+        let failCount = 0;
+        const loadingToastId = toast.loading("Uploading teachers...");
+        for (const row of parsed) {
+          try {
+            const fd = new FormData();
+            fd.append("firstName", row.firstName || "");
+            fd.append("lastName", row.lastName || "");
+            fd.append("gender", (row.gender || "male").toLowerCase());
+            fd.append("email", row.email || "");
+            fd.append("phone", row.phone || "");
+            fd.append("qualification", row.qualification || "");
+            fd.append("experience", row.experience || "");
+            fd.append("subject", row.subject || "");
+            fd.append("salary", row.salary || "");
+            fd.append("address", row.address || "");
+            fd.append("joiningDate", row.joiningDate || new Date().toISOString().split("T")[0]);
+            fd.append("status", (row.status || "active").toLowerCase());
+            fd.append("schoolSection", (row.schoolSection || localStorage.getItem("activeSection") || "girls").toLowerCase());
+            await createTeacher(fd);
+            successCount++;
+          } catch (err) {
+            console.error("Failed to create teacher from CSV row:", row, err);
+            toast.error(`Row "${row.firstName} ${row.lastName}": ${err.message}`);
+            failCount++;
+          }
+        }
+        toast.dismiss(loadingToastId);
+        if (successCount > 0) {
+          toast.success(`${successCount} teachers uploaded successfully!`);
+          fetchTeachers();
+        }
+        if (failCount > 0) {
+          toast.error(`${failCount} rows failed to upload. Check console.`);
+        }
+      } catch (err) {
+        toast.error("Failed to parse CSV: " + err.message);
+      } finally {
+        if (csvFileInputRef.current) csvFileInputRef.current.value = "";
+      }
+    };
+    reader.readAsText(file);
   };
 
   // ─── Modal handlers ───────────────────────────────────────────
@@ -727,8 +858,10 @@ export default function TeacherDataTable() {
             <option value="On Leave">On Leave</option>
             <option value="Inactive">Inactive</option>
           </select>
-          <div className="flex gap-2">
-            <button onClick={exportCSV} title="Export CSV" className="p-2 bg-slate-100 rounded-lg hover:bg-slate-200 transition"><FaFileCsv className="text-slate-600" /></button>
+          <div className="flex flex-wrap gap-2 items-center">
+            <input type="file" accept=".csv" ref={csvFileInputRef} className="hidden" onChange={handleUploadCSV} />
+            <button type="button" onClick={() => csvFileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold transition">Upload CSV</button>
+            <button type="button" onClick={handleBackupData} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition">Backup Data</button>
             <button onClick={exportExcel} title="Export Excel" className="p-2 bg-slate-100 rounded-lg hover:bg-slate-200 transition"><FaFileExcel className="text-green-600" /></button>
             <button onClick={exportPDF} title="Export PDF" className="p-2 bg-slate-100 rounded-lg hover:bg-slate-200 transition"><FaFilePdf className="text-red-600" /></button>
           </div>

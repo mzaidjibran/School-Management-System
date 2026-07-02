@@ -7,7 +7,9 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveAs } from "file-saver";
-import { getAllFees, updateFee, payFee } from "../../api/Fee_Api.js";
+import { getAllFees, updateFee, payFee, createFee } from "../../api/Fee_Api.js";
+import { getAllClasses } from "../../Api/Class_Api.js";
+import { getAllStudents } from "../../Api/Student_Api.js";
 import toast from "react-hot-toast";
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -355,7 +357,13 @@ export default function FeeRecords() {
     }
   };
 
-  useEffect(() => { fetchFees(); }, []);
+  useEffect(() => {
+    fetchFees();
+    window.addEventListener("branch-changed", fetchFees);
+    return () => {
+      window.removeEventListener("branch-changed", fetchFees);
+    };
+  }, []);
 
   useEffect(() => {
     let result = records;
@@ -380,21 +388,128 @@ export default function FeeRecords() {
     setRecords((prev) => prev.map((r) => (r._id === updated._id ? updated : r)));
   };
 
-  const exportCSV = () => {
-    const headers = ["Roll No", "Student", "Fee Type", "Month", "Year", "Due Date", "Total", "Paid", "Remaining", "Status"];
-    const rows = filtered.map((r) => [
-      r.student?.rollNumber || "—",
-      r.student ? `${r.student.firstName} ${r.student.lastName}` : "—",
-      r.feeType,
-      r.month ? MONTHS[r.month - 1] : "—",
-      r.year,
-      r.dueDate?.split("T")[0] || "—",
-      r.amount,
-      r.paidAmount,
-      r.amount - r.paidAmount,
-      statusLabel(r.status),
+  const parseCSV = (text) => {
+    const lines = [];
+    let row = [""];
+    let inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      const nextChar = text[i + 1];
+      if (char === '"') {
+        if (inQuotes && nextChar === '"') {
+          row[row.length - 1] += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        row.push('');
+      } else if ((char === '\r' || char === '\n') && !inQuotes) {
+        if (char === '\r' && nextChar === '\n') i++;
+        lines.push(row);
+        row = [''];
+      } else {
+        row[row.length - 1] += char;
+      }
+    }
+    if (row.length > 1 || row[0] !== '') lines.push(row);
+    const headers = lines[0].map(h => h.trim());
+    const data = [];
+    for (let i = 1; i < lines.length; i++) {
+      const r = lines[i];
+      if (r.length === 0 || (r.length === 1 && !r[0])) continue;
+      const obj = {};
+      headers.forEach((h, idx) => {
+        obj[h] = (r[idx] !== undefined) ? r[idx].trim() : "";
+      });
+      data.push(obj);
+    }
+    return data;
+  };
+
+  const csvFileInputRef = useRef(null);
+
+  const handleBackupData = () => {
+    const headers = ["rollNumber", "studentName", "className", "month", "year", "amount", "paidAmount", "dueDate", "status"];
+    const rows = records.map((r) => [
+      r.student?.rollNumber || "",
+      `${r.student?.firstName || ""} ${r.student?.lastName || ""}`.trim(),
+      r.class?.name || "",
+      r.month || 1,
+      r.year || new Date().getFullYear(),
+      r.amount || 0,
+      r.paidAmount || 0,
+      r.dueDate ? r.dueDate.split("T")[0] : "",
+      r.status || "pending"
     ]);
-    saveAs(new Blob([[headers, ...rows].map((row) => row.join(",")).join("\n")], { type: "text/csv" }), "fee_records.csv");
+    const csvContent = [headers.join(","), ...rows.map(row => row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(","))].join("\n");
+    saveAs(new Blob([csvContent], { type: "text/csv;charset=utf-8;" }), "fees_backup.csv");
+    toast.success("Fees backup downloaded successfully!");
+  };
+
+  const handleUploadCSV = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const text = evt.target.result;
+        const parsed = parseCSV(text);
+        if (parsed.length === 0) {
+          toast.error("CSV file is empty");
+          return;
+        }
+        const [classesRes, studentsRes] = await Promise.all([
+          getAllClasses(),
+          getAllStudents()
+        ]);
+        const classesList = classesRes.data || [];
+        const studentsList = studentsRes.data || [];
+        let successCount = 0;
+        let failCount = 0;
+        const loadingToastId = toast.loading("Uploading fee records...");
+        for (const row of parsed) {
+          try {
+            const matchedClass = classesList.find(c => c.name.toLowerCase() === (row.className || "").toLowerCase());
+            const matchedStudent = studentsList.find(s => s.rollNumber === row.rollNumber);
+            if (!matchedStudent) {
+              console.warn(`Student with roll number ${row.rollNumber} not found.`);
+              failCount++;
+              continue;
+            }
+            const payload = {
+              student: matchedStudent._id,
+              class: matchedClass ? matchedClass._id : matchedStudent.class?._id || matchedStudent.class,
+              month: Number(row.month) || 1,
+              year: Number(row.year) || new Date().getFullYear(),
+              amount: Number(row.amount) || 0,
+              paidAmount: Number(row.paidAmount) || 0,
+              dueDate: row.dueDate || new Date(new Date().getFullYear(), new Date().getMonth(), 10).toISOString().split("T")[0],
+              status: (row.status || "pending").toLowerCase()
+            };
+            await createFee(payload);
+            successCount++;
+          } catch (err) {
+            console.error("Failed to map fee CSV row:", row, err);
+            toast.error(`Roll# ${row.rollNumber}: ${err.message}`);
+            failCount++;
+          }
+        }
+        toast.dismiss(loadingToastId);
+        if (successCount > 0) {
+          toast.success(`${successCount} fee records uploaded successfully!`);
+          fetchFees();
+        }
+        if (failCount > 0) {
+          toast.error(`${failCount} rows failed to upload. Check console.`);
+        }
+      } catch (err) {
+        toast.error("Failed to parse CSV: " + err.message);
+      } finally {
+        if (csvFileInputRef.current) csvFileInputRef.current.value = "";
+      }
+    };
+    reader.readAsText(file);
   };
 
   const exportExcel = () => {
@@ -473,8 +588,10 @@ export default function FeeRecords() {
             <option value="">All Status</option>
             {["paid", "partial", "pending", "overdue"].map((s) => <option key={s} value={s}>{statusLabel(s)}</option>)}
           </select>
-          <div className="flex gap-2 ml-auto">
-            <button onClick={exportCSV} title="CSV" className="p-2 bg-slate-100 hover:bg-slate-200 rounded-lg transition"><FaFileCsv className="text-slate-600 w-4 h-4" /></button>
+          <div className="flex flex-wrap gap-2 items-center ml-auto">
+            <input type="file" accept=".csv" ref={csvFileInputRef} className="hidden" onChange={handleUploadCSV} />
+            <button type="button" onClick={() => csvFileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold transition">Upload CSV</button>
+            <button type="button" onClick={handleBackupData} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition">Backup Data</button>
             <button onClick={exportExcel} title="Excel" className="p-2 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition"><FaFileExcel className="text-emerald-600 w-4 h-4" /></button>
             <button onClick={exportPDF} title="PDF" className="p-2 bg-rose-50 hover:bg-rose-100 rounded-lg transition"><FaFilePdf className="text-rose-600 w-4 h-4" /></button>
           </div>

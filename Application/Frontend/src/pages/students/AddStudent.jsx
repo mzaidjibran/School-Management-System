@@ -145,6 +145,7 @@ export default function AddStudent() {
     class: "",
     rollNumber: "",
     section: "",
+    schoolSection: localStorage.getItem("activeSection") || "girls",
     admissionDate: "",
     previousSchool: "",
     medicalInfo: "",
@@ -231,6 +232,7 @@ export default function AddStudent() {
       if (!formData.class) newErrors.class = "Class is required";
       if (!formData.rollNumber) newErrors.rollNumber = "Roll number is required";
       if (!formData.admissionDate) newErrors.admissionDate = "Admission date is required";
+      if (!formData.schoolSection) newErrors.schoolSection = "School section is required";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -277,6 +279,7 @@ export default function AddStudent() {
       // Academic
       fd.append("rollNumber", formData.rollNumber);
       fd.append("section", formData.section);
+      fd.append("schoolSection", formData.schoolSection);
       fd.append("admissionDate", formData.admissionDate);
       fd.append("class", formData.class);
 
@@ -499,7 +502,19 @@ export default function AddStudent() {
                       error={errors.class}
                     />
                     <Input label="Roll Number" name="rollNumber" value={formData.rollNumber} onChange={handleInputChange} required error={errors.rollNumber} />
-                    <Select label="Section" name="section" options={[{ value: "girls", label: "Girls" }, { value: "boys", label: "Boys" }]} value={formData.section} onChange={handleInputChange} />
+                    <Input label="Class Section (e.g. A, B)" name="section" value={formData.section} onChange={handleInputChange} />
+                    <Select
+                      label="School Section"
+                      name="schoolSection"
+                      options={[
+                        { value: "girls", label: "Girls Section" },
+                        { value: "boys", label: "Boys Section" },
+                      ]}
+                      value={formData.schoolSection}
+                      onChange={handleInputChange}
+                      required
+                      error={errors.schoolSection}
+                    />
                     <Input label="Admission Date" type="date" name="admissionDate" value={formData.admissionDate} onChange={handleInputChange} required error={errors.admissionDate} />
                     <Input label="Previous School" name="previousSchool" value={formData.previousSchool} onChange={handleInputChange} />
                   </div>

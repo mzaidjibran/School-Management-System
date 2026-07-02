@@ -10,8 +10,9 @@ const createStudent = async (data) => {
     headers: isFormData ? getFormHeaders() : getHeaders(),
     body: isFormData ? data : JSON.stringify(data),
   });
-  if (!response.ok) throw new Error(`Create failed: ${response.status}`);
-  return response.json();
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || `Create failed: ${response.status}`);
+  return result;
 };
 
 export default createStudent;

@@ -142,21 +142,27 @@ export default function ExamList() {
   const [editExam, setEditExam]     = useState(null);
   const itemsPerPage = 10;
 
+  const fetchData = async () => {
+    try {
+      const [examRes, classRes] = await Promise.all([getAllExams(), getAllClasses()]);
+      setExams(examRes.data || []);
+      setFiltered(examRes.data || []);
+      setClasses(classRes.data || []);
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to load exams: " + e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [examRes, classRes] = await Promise.all([getAllExams(), getAllClasses()]);
-        setExams(examRes.data || []);
-        setFiltered(examRes.data || []);
-        setClasses(classRes.data || []);
-      } catch (e) {
-        console.error(e);
-        toast.error("Failed to load exams: " + e.message);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchData();
+
+    window.addEventListener("branch-changed", fetchData);
+    return () => {
+      window.removeEventListener("branch-changed", fetchData);
+    };
   }, []);
 
   useEffect(() => {

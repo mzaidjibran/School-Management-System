@@ -81,6 +81,9 @@ export const createStudent = async (request, response) => {
   try {
     const studentData = normalizePayload(request.body, request.file);
     studentData.createdBy = request.userId;
+    if (request.headers["x-branch-id"]) studentData.branch = request.headers["x-branch-id"];
+    studentData.schoolSection = studentData.schoolSection || request.headers["x-section"];
+
     const student = await Student.create(studentData);
     const populated = await Student.findById(student._id).populate("currentClass");
     response.status(201).json({
@@ -107,7 +110,12 @@ export const getAllStudents = async (request, response) => {
       query.currentClass = request.query.currentClass;
     }
     if (request.query.section) {
-      query.section = request.query.section;
+      query.schoolSection = request.query.section;
+    } else if (request.headers["x-section"]) {
+      query.schoolSection = request.headers["x-section"];
+    }
+    if (request.headers["x-branch-id"]) {
+      query.branch = request.headers["x-branch-id"];
     }
     const students = await Student.find(query).populate("currentClass");
     response.status(200).json({
@@ -125,10 +133,13 @@ export const getAllStudents = async (request, response) => {
   }
 };
 
-// ─── Get Single Student ───────────────────────────────────────────
 export const getSingleStudent = async (request, response) => {
   try {
-    const student = await Student.findOne({ _id: request.params.id, createdBy: request.userId }).populate("currentClass");
+    const query = { _id: request.params.id, createdBy: request.userId };
+    if (request.headers["x-branch-id"]) query.branch = request.headers["x-branch-id"];
+    if (request.headers["x-section"]) query.schoolSection = request.headers["x-section"];
+
+    const student = await Student.findOne(query).populate("currentClass");
     if (!student) {
       return response.status(404).json({
         success: false,
@@ -156,8 +167,12 @@ export const updateStudent = async (request, response) => {
   try {
     const updateData = normalizePayload(request.body, request.file);
 
+    const query = { _id: request.params.id, createdBy: request.userId };
+    if (request.headers["x-branch-id"]) query.branch = request.headers["x-branch-id"];
+    if (request.headers["x-section"]) query.schoolSection = request.headers["x-section"];
+
     const updatedStudent = await Student.findOneAndUpdate(
-      { _id: request.params.id, createdBy: request.userId },
+      query,
       updateData,
       { new: true, runValidators: true }
     ).populate("currentClass");
@@ -185,10 +200,13 @@ export const updateStudent = async (request, response) => {
   }
 };
 
-// ─── Delete Student ───────────────────────────────────────────────
 export const deleteStudent = async (request, response) => {
   try {
-    const deletedStudent = await Student.findOneAndDelete({ _id: request.params.id, createdBy: request.userId });
+    const query = { _id: request.params.id, createdBy: request.userId };
+    if (request.headers["x-branch-id"]) query.branch = request.headers["x-branch-id"];
+    if (request.headers["x-section"]) query.schoolSection = request.headers["x-section"];
+
+    const deletedStudent = await Student.findOneAndDelete(query);
 
     if (!deletedStudent) {
       return response.status(404).json({

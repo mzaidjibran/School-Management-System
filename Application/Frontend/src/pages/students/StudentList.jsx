@@ -5,7 +5,7 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveAs } from "file-saver";
-import { getAllStudents, updateStudent, deleteStudent } from "../../Api/Student_Api";
+import createStudent, { getAllStudents, updateStudent, deleteStudent } from "../../Api/Student_Api";
 import { getAllClasses } from "../../Api/Class_Api";
 import toast from "react-hot-toast";
 import { confirmToast } from "../../utils/toastHelpers.jsx";
@@ -189,6 +189,7 @@ const StudentFormModal = ({ isOpen, onClose, student, mode, onSave }) => {
         class: student.classId || "",
         rollNumber: student.rollNumber || "",
         section: student.section || "",
+        schoolSection: student.schoolSection || "",
         admissionDate: student.admissionDate || "",
         previousSchool: student.previousSchool || "",
         medicalInfo: student.medicalInfo || "",
@@ -197,7 +198,31 @@ const StudentFormModal = ({ isOpen, onClose, student, mode, onSave }) => {
       });
       setImagePreview(student.picture || null);
     } else {
-      setFormData(emptyForm);
+      setFormData({
+        name: "",
+        gender: "",
+        dateOfBirth: "",
+        bloodGroup: "",
+        cnic: "",
+        religion: "",
+        nationality: "",
+        phone: "",
+        email: "",
+        address: "",
+        city: "",
+        fatherName: "",
+        motherName: "",
+        parentPhone: "",
+        class: "",
+        rollNumber: "",
+        section: "",
+        schoolSection: localStorage.getItem("activeSection") || "girls",
+        admissionDate: "",
+        previousSchool: "",
+        medicalInfo: "",
+        emergencyName: "",
+        emergencyPhone: "",
+      });
       setProfileImage(null);
       setImagePreview(null);
       setImageError("");
@@ -343,7 +368,19 @@ const StudentFormModal = ({ isOpen, onClose, student, mode, onSave }) => {
                   disabled={isViewOnly}
                 />
                 <Input label="Roll Number" name="rollNumber" value={formData.rollNumber} onChange={handleChange} required error={errors.rollNumber} disabled={isViewOnly} />
-                <Select label="Section" name="section" options={[{ value: "girls", label: "Girls" }, { value: "boys", label: "Boys" }]} value={formData.section} onChange={handleChange} disabled={isViewOnly} />
+                <Input label="Class Section (e.g. A, B)" name="section" value={formData.section} onChange={handleChange} disabled={isViewOnly} />
+                <Select
+                  label="School Section"
+                  name="schoolSection"
+                  options={[
+                    { value: "girls", label: "Girls Section" },
+                    { value: "boys", label: "Boys Section" },
+                  ]}
+                  value={formData.schoolSection}
+                  onChange={handleChange}
+                  disabled={isViewOnly}
+                  required
+                />
                 <Input label="Admission Date" type="date" name="admissionDate" value={formData.admissionDate} onChange={handleChange} disabled={isViewOnly} />
                 <Input label="Previous School" name="previousSchool" value={formData.previousSchool} onChange={handleChange} disabled={isViewOnly} />
               </div>
@@ -454,6 +491,7 @@ export default function StudentList() {
         class: s.currentClass?.name || s.class || "",
         rollNumber: s.rollNumber || "",
         section: s.section || "",
+        schoolSection: s.schoolSection || "",
         admissionDate: s.admissionDate ? parseDate(s.admissionDate) : "",
         previousSchool: s.previousSchool || "",
         medicalInfo: s.medicalInfo || "",
@@ -480,6 +518,10 @@ export default function StudentList() {
 
   useEffect(() => {
     fetchStudents();
+    window.addEventListener("branch-changed", fetchStudents);
+    return () => {
+      window.removeEventListener("branch-changed", fetchStudents);
+    };
   }, []);
 
   useEffect(() => {
@@ -525,7 +567,154 @@ export default function StudentList() {
       theme: "striped",
       headStyles: { fillColor: [79, 70, 229] },
     });
-    doc.save("students.pdf");
+  };
+
+  const parseCSV = (text) => {
+    const lines = [];
+    let row = [""];
+    let inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      const nextChar = text[i + 1];
+      if (char === '"') {
+        if (inQuotes && nextChar === '"') {
+          row[row.length - 1] += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        row.push('');
+      } else if ((char === '\r' || char === '\n') && !inQuotes) {
+        if (char === '\r' && nextChar === '\n') i++;
+        lines.push(row);
+        row = [''];
+      } else {
+        row[row.length - 1] += char;
+      }
+    }
+    if (row.length > 1 || row[0] !== '') lines.push(row);
+    const headers = lines[0].map(h => h.trim());
+    const data = [];
+    for (let i = 1; i < lines.length; i++) {
+      const r = lines[i];
+      if (r.length === 0 || (r.length === 1 && !r[0])) continue;
+      const obj = {};
+      headers.forEach((h, idx) => {
+        obj[h] = (r[idx] !== undefined) ? r[idx].trim() : "";
+      });
+      data.push(obj);
+    }
+    return data;
+  };
+
+  const csvFileInputRef = useRef(null);
+
+  const handleBackupData = () => {
+    const headers = [
+      "firstName", "lastName", "gender", "dateOfBirth", "email", "phone",
+      "address", "city", "fatherName", "parentPhone", "rollNumber", "section", "schoolSection",
+      "admissionDate", "className", "cnic", "bloodGroup", "religion",
+      "nationality", "previousSchool", "medicalInfo", "emergencyName", "emergencyPhone"
+    ];
+    const rows = students.map((s) => [
+      s.firstName || "",
+      s.lastName || "",
+      s.gender || "",
+      s.dateOfBirth ? s.dateOfBirth.split("T")[0] : "",
+      s.email || "",
+      s.phone || "",
+      s.address || "",
+      s.city || "",
+      s.guardian?.name || s.fatherName || "",
+      s.guardian?.phone || s.parentPhone || "",
+      s.rollNumber || "",
+      s.section || "",
+      s.schoolSection || "",
+      s.admissionDate ? s.admissionDate.split("T")[0] : "",
+      s.class?.name || s.className || "",
+      s.CNIC || "",
+      s.bloodGroup || "",
+      s.religion || "",
+      s.nationality || "",
+      s.previousSchool || "",
+      s.medicalInfo || "",
+      s.emergencyName || "",
+      s.emergencyPhone || ""
+    ]);
+    const csvContent = [headers.join(","), ...rows.map(r => r.map(val => `"${String(val).replace(/"/g, '""')}"`).join(","))].join("\n");
+    saveAs(new Blob([csvContent], { type: "text/csv;charset=utf-8;" }), "students_backup.csv");
+    toast.success("Students backup downloaded successfully!");
+  };
+
+  const handleUploadCSV = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const text = evt.target.result;
+        const parsed = parseCSV(text);
+        if (parsed.length === 0) {
+          toast.error("CSV file is empty");
+          return;
+        }
+        const classesRes = await getAllClasses();
+        const classesList = classesRes.data || [];
+        let successCount = 0;
+        let failCount = 0;
+        const loadingToastId = toast.loading("Uploading students...");
+        for (const row of parsed) {
+          try {
+            const matchedClass = classesList.find(c => c.name.toLowerCase() === (row.className || "").toLowerCase());
+            const fd = new FormData();
+            fd.append("firstName", row.firstName || "");
+            fd.append("lastName", row.lastName || "");
+            fd.append("gender", (row.gender || "male").toLowerCase());
+            fd.append("dateOfBirth", row.dateOfBirth || "");
+            fd.append("email", row.email || "");
+            fd.append("phone", row.phone || "");
+            fd.append("address", row.address || "");
+            fd.append("city", row.city || "");
+            fd.append("guardian[name]", row.fatherName || "");
+            fd.append("guardian[phone]", row.parentPhone || "");
+            fd.append("guardian[relationship]", "father");
+            fd.append("rollNumber", row.rollNumber || "");
+            fd.append("section", row.section || "");
+            fd.append("schoolSection", (row.schoolSection || localStorage.getItem("activeSection") || "girls").toLowerCase());
+            fd.append("admissionDate", row.admissionDate || new Date().toISOString().split("T")[0]);
+            if (matchedClass) fd.append("class", matchedClass._id);
+            if (row.cnic) fd.append("CNIC", row.cnic);
+            if (row.bloodGroup) fd.append("bloodGroup", row.bloodGroup);
+            if (row.religion) fd.append("religion", row.religion);
+            if (row.nationality) fd.append("nationality", row.nationality);
+            if (row.previousSchool) fd.append("previousSchool", row.previousSchool);
+            if (row.medicalInfo) fd.append("medicalInfo", row.medicalInfo);
+            if (row.emergencyName) fd.append("emergencyName", row.emergencyName);
+            if (row.emergencyPhone) fd.append("emergencyPhone", row.emergencyPhone);
+            await createStudent(fd);
+            successCount++;
+          } catch (err) {
+            console.error("Failed to create student from CSV row:", row, err);
+            toast.error(`Row "${row.firstName} ${row.lastName}": ${err.message}`);
+            failCount++;
+          }
+        }
+        toast.dismiss(loadingToastId);
+        if (successCount > 0) {
+          toast.success(`${successCount} students uploaded successfully!`);
+          fetchStudents();
+        }
+        if (failCount > 0) {
+          toast.error(`${failCount} rows failed to upload. Check console.`);
+        }
+      } catch (err) {
+        toast.error("Failed to parse CSV: " + err.message);
+      } finally {
+        if (csvFileInputRef.current) csvFileInputRef.current.value = "";
+      }
+    };
+    reader.readAsText(file);
   };
 
   const openModal = (student, mode) => { setSelectedStudent(student); setModalMode(mode); setModalOpen(true); };
@@ -542,6 +731,7 @@ export default function StudentList() {
       fd.append("phone", data.phone || "");
       fd.append("rollNumber", data.rollNumber || "");
       fd.append("section", data.section || "");
+      fd.append("schoolSection", data.schoolSection || "");
       fd.append("admissionDate", data.admissionDate || "");
       fd.append("guardian[name]", data.fatherName || "");
       fd.append("guardian[phone]", data.parentPhone || "");
@@ -642,8 +832,10 @@ export default function StudentList() {
             <option value="">All Classes</option>
             {uniqueClasses.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
-          <div className="flex gap-2">
-            <button onClick={exportCSV} title="Export CSV" className="p-2 bg-slate-100 rounded-lg hover:bg-slate-200 transition"><FaFileCsv className="text-slate-600" /></button>
+          <div className="flex flex-wrap gap-2 items-center">
+            <input type="file" accept=".csv" ref={csvFileInputRef} className="hidden" onChange={handleUploadCSV} />
+            <button type="button" onClick={() => csvFileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold transition">Upload CSV</button>
+            <button type="button" onClick={handleBackupData} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition">Backup Data</button>
             <button onClick={exportExcel} title="Export Excel" className="p-2 bg-slate-100 rounded-lg hover:bg-slate-200 transition"><FaFileExcel className="text-green-600" /></button>
             <button onClick={exportPDF} title="Export PDF" className="p-2 bg-slate-100 rounded-lg hover:bg-slate-200 transition"><FaFilePdf className="text-red-600" /></button>
           </div>

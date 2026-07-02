@@ -7,6 +7,8 @@ export const getAllSubjects = async (req, res) => {
     if (classId) filter.class = classId;
     if (status) filter.status = status;
     if (search) filter.name = { $regex: search, $options: "i" };
+    if (req.headers["x-branch-id"]) filter.branch = req.headers["x-branch-id"];
+    if (req.headers["x-section"]) filter.schoolSection = req.headers["x-section"];
 
     const subjects = await Subject.find(filter)
       .populate("class", "name section")
@@ -27,7 +29,10 @@ export const getAllSubjects = async (req, res) => {
 
 export const getSubjectById = async (req, res) => {
   try {
-    const subject = await Subject.findOne({ _id: req.params.id, createdBy: req.userId })
+    const query = { _id: req.params.id, createdBy: req.userId };
+    if (req.headers["x-branch-id"]) query.branch = req.headers["x-branch-id"];
+    if (req.headers["x-section"]) query.schoolSection = req.headers["x-section"];
+    const subject = await Subject.findOne(query)
       .populate("class", "name section")
       .populate("teacher", "name");
     if (!subject)
@@ -41,6 +46,8 @@ export const getSubjectById = async (req, res) => {
 export const addSubject = async (req, res) => {
   try {
     req.body.createdBy = req.userId;
+    if (req.headers["x-branch-id"]) req.body.branch = req.headers["x-branch-id"];
+    req.body.schoolSection = req.body.schoolSection || req.headers["x-section"];
     const subject = new Subject(req.body);
     await subject.save();
     const populated = await Subject.findOne({ _id: subject._id, createdBy: req.userId })
@@ -67,7 +74,10 @@ export const addSubject = async (req, res) => {
 
 export const updateSubject = async (req, res) => {
   try {
-    const subject = await Subject.findOneAndUpdate({ _id: req.params.id, createdBy: req.userId }, req.body, {
+    const query = { _id: req.params.id, createdBy: req.userId };
+    if (req.headers["x-branch-id"]) query.branch = req.headers["x-branch-id"];
+    if (req.headers["x-section"]) query.schoolSection = req.headers["x-section"];
+    const subject = await Subject.findOneAndUpdate(query, req.body, {
       new: true,
       runValidators: true,
     })
@@ -88,7 +98,10 @@ export const updateSubject = async (req, res) => {
 
 export const deleteSubject = async (req, res) => {
   try {
-    const deleted = await Subject.findOneAndDelete({ _id: req.params.id, createdBy: req.userId });
+    const query = { _id: req.params.id, createdBy: req.userId };
+    if (req.headers["x-branch-id"]) query.branch = req.headers["x-branch-id"];
+    if (req.headers["x-section"]) query.schoolSection = req.headers["x-section"];
+    const deleted = await Subject.findOneAndDelete(query);
     if (!deleted)
       return res.status(404).json({ success: false, error: true, message: "Subject not found" });
     res.json({

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   FaSearch, FaEye, FaEdit, FaTrash,
   FaFileCsv, FaFileExcel, FaFilePdf,
@@ -8,7 +8,9 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveAs } from "file-saver";
-import { getAllSubjects, updateSubject, deleteSubject } from "../../api/Subject_Api.js";
+import { getAllSubjects, updateSubject, deleteSubject, addSubject } from "../../api/Subject_Api.js";
+import { getAllClasses } from "../../Api/Class_Api.js";
+import { getAllTeachers } from "../../Api/Teacher_Api.js";
 import toast from "react-hot-toast";
 import { confirmToast } from "../../utils/toastHelpers.jsx";
 
@@ -323,24 +325,32 @@ export default function Subjects() {
     }
   };
 
+  const loadDropdowns = async () => {
+    try {
+      const [classRes, teacherRes] = await Promise.all([
+        getAllClasses(),
+        getAllTeachers(),
+      ]);
+      setClasses(classRes.data || []);
+      setTeachers(teacherRes.data || []);
+    } catch {
+      // silently fail — edit modal mein error dikhega
+    }
+  };
+
   useEffect(() => {
     fetchSubjects();
-    // Classes aur teachers bhi load karo edit modal ke liye
-    const loadDropdowns = async () => {
-      try {
-        const [classRes, teacherRes] = await Promise.all([
-          fetch(`${API_BASE}/api/classes`, { headers: { "Content-Type": "application/json" } }),
-          fetch(`${API_BASE}/api/teachers`, { headers: { "Content-Type": "application/json" } }),
-        ]);
-        const classJson = await classRes.json();
-        const teacherJson = await teacherRes.json();
-        setClasses(classJson.data || classJson.classes || []);
-        setTeachers(teacherJson.data || teacherJson.teachers || []);
-      } catch {
-        // silently fail — edit modal mein error dikhega
-      }
-    };
     loadDropdowns();
+
+    const handleUpdate = () => {
+      fetchSubjects();
+      loadDropdowns();
+    };
+
+    window.addEventListener("branch-changed", handleUpdate);
+    return () => {
+      window.removeEventListener("branch-changed", handleUpdate);
+    };
   }, []);
 
   // Frontend filters
@@ -408,6 +418,129 @@ export default function Subjects() {
     ]);
     saveAs(new Blob([[headers, ...rows].map((r) => r.join(",")).join("\n")], { type: "text/csv" }), "subjects.csv");
   };
+
+  const parseCSV = (text) => {
+    const lines = [];
+    let row = [""];
+    let inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      const nextChar = text[i + 1];
+      if (char === '"') {
+        if (inQuotes && nextChar === '"') {
+          row[row.length - 1] += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        row.push('');
+      } else if ((char === '\r' || char === '\n') && !inQuotes) {
+        if (char === '\r' && nextChar === '\n') i++;
+        lines.push(row);
+        row = [''];
+      } else {
+        row[row.length - 1] += char;
+      }
+    }
+    if (row.length > 1 || row[0] !== '') lines.push(row);
+    const headers = lines[0].map(h => h.trim());
+    const data = [];
+    for (let i = 1; i < lines.length; i++) {
+      const r = lines[i];
+      if (r.length === 0 || (r.length === 1 && !r[0])) continue;
+      const obj = {};
+      headers.forEach((h, idx) => {
+        obj[h] = (r[idx] !== undefined) ? r[idx].trim() : "";
+      });
+      data.push(obj);
+    }
+    return data;
+  };
+
+  const csvFileInputRef = useRef(null);
+
+  const handleBackupData = () => {
+    const headers = ["code", "name", "className", "type", "teacherName", "creditHours", "status"];
+    const rows = subjects.map((s) => [
+      s.code || "",
+      s.name || "",
+      Array.isArray(s.class) ? s.class.map((c) => c.name || c).join("; ") : s.class?.name || "",
+      s.type || "theory",
+      s.teacher?.name || "",
+      s.creditHours || 0,
+      s.status || "active"
+    ]);
+    const csvContent = [headers.join(","), ...rows.map(r => r.map(val => `"${String(val).replace(/"/g, '""')}"`).join(","))].join("\n");
+    saveAs(new Blob([csvContent], { type: "text/csv;charset=utf-8;" }), "subjects_backup.csv");
+    toast.success("Subjects backup downloaded successfully!");
+  };
+
+  const handleUploadCSV = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const text = evt.target.result;
+        const parsed = parseCSV(text);
+        if (parsed.length === 0) {
+          toast.error("CSV file is empty");
+          return;
+        }
+        const [classesRes, teachersRes] = await Promise.all([
+          getAllClasses(),
+          getAllTeachers()
+        ]);
+        const classesList = classesRes.data || [];
+        const teachersList = teachersRes.data || [];
+        let successCount = 0;
+        let failCount = 0;
+        const loadingToastId = toast.loading("Uploading subjects...");
+        for (const row of parsed) {
+          try {
+            const matchedClass = classesList.find(c => c.name.toLowerCase() === (row.className || "").toLowerCase());
+            const matchedTeacher = teachersList.find(t => {
+              const fullName = `${t.firstName || ""} ${t.lastName || ""}`.trim().toLowerCase();
+              return fullName === (row.teacherName || "").toLowerCase();
+            });
+            const payload = {
+              code: row.code || "",
+              name: row.name || "",
+              type: (row.type || "theory").toLowerCase(),
+              creditHours: Number(row.creditHours) || 3,
+              status: (row.status || "active").toLowerCase(),
+            };
+            if (matchedClass) {
+              payload.class = matchedClass._id;
+            }
+            if (matchedTeacher) {
+              payload.teacher = matchedTeacher._id;
+            }
+            await addSubject(payload);
+            successCount++;
+          } catch (err) {
+            console.error("Failed to create subject from CSV row:", row, err);
+            toast.error(`Row "${row.name}": ${err.message}`);
+            failCount++;
+          }
+        }
+        toast.dismiss(loadingToastId);
+        if (successCount > 0) {
+          toast.success(`${successCount} subjects uploaded successfully!`);
+          fetchSubjects();
+        }
+        if (failCount > 0) {
+          toast.error(`${failCount} rows failed to upload. Check console.`);
+        }
+      } catch (err) {
+        toast.error("Failed to parse CSV: " + err.message);
+      } finally {
+        if (csvFileInputRef.current) csvFileInputRef.current.value = "";
+      }
+    };
+    reader.readAsText(file);
+  };
   const exportExcel = () => {
     const ws = XLSX.utils.json_to_sheet(filtered.map((s) => ({
       Code: s.code,
@@ -466,10 +599,10 @@ export default function Subjects() {
             <h1 className="text-2xl font-bold text-slate-800">Subjects</h1>
             <p className="text-slate-500 text-sm mt-0.5">Manage all school subjects, types, and assignments</p>
           </div>
-          <div className="flex items-center gap-2">
-            <button onClick={exportCSV} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors">
-              <FaFileCsv className="text-emerald-600" /> CSV
-            </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <input type="file" accept=".csv" ref={csvFileInputRef} className="hidden" onChange={handleUploadCSV} />
+            <button type="button" onClick={() => csvFileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold transition">Upload CSV</button>
+            <button type="button" onClick={handleBackupData} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition">Backup Data</button>
             <button onClick={exportExcel} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 transition-colors">
               <FaFileExcel className="text-green-600" /> Excel
             </button>

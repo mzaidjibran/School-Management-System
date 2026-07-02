@@ -9,8 +9,9 @@ export const markAttendance = async (records) => {
     headers: getHeaders(),
     body: JSON.stringify({ records }),
   });
-  if (!response.ok) throw new Error(`Mark attendance failed: ${response.status}`);
-  return response.json();
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || `Mark attendance failed: ${response.status}`);
+  return result;
 };
 
 // ─── Get Attendance By Class and Date ────────────────────────────

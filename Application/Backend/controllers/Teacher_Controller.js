@@ -58,6 +58,8 @@ export const createTeacher = async (request, response) => {
   try {
     const teacherData = normalizePayload(request.body, request.file);
     teacherData.userId = request.userId;
+    if (request.headers["x-branch-id"]) teacherData.branch = request.headers["x-branch-id"];
+    teacherData.schoolSection = teacherData.schoolSection || request.headers["x-section"];
 
     const teacher = await Teacher.create(teacherData);
     response
@@ -77,7 +79,11 @@ export const createTeacher = async (request, response) => {
 
 export const getAllTeachers = async (request, response) => {
   try {
-    const teachers = await Teacher.find({ userId: request.userId });
+    const query = { userId: request.userId };
+    if (request.headers["x-branch-id"]) query.branch = request.headers["x-branch-id"];
+    if (request.headers["x-section"]) query.schoolSection = request.headers["x-section"];
+
+    const teachers = await Teacher.find(query);
     response
       .status(200)
       .json({
@@ -95,10 +101,11 @@ export const getAllTeachers = async (request, response) => {
 
 export const getSingleTeacher = async (request, response) => {
   try {
-    const teacher = await Teacher.findOne({
-      _id: request.params.id,
-      userId: request.userId,
-    });
+    const query = { _id: request.params.id, userId: request.userId };
+    if (request.headers["x-branch-id"]) query.branch = request.headers["x-branch-id"];
+    if (request.headers["x-section"]) query.schoolSection = request.headers["x-section"];
+
+    const teacher = await Teacher.findOne(query);
     if (!teacher)
       return response
         .status(404)
@@ -121,8 +128,12 @@ export const getSingleTeacher = async (request, response) => {
 export const updateTeacher = async (request, response) => {
   try {
     const updateData = normalizePayload(request.body, request.file);
+    const query = { _id: request.params.id, userId: request.userId };
+    if (request.headers["x-branch-id"]) query.branch = request.headers["x-branch-id"];
+    if (request.headers["x-section"]) query.schoolSection = request.headers["x-section"];
+
     const updatedTeacher = await Teacher.findOneAndUpdate(
-      { _id: request.params.id, userId: request.userId },
+      query,
       updateData,
       { new: true, runValidators: true },
     );
@@ -147,10 +158,11 @@ export const updateTeacher = async (request, response) => {
 
 export const deleteTeacher = async (request, response) => {
   try {
-    const deletedTeacher = await Teacher.findOneAndDelete({
-      _id: request.params.id,
-      userId: request.userId,
-    });
+    const query = { _id: request.params.id, userId: request.userId };
+    if (request.headers["x-branch-id"]) query.branch = request.headers["x-branch-id"];
+    if (request.headers["x-section"]) query.schoolSection = request.headers["x-section"];
+
+    const deletedTeacher = await Teacher.findOneAndDelete(query);
     if (!deletedTeacher)
       return response
         .status(404)

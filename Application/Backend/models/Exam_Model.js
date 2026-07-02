@@ -24,8 +24,17 @@ const ExamSchema = new mongoose.Schema(
       enum: ["scheduled", "ongoing", "completed", "cancelled", "Upcoming", "Ongoing", "Completed", "Cancelled"],
       default: "scheduled",
     },
-    // Optional — set karo jab auth ho
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    branch: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Branch",
+      default: null,
+    },
+    schoolSection: {
+      type: String,
+      enum: ["girls", "boys"],
+      default: null,
+    },
   },
   { timestamps: true }
 );

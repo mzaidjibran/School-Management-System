@@ -5,9 +5,15 @@ export const createOrUpdateTimetable = async (req, res) => {
   try {
     const { class: classId, day, session } = req.body;
     req.body.createdBy = req.userId;
+    if (req.headers["x-branch-id"]) req.body.branch = req.headers["x-branch-id"];
+    if (req.headers["x-section"]) req.body.schoolSection = req.headers["x-section"];
+
+    const query = { class: classId, day, session, createdBy: req.userId };
+    if (req.headers["x-branch-id"]) query.branch = req.headers["x-branch-id"];
+    if (req.headers["x-section"]) query.schoolSection = req.headers["x-section"];
 
     const timetable = await TimeTable.findOneAndUpdate(
-      { class: classId, day, session, createdBy: req.userId },
+      query,
       { ...req.body },
       { upsert: true, new: true, runValidators: true }
     );
@@ -30,6 +36,8 @@ export const getClassTimetable = async (req, res) => {
 
     const filter = { class: classId, isActive: true, createdBy: req.userId };
     if (session) filter.session = session;
+    if (req.headers["x-branch-id"]) filter.branch = req.headers["x-branch-id"];
+    if (req.headers["x-section"]) filter.schoolSection = req.headers["x-section"];
 
     const timetable = await TimeTable.find(filter)
       .populate("class", "name section")
@@ -64,6 +72,8 @@ export const getTodayTimetable = async (req, res) => {
 
     const filter = { class: classId, day: today, isActive: true, createdBy: req.userId };
     if (session) filter.session = session;
+    if (req.headers["x-branch-id"]) filter.branch = req.headers["x-branch-id"];
+    if (req.headers["x-section"]) filter.schoolSection = req.headers["x-section"];
 
     const timetable = await TimeTable.findOne(filter).populate(
       "periods.teacher",
@@ -109,6 +119,8 @@ export const getTeacherTimetable = async (req, res) => {
 
     const filter = { "periods.teacher": teacherId, isActive: true, createdBy: req.userId };
     if (session) filter.session = session;
+    if (req.headers["x-branch-id"]) filter.branch = req.headers["x-branch-id"];
+    if (req.headers["x-section"]) filter.schoolSection = req.headers["x-section"];
 
     const timetables = await TimeTable.find(filter).populate(
       "class",
@@ -124,7 +136,11 @@ export const getTeacherTimetable = async (req, res) => {
 // ─── Delete A Timetable Entry By ID ──────────────────────────────
 export const deleteTimetable = async (req, res) => {
   try {
-    const deleted = await TimeTable.findOneAndDelete({ _id: req.params.id, createdBy: req.userId });
+    const query = { _id: req.params.id, createdBy: req.userId };
+    if (req.headers["x-branch-id"]) query.branch = req.headers["x-branch-id"];
+    if (req.headers["x-section"]) query.schoolSection = req.headers["x-section"];
+
+    const deleted = await TimeTable.findOneAndDelete(query);
     if (!deleted) {
       return res
         .status(404)

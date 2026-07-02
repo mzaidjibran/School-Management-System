@@ -39,6 +39,16 @@ const teacherSchema = new mongoose.Schema({
         phone: { type: String }
     },
     profileImage: { type: String },
+    branch: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Branch',
+        default: null,
+    },
+    schoolSection: {
+        type: String,
+        enum: ['girls', 'boys'],
+        default: null,
+    },
 }, { timestamps: true });
 
 teacherSchema.index({ employeeId: 1, userId: 1 }, { unique: true });

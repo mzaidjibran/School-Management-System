@@ -7,6 +7,8 @@ export const getAllNotices = async (req, res) => {
     if (status) filter.status = status;
     if (priority) filter.priority = priority;
     if (targetAudience) filter.targetAudience = targetAudience;
+    if (req.headers["x-branch-id"]) filter.branch = req.headers["x-branch-id"];
+    if (req.headers["x-section"]) filter.schoolSection = req.headers["x-section"];
 
     const total = await Notice.countDocuments(filter);
     const notices = await Notice.find(filter)
@@ -24,8 +26,12 @@ export const getAllNotices = async (req, res) => {
 
 export const getNoticeById = async (req, res) => {
   try {
+    const query = { _id: req.params.id, createdBy: req.userId };
+    if (req.headers["x-branch-id"]) query.branch = req.headers["x-branch-id"];
+    if (req.headers["x-section"]) query.schoolSection = req.headers["x-section"];
+
     const notice = await Notice.findOneAndUpdate(
-      { _id: req.params.id, createdBy: req.userId },
+      query,
       { $inc: { views: 1 } },
       { new: true }
     ).populate("createdBy", "name");
@@ -39,6 +45,8 @@ export const getNoticeById = async (req, res) => {
 export const createNotice = async (req, res) => {
   try {
     req.body.createdBy = req.userId;
+    if (req.headers["x-branch-id"]) req.body.branch = req.headers["x-branch-id"];
+    if (req.headers["x-section"]) req.body.schoolSection = req.headers["x-section"];
     const notice = new Notice({ ...req.body});
     await notice.save();
     res.status(201).json({ success: true, message: "Notice created", notice });
@@ -49,7 +57,11 @@ export const createNotice = async (req, res) => {
 
 export const updateNotice = async (req, res) => {
   try {
-    const notice = await Notice.findOneAndUpdate({ _id: req.params.id, createdBy: req.userId }, req.body, {
+    const query = { _id: req.params.id, createdBy: req.userId };
+    if (req.headers["x-branch-id"]) query.branch = req.headers["x-branch-id"];
+    if (req.headers["x-section"]) query.schoolSection = req.headers["x-section"];
+
+    const notice = await Notice.findOneAndUpdate(query, req.body, {
       new: true, runValidators: true,
     });
     if (!notice) return res.status(404).json({ success: false, message: "Notice not found" });
@@ -61,7 +73,11 @@ export const updateNotice = async (req, res) => {
 
 export const deleteNotice = async (req, res) => {
   try {
-    const deleted = await Notice.findOneAndDelete({ _id: req.params.id, createdBy: req.userId });
+    const query = { _id: req.params.id, createdBy: req.userId };
+    if (req.headers["x-branch-id"]) query.branch = req.headers["x-branch-id"];
+    if (req.headers["x-section"]) query.schoolSection = req.headers["x-section"];
+
+    const deleted = await Notice.findOneAndDelete(query);
     if (!deleted) return res.status(404).json({ success: false, message: "Notice not found" });
     res.json({ success: true, message: "Notice deleted" });
   } catch (err) {
@@ -72,12 +88,16 @@ export const deleteNotice = async (req, res) => {
 export const getActiveNotices = async (req, res) => {
   try {
     const now = new Date();
-    const notices = await Notice.find({
+    const filter = {
       createdBy: req.userId,
       status: "published",
       publishDate: { $lte: now },
       $or: [{ expiryDate: { $gte: now } }, { expiryDate: null }],
-    }).sort({ priority: 1, publishDate: -1 }).limit(10);
+    };
+    if (req.headers["x-branch-id"]) filter.branch = req.headers["x-branch-id"];
+    if (req.headers["x-section"]) filter.schoolSection = req.headers["x-section"];
+
+    const notices = await Notice.find(filter).sort({ priority: 1, publishDate: -1 }).limit(10);
     res.json({ success: true, notices });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

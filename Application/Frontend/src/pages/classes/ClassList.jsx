@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   FaSearch,
   FaFileCsv,
@@ -12,7 +12,7 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveAs } from "file-saver";
-import { getAllClasses, updateClass, deleteClass } from "../../api/Class_Api.js"; // path apne folder structure ke hisaab se adjust kar lein
+import { getAllClasses, updateClass, deleteClass, createClass } from "../../api/Class_Api.js"; // path apne folder structure ke hisaab se adjust kar lein
 import { getAllTeachers } from "../../api/Teacher_Api.js"; // path apne folder structure ke hisaab se adjust kar lein
 import toast from "react-hot-toast";
 import { confirmToast } from "../../utils/toastHelpers.jsx";
@@ -502,37 +502,45 @@ export default function ClassList() {
   const [modalMode, setModalMode] = useState("view");
   const [selectedClass, setSelectedClass] = useState(null);
 
-  useEffect(() => {
-    const fetchClasses = async () => {
-      setLoading(true);
-      try {
-        const result = await getAllClasses();
-        setClasses(result.data || []);
-        setFiltered(result.data || []);
-      } catch (error) {
-        console.error(error);
-        toast.error("Failed to load classes: " + error.message);
-        setClasses([]);
-        setFiltered([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchClasses();
-  }, []);
+  const fetchClasses = async () => {
+    setLoading(true);
+    try {
+      const result = await getAllClasses();
+      setClasses(result.data || []);
+      setFiltered(result.data || []);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load classes: " + error.message);
+      setClasses([]);
+      setFiltered([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Teacher list — ClassModal ke "Class Teacher" dropdown ke liye
+  const fetchTeachersList = async () => {
+    try {
+      const result = await getAllTeachers();
+      setTeachers(result.data || []);
+    } catch (error) {
+      console.error(error);
+      setTeachers([]);
+    }
+  };
+
   useEffect(() => {
-    const fetchTeachers = async () => {
-      try {
-        const result = await getAllTeachers();
-        setTeachers(result.data || []);
-      } catch (error) {
-        console.error(error);
-        setTeachers([]);
-      }
+    fetchClasses();
+    fetchTeachersList();
+
+    const handleUpdate = () => {
+      fetchClasses();
+      fetchTeachersList();
     };
-    fetchTeachers();
+
+    window.addEventListener("branch-changed", handleUpdate);
+    return () => {
+      window.removeEventListener("branch-changed", handleUpdate);
+    };
   }, []);
 
   useEffect(() => {
@@ -589,6 +597,124 @@ export default function ClassList() {
       }),
       "classes.csv",
     );
+  };
+
+  const parseCSV = (text) => {
+    const lines = [];
+    let row = [""];
+    let inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      const nextChar = text[i + 1];
+      if (char === '"') {
+        if (inQuotes && nextChar === '"') {
+          row[row.length - 1] += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        row.push('');
+      } else if ((char === '\r' || char === '\n') && !inQuotes) {
+        if (char === '\r' && nextChar === '\n') i++;
+        lines.push(row);
+        row = [''];
+      } else {
+        row[row.length - 1] += char;
+      }
+    }
+    if (row.length > 1 || row[0] !== '') lines.push(row);
+    const headers = lines[0].map(h => h.trim());
+    const data = [];
+    for (let i = 1; i < lines.length; i++) {
+      const r = lines[i];
+      if (r.length === 0 || (r.length === 1 && !r[0])) continue;
+      const obj = {};
+      headers.forEach((h, idx) => {
+        obj[h] = (r[idx] !== undefined) ? r[idx].trim() : "";
+      });
+      data.push(obj);
+    }
+    return data;
+  };
+
+  const csvFileInputRef = useRef(null);
+
+  const handleBackupData = () => {
+    const headers = ["name", "section", "academicYear", "teacherName", "capacity", "room", "shift", "isActive"];
+    const rows = classes.map((c) => [
+      c.name || "",
+      c.section || "",
+      c.academicYear || "",
+      c.classTeacher ? `${c.classTeacher.firstName} ${c.classTeacher.lastName}`.trim() : "",
+      c.capacity || "",
+      c.room || "",
+      c.shift || "",
+      c.isActive !== undefined ? c.isActive : true
+    ]);
+    const csvContent = [headers.join(","), ...rows.map(r => r.map(val => `"${String(val).replace(/"/g, '""')}"`).join(","))].join("\n");
+    saveAs(new Blob([csvContent], { type: "text/csv;charset=utf-8;" }), "classes_backup.csv");
+    toast.success("Classes backup downloaded successfully!");
+  };
+
+  const handleUploadCSV = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const text = evt.target.result;
+        const parsed = parseCSV(text);
+        if (parsed.length === 0) {
+          toast.error("CSV file is empty");
+          return;
+        }
+        const teachersRes = await getAllTeachers();
+        const teachersList = teachersRes.data || [];
+        let successCount = 0;
+        let failCount = 0;
+        const loadingToastId = toast.loading("Uploading classes...");
+        for (const row of parsed) {
+          try {
+            const matchedTeacher = teachersList.find(t => {
+              const fullName = `${t.firstName || ""} ${t.lastName || ""}`.trim().toLowerCase();
+              return fullName === (row.teacherName || "").toLowerCase();
+            });
+            const payload = {
+              name: row.name || "",
+              section: row.section || "",
+              academicYear: row.academicYear || new Date().getFullYear().toString(),
+              capacity: Number(row.capacity) || 40,
+              room: row.room || "",
+              shift: row.shift || "Morning",
+              isActive: row.isActive !== undefined ? (row.isActive.toLowerCase() === "true" || row.isActive === "1") : true,
+            };
+            if (matchedTeacher) {
+              payload.classTeacher = matchedTeacher._id;
+            }
+            await createClass(payload);
+            successCount++;
+          } catch (err) {
+            console.error("Failed to create class from CSV row:", row, err);
+            toast.error(`Row "${row.name}": ${err.message}`);
+            failCount++;
+          }
+        }
+        toast.dismiss(loadingToastId);
+        if (successCount > 0) {
+          toast.success(`${successCount} classes uploaded successfully!`);
+          fetchClasses();
+        }
+        if (failCount > 0) {
+          toast.error(`${failCount} rows failed to upload. Check console.`);
+        }
+      } catch (err) {
+        toast.error("Failed to parse CSV: " + err.message);
+      } finally {
+        if (csvFileInputRef.current) csvFileInputRef.current.value = "";
+      }
+    };
+    reader.readAsText(file);
   };
   const exportExcel = () => {
     const ws = XLSX.utils.json_to_sheet(
@@ -787,14 +913,10 @@ const handleSave = (updatedClass) => {
               <option value="Inactive">Inactive</option>
             </select>
             {/* Exports — colorful */}
-            <div className="flex gap-2 ml-auto">
-              <button
-                onClick={exportCSV}
-                title="Export CSV"
-                className="p-2 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
-              >
-                <FaFileCsv className="text-slate-600 w-4 h-4" />
-              </button>
+            <div className="flex flex-wrap gap-2 items-center ml-auto">
+              <input type="file" accept=".csv" ref={csvFileInputRef} className="hidden" onChange={handleUploadCSV} />
+              <button type="button" onClick={() => csvFileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold transition">Upload CSV</button>
+              <button type="button" onClick={handleBackupData} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition">Backup Data</button>
               <button
                 onClick={exportExcel}
                 title="Export Excel"

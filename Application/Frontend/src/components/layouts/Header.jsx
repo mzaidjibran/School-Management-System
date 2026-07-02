@@ -49,6 +49,18 @@ export default function ProHeader() {
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef(null);
 
+  const [activeBranchName, setActiveBranchName] = useState(localStorage.getItem("activeBranchName") || "");
+  const [activeSection, setActiveSection] = useState(localStorage.getItem("activeSection") || "");
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setActiveBranchName(localStorage.getItem("activeBranchName") || "");
+      setActiveSection(localStorage.getItem("activeSection") || "");
+    };
+    window.addEventListener("branch-changed", handleUpdate);
+    return () => window.removeEventListener("branch-changed", handleUpdate);
+  }, []);
+
   // Sync state when modal opens
   useEffect(() => {
     if (editModalOpen) {
@@ -172,6 +184,25 @@ export default function ProHeader() {
 
           {/* Right Side */}
           <div className="flex items-center gap-3 shrink-0">
+
+            {/* Active Branch & Section Badge */}
+            <div 
+              onClick={() => window.dispatchEvent(new Event("open-branch-modal"))}
+              className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50/60 hover:bg-indigo-50 border border-indigo-100/60 rounded-xl cursor-pointer select-none transition-all group shrink-0"
+              title="Click to Switch Branch or Section"
+            >
+              <div className="hidden sm:flex flex-col text-right">
+                <span className="text-[11px] font-extrabold text-indigo-700 leading-tight truncate max-w-[120px]">
+                  {activeBranchName || "Select Branch"}
+                </span>
+                <span className="text-[9px] font-bold text-indigo-500 capitalize leading-none">
+                  {activeSection ? `${activeSection} Section` : "Select Section"}
+                </span>
+              </div>
+              <div className="w-7 h-7 rounded-lg bg-indigo-600/10 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
+                <School size={14} />
+              </div>
+            </div>
 
             {/* Notification Bell */}
             <div className="relative" ref={notifDropdownRef}>

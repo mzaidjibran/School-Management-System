@@ -19,10 +19,20 @@ const SubjectSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    branch: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Branch",
+      default: null,
+    },
+    schoolSection: {
+      type: String,
+      enum: ["girls", "boys"],
+      default: null,
+    },
   },
   { timestamps: true }
 );
 
-SubjectSchema.index({ code: 1, createdBy: 1 }, { unique: true });
+SubjectSchema.index({ code: 1, createdBy: 1, branch: 1, schoolSection: 1 }, { unique: true });
 
 export default mongoose.model('Subject', SubjectSchema);

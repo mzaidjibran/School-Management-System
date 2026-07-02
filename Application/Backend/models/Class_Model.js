@@ -59,12 +59,22 @@ const classSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    branch: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Branch",
+      default: null,
+    },
+    schoolSection: {
+      type: String,
+      enum: ["girls", "boys"],
+      default: null,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-classSchema.index({ name: 1, section: 1, academicYear: 1, createdBy: 1 }, { unique: true });
+classSchema.index({ name: 1, section: 1, academicYear: 1, createdBy: 1, branch: 1, schoolSection: 1 }, { unique: true });
 
 export const Class = mongoose.model("Class", classSchema);

@@ -11,6 +11,8 @@ export const getAllExams = async (req, res) => {
     if (status)    filter.status   = status;
     if (examType)  filter.examType = examType;
     if (session)   filter.session  = session;
+    if (req.headers["x-branch-id"]) filter.branch = req.headers["x-branch-id"];
+    if (req.headers["x-section"]) filter.schoolSection = req.headers["x-section"];
 
     const total = await Exam.countDocuments(filter);
     const exams = await Exam.find(filter)
@@ -27,7 +29,10 @@ export const getAllExams = async (req, res) => {
 
 export const getExamById = async (req, res) => {
   try {
-    const exam = await Exam.findOne({ _id: req.params.id, createdBy: req.userId }).populate("class", "name section");
+    const query = { _id: req.params.id, createdBy: req.userId };
+    if (req.headers["x-branch-id"]) query.branch = req.headers["x-branch-id"];
+    if (req.headers["x-section"]) query.schoolSection = req.headers["x-section"];
+    const exam = await Exam.findOne(query).populate("class", "name section");
     if (!exam) return res.status(404).json({ success: false, error: true, message: "Exam not found" });
     res.json({ success: true, error: false, message: "Exam fetched", data: exam });
   } catch (err) {
@@ -39,10 +44,16 @@ export const createExam = async (req, res) => {
   try {
     const examData = { ...req.body };
     examData.createdBy = req.userId;
+    if (req.headers["x-branch-id"]) examData.branch = req.headers["x-branch-id"];
+    if (req.headers["x-section"]) examData.schoolSection = req.headers["x-section"];
 
     const exam = new Exam(examData);
     await exam.save();
-    const populated = await Exam.findOne({ _id: exam._id, createdBy: req.userId }).populate("class", "name section");
+    
+    const query = { _id: exam._id, createdBy: req.userId };
+    if (req.headers["x-branch-id"]) query.branch = req.headers["x-branch-id"];
+    if (req.headers["x-section"]) query.schoolSection = req.headers["x-section"];
+    const populated = await Exam.findOne(query).populate("class", "name section");
     res.status(201).json({ success: true, error: false, message: "Exam created", data: populated });
   } catch (err) {
     res.status(400).json({ success: false, error: true, message: err.message });
@@ -51,7 +62,11 @@ export const createExam = async (req, res) => {
 
 export const updateExam = async (req, res) => {
   try {
-    const exam = await Exam.findOneAndUpdate({ _id: req.params.id, createdBy: req.userId }, req.body, {
+    const query = { _id: req.params.id, createdBy: req.userId };
+    if (req.headers["x-branch-id"]) query.branch = req.headers["x-branch-id"];
+    if (req.headers["x-section"]) query.schoolSection = req.headers["x-section"];
+
+    const exam = await Exam.findOneAndUpdate(query, req.body, {
       new: true, runValidators: true,
     }).populate("class", "name section");
     if (!exam) return res.status(404).json({ success: false, error: true, message: "Exam not found" });
@@ -63,11 +78,15 @@ export const updateExam = async (req, res) => {
 
 export const deleteExam = async (req, res) => {
   try {
-    const exam = await Exam.findOne({ _id: req.params.id, createdBy: req.userId });
+    const query = { _id: req.params.id, createdBy: req.userId };
+    if (req.headers["x-branch-id"]) query.branch = req.headers["x-branch-id"];
+    if (req.headers["x-section"]) query.schoolSection = req.headers["x-section"];
+
+    const exam = await Exam.findOne(query);
     if (!exam) return res.status(404).json({ success: false, error: true, message: "Exam not found" });
 
     await Result.deleteMany({ exam: req.params.id });
-    await Exam.deleteOne({ _id: req.params.id });
+    await Exam.deleteOne(query);
     res.json({ success: true, error: false, message: "Exam and its results deleted" });
   } catch (err) {
     res.status(500).json({ success: false, error: true, message: err.message });

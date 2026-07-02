@@ -140,6 +140,7 @@ export default function AddTeacherPage() {
     experience: "",
     salary: "",
     employmentStatus: "",
+    schoolSection: localStorage.getItem("activeSection") || "girls",
     notes: "",
     emergencyName: "",
     emergencyPhone: "",
@@ -215,6 +216,7 @@ export default function AddTeacherPage() {
       if (!formData.employeeId.trim()) newErrors.employeeId = "Employee ID is required";
       if (!formData.joiningDate) newErrors.joiningDate = "Joining date is required";
       if (!formData.employmentStatus) newErrors.employmentStatus = "Employment status is required";
+      if (!formData.schoolSection) newErrors.schoolSection = "School section is required";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -474,6 +476,15 @@ export default function AddTeacherPage() {
                         onChange={handleInputChange}
                         required
                         error={errors.employmentStatus}
+                      />
+                      <Select
+                        label="School Section"
+                        name="schoolSection"
+                        options={[{ value: "girls", label: "Girls Section" }, { value: "boys", label: "Boys Section" }]}
+                        value={formData.schoolSection}
+                        onChange={handleInputChange}
+                        required
+                        error={errors.schoolSection}
                       />
                     </div>
                   </div>

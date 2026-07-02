@@ -9,8 +9,9 @@ export const createFee = async (data) => {
     headers: getHeaders(),
     body: JSON.stringify(data),
   });
-  if (!response.ok) throw new Error(`Create fee failed: ${response.status}`);
-  return response.json();
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || `Create fee failed: ${response.status}`);
+  return result;
 };
 
 // ─── Get All Fee Records (with optional filters) ──────────────────

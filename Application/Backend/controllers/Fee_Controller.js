@@ -13,6 +13,8 @@ function generateReceiptNumber() {
 export const createFee = async (request, response) => {
   try {
     request.body.createdBy = request.userId;
+    if (request.headers["x-branch-id"]) request.body.branch = request.headers["x-branch-id"];
+    if (request.headers["x-section"]) request.body.schoolSection = request.headers["x-section"];
     const fee = await Fee.create(request.body);
 
     response.status(201).json({
@@ -46,6 +48,8 @@ export const getStudentFees = async (request, response) => {
     const filter = { student: studentId, createdBy: request.userId };
     if (status) filter.status = status;
     if (year) filter.year = Number(year);
+    if (request.headers["x-branch-id"]) filter.branch = request.headers["x-branch-id"];
+    if (request.headers["x-section"]) filter.schoolSection = request.headers["x-section"];
 
     const fees = await Fee.find(filter).sort({ year: -1, month: -1 });
 
@@ -72,10 +76,14 @@ export const getStudentFees = async (request, response) => {
 // ─── Get Pending Fees ─────────────────────────────────────────────
 export const getPendingFees = async (request, response) => {
   try {
-    const fees = await Fee.find({
+    const filter = {
       createdBy: request.userId,
       status: { $in: ["pending", "partial", "overdue"] },
-    })
+    };
+    if (request.headers["x-branch-id"]) filter.branch = request.headers["x-branch-id"];
+    if (request.headers["x-section"]) filter.schoolSection = request.headers["x-section"];
+
+    const fees = await Fee.find(filter)
       .populate("student", "firstName lastName rollNumber")
       .sort({ dueDate: 1 });
 
@@ -104,6 +112,8 @@ export const getAllFees = async (request, response) => {
     if (status) filter.status = status;
     if (month) filter.month = Number(month);
     if (year) filter.year = Number(year);
+    if (request.headers["x-branch-id"]) filter.branch = request.headers["x-branch-id"];
+    if (request.headers["x-section"]) filter.schoolSection = request.headers["x-section"];
 
     const fees = await Fee.find(filter)
       .populate("student", "firstName lastName rollNumber class section")  // ← yeh already tha
@@ -131,7 +141,11 @@ export const payFee = async (request, response) => {
     const { id } = request.params;
     const { payingAmount, paymentMethod } = request.body;
 
-    const fee = await Fee.findOne({ _id: id, createdBy: request.userId });
+    const query = { _id: id, createdBy: request.userId };
+    if (request.headers["x-branch-id"]) query.branch = request.headers["x-branch-id"];
+    if (request.headers["x-section"]) query.schoolSection = request.headers["x-section"];
+
+    const fee = await Fee.findOne(query);
     if (!fee) {
       return response.status(404).json({
         success: false,
@@ -183,8 +197,12 @@ export const payFee = async (request, response) => {
 // ─── Update Fee Record ────────────────────────────────────────────
 export const updateFee = async (request, response) => {
   try {
+    const query = { _id: request.params.id, createdBy: request.userId };
+    if (request.headers["x-branch-id"]) query.branch = request.headers["x-branch-id"];
+    if (request.headers["x-section"]) query.schoolSection = request.headers["x-section"];
+
     const updated = await Fee.findOneAndUpdate(
-      { _id: request.params.id, createdBy: request.userId },
+      query,
       request.body,
       { new: true, runValidators: true }
     );
@@ -215,7 +233,11 @@ export const updateFee = async (request, response) => {
 // ─── Delete Fee Record ────────────────────────────────────────────
 export const deleteFee = async (request, response) => {
   try {
-    const deleted = await Fee.findOneAndDelete({ _id: request.params.id, createdBy: request.userId });
+    const query = { _id: request.params.id, createdBy: request.userId };
+    if (request.headers["x-branch-id"]) query.branch = request.headers["x-branch-id"];
+    if (request.headers["x-section"]) query.schoolSection = request.headers["x-section"];
+
+    const deleted = await Fee.findOneAndDelete(query);
 
     if (!deleted) {
       return response.status(404).json({

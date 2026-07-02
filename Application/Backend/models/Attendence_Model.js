@@ -19,10 +19,15 @@ const attendanceSchema = new mongoose.Schema(
       required: [true, "Date is mandatory"],
     },
 
-    section: {
+    schoolSection: {
       type: String,
       enum: ["girls", "boys"],
       required: false,
+    },
+    branch: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Branch",
+      default: null,
     },
 
     status: {

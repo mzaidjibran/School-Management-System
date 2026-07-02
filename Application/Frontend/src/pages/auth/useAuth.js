@@ -1,15 +1,58 @@
 import { useState, useEffect } from "react";
 import { normalizeRole } from "../../Api/Auth_Api.js";
 
-// Reads current auth state from localStorage.
-const getAuthState = () => ({
-  token:     localStorage.getItem("accessToken"),
-  userRole:  normalizeRole(localStorage.getItem("userRole")),
-  userId:    localStorage.getItem("userId"),
-  userName:  localStorage.getItem("userName"),
-  userEmail: localStorage.getItem("userEmail"),
-  userImage: localStorage.getItem("userImage"),
-});
+const decodeToken = (token) => {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    return JSON.parse(atob(parts[1]));
+  } catch {
+    return null;
+  }
+};
+
+const isTokenExpired = (token) => {
+  if (!token) return true;
+  const decoded = decodeToken(token);
+  if (!decoded || !decoded.exp) return true;
+  return decoded.exp * 1000 < Date.now();
+};
+
+const getAuthState = () => {
+  const token = localStorage.getItem("accessToken");
+  if (!token || isTokenExpired(token)) {
+    if (token) {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("userRole");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("userName");
+      localStorage.removeItem("userEmail");
+      localStorage.removeItem("userImage");
+      localStorage.removeItem("user");
+      localStorage.removeItem("activeBranch");
+      localStorage.removeItem("activeBranchName");
+      localStorage.removeItem("activeSection");
+    }
+    return {
+      token: null,
+      userRole: null,
+      userId: null,
+      userName: null,
+      userEmail: null,
+      userImage: null,
+    };
+  }
+
+  return {
+    token,
+    userRole:  normalizeRole(localStorage.getItem("userRole")),
+    userId:    localStorage.getItem("userId"),
+    userName:  localStorage.getItem("userName"),
+    userEmail: localStorage.getItem("userEmail"),
+    userImage: localStorage.getItem("userImage"),
+  };
+};
 
 // Returns the current authenticated user's state and derived role flags.
 // Listens to "auth-changed" (same tab) and "storage" (other tabs) to stay in sync.

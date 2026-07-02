@@ -80,6 +80,9 @@ export const logOut = async () => {
     localStorage.removeItem("userEmail");
     localStorage.removeItem("userImage");
     localStorage.removeItem("user");
+    localStorage.removeItem("activeBranch");
+    localStorage.removeItem("activeBranchName");
+    localStorage.removeItem("activeSection");
     notifyAuthChange();
   }
 };

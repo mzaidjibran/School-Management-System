@@ -24,6 +24,16 @@ const NoticeSchema = new mongoose.Schema(
       default: "published",
     },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    branch: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Branch",
+      default: null,
+    },
+    schoolSection: {
+      type: String,
+      enum: ["girls", "boys"],
+      default: null,
+    },
     views: { type: Number, default: 0 },
   },
   { timestamps: true }

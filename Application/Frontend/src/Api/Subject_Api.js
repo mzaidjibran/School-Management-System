@@ -30,8 +30,9 @@ export const addSubject = async (data) => {
     headers: getHeaders(),
     body: JSON.stringify(data),
   });
-  if (!response.ok) throw new Error(`Add subject failed: ${response.status}`);
-  return response.json();
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || `Add subject failed: ${response.status}`);
+  return result;
 };
 
 // ─── Update Subject ───────────────────────────────────────────────

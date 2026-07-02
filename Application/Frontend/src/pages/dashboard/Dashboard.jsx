@@ -16,10 +16,17 @@ import {
 
 // ── API base ──────────────────────────────────────────────────────
 const API = import.meta.env.VITE_API_BASE || "http://localhost:5000";
-const authHeaders = () => ({
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-});
+const authHeaders = () => {
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+  };
+  const activeBranch = localStorage.getItem("activeBranch");
+  const activeSection = localStorage.getItem("activeSection");
+  if (activeBranch) headers["x-branch-id"] = activeBranch;
+  if (activeSection) headers["x-section"] = activeSection;
+  return headers;
+};
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -52,6 +59,7 @@ export default function Dashboard() {
   // ── Fetch all dashboard data ──────────────────────────────────
   useEffect(() => {
     async function fetchAll() {
+      setLoading(true);
       try {
         const [
           studRes,
@@ -127,6 +135,8 @@ export default function Dashboard() {
             leave: attData.data.leave,
             late: attData.data.late,
           });
+        } else {
+          setAttendance(null);
         }
       } catch (err) {
         console.error("Dashboard fetch error:", err);
@@ -136,6 +146,11 @@ export default function Dashboard() {
       }
     }
     fetchAll();
+
+    window.addEventListener("branch-changed", fetchAll);
+    return () => {
+      window.removeEventListener("branch-changed", fetchAll);
+    };
   }, []);
 
   // ── Helpers ───────────────────────────────────────────────────

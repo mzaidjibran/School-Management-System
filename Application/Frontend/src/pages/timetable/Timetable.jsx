@@ -19,6 +19,7 @@ import {
   deleteTimetable,
   createOrUpdateTimetable,
 } from "../../api/Timetable_Api.js";
+import { getAllClasses } from "../../Api/Class_Api.js";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
@@ -177,11 +178,8 @@ export default function TimetableList() {
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
-      const classRes = await fetch(`${API_BASE}/api/classes`, {
-        headers: { "Content-Type": "application/json" },
-      });
-      const classJson = await classRes.json();
-      const classes = classJson.data || classJson.classes || [];
+      const classJson = await getAllClasses();
+      const classes = classJson.data || [];
 
       // For each class, fetch its timetable
       const results = await Promise.all(
@@ -224,6 +222,11 @@ export default function TimetableList() {
 
   useEffect(() => {
     fetchAll();
+
+    window.addEventListener("branch-changed", fetchAll);
+    return () => {
+      window.removeEventListener("branch-changed", fetchAll);
+    };
   }, [fetchAll]);
 
   // ── Filter ────────────────────────────────────────────────────
