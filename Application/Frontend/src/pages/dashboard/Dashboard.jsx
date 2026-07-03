@@ -328,7 +328,7 @@ export default function Dashboard() {
         {/* Left Side: Main Content (2/3 width) */}
         <div className="lg:col-span-2 space-y-6">
           {/* Overview Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {overviewStats.map((stat, idx) => (
               <div
                 key={idx}
@@ -350,7 +350,7 @@ export default function Dashboard() {
           </div>
 
           {/* Recent Fees */}
-          <div className="bg-white rounded-2xl border border-slate-100/80 shadow-sm p-5 overflow-x-auto">
+          <div className="bg-white rounded-2xl border border-slate-100/80 shadow-sm p-5">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-bold text-slate-800">
                 Recent Fee Collections
@@ -363,47 +363,69 @@ export default function Dashboard() {
               </button>
             </div>
             {recentFees.length ? (
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-slate-100">
-                    <th className={thClass}>Student</th>
-                    <th className={thClass}>Class</th>
-                    <th className={thClass}>Amount</th>
-                    <th className={thClass}>Date</th>
-                    <th className={thClass}>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
+              <>
+                <table className="hidden sm:table w-full">
+                  <thead>
+                    <tr className="border-b border-slate-100">
+                      <th className={thClass}>Student</th>
+                      <th className={thClass}>Class</th>
+                      <th className={thClass}>Amount</th>
+                      <th className={thClass}>Date</th>
+                      <th className={thClass}>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentFees.map((fee, i) => (
+                      <tr
+                        key={i}
+                        className="border-b border-slate-50 hover:bg-slate-50/80 transition-colors"
+                      >
+                        <td className={tdClass + " font-semibold text-slate-800"}>
+                          {fee.studentId?.name || fee.studentName || "—"}
+                        </td>
+                        <td className={tdClass}>
+                          {fee.classId?.name || fee.className || "—"}
+                        </td>
+                        <td className={tdClass + " font-semibold text-slate-900"}>
+                          ₨ {fee.amount?.toLocaleString() || "—"}
+                        </td>
+                        <td className={tdClass}>
+                          {fee.date
+                            ? new Date(fee.date).toLocaleDateString("en-PK")
+                            : "—"}
+                        </td>
+                        <td className={tdClass}>
+                          <span
+                            className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${feeStatusColor(fee.status)}`}
+                          >
+                            {fee.status || "—"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {/* Mobile view */}
+                <div className="block sm:hidden space-y-2">
                   {recentFees.map((fee, i) => (
-                    <tr
-                      key={i}
-                      className="border-b border-slate-50 hover:bg-slate-50/80 transition-colors"
-                    >
-                      <td className={tdClass + " font-semibold text-slate-800"}>
-                        {fee.studentId?.name || fee.studentName || "—"}
-                      </td>
-                      <td className={tdClass}>
-                        {fee.classId?.name || fee.className || "—"}
-                      </td>
-                      <td className={tdClass + " font-semibold text-slate-900"}>
-                        ₨ {fee.amount?.toLocaleString() || "—"}
-                      </td>
-                      <td className={tdClass}>
-                        {fee.date
-                          ? new Date(fee.date).toLocaleDateString("en-PK")
-                          : "—"}
-                      </td>
-                      <td className={tdClass}>
-                        <span
-                          className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${feeStatusColor(fee.status)}`}
-                        >
+                    <div key={i} className="p-2.5 border border-slate-100 rounded-xl space-y-1.5 bg-slate-50/30">
+                      <div className="flex justify-between items-center">
+                        <strong className="text-xs font-bold text-slate-800">{fee.studentId?.name || fee.studentName || "—"}</strong>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold capitalize ${feeStatusColor(fee.status)}`}>
                           {fee.status || "—"}
                         </span>
-                      </td>
-                    </tr>
+                      </div>
+                      <div className="flex justify-between text-[11px] text-slate-500">
+                        <span>Class: {fee.classId?.name || fee.className || "—"}</span>
+                        <span className="font-semibold text-slate-800">₨ {fee.amount?.toLocaleString() || "—"}</span>
+                      </div>
+                      <div className="text-[10px] text-slate-400">
+                        Date: {fee.date ? new Date(fee.date).toLocaleDateString("en-PK") : "—"}
+                      </div>
+                    </div>
                   ))}
-                </tbody>
-              </table>
+                </div>
+              </>
             ) : (
               <p className="text-xs text-slate-400 text-center py-6">
                 No fee records found
@@ -414,7 +436,7 @@ export default function Dashboard() {
           {/* Upcoming Exams + Notices Side by Side */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Upcoming Exams */}
-            <div className="bg-white rounded-2xl border border-slate-100/80 shadow-sm p-5 overflow-x-auto">
+            <div className="bg-white rounded-2xl border border-slate-100/80 shadow-sm p-5">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-bold text-slate-800">
                   Upcoming Exams
@@ -427,37 +449,55 @@ export default function Dashboard() {
                 </button>
               </div>
               {exams.length ? (
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-slate-100">
-                      <th className={thClass}>Exam</th>
-                      <th className={thClass}>Subject</th>
-                      <th className={thClass}>Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {exams.map((ex, i) => (
-                      <tr
-                        key={i}
-                        className="border-b border-slate-50 hover:bg-slate-50/50"
-                      >
-                        <td
-                          className={tdClass + " font-semibold text-slate-800"}
-                        >
-                          {ex.title || ex.name || "—"}
-                        </td>
-                        <td className={tdClass}>
-                          {ex.subject?.name || ex.subjectName || "—"}
-                        </td>
-                        <td className={tdClass + " font-medium"}>
-                          {ex.date
-                            ? new Date(ex.date).toLocaleDateString("en-PK")
-                            : "—"}
-                        </td>
+                <>
+                  <table className="hidden sm:table w-full">
+                    <thead>
+                      <tr className="border-b border-slate-100">
+                        <th className={thClass}>Exam</th>
+                        <th className={thClass}>Subject</th>
+                        <th className={thClass}>Date</th>
                       </tr>
+                    </thead>
+                    <tbody>
+                      {exams.map((ex, i) => (
+                        <tr
+                          key={i}
+                          className="border-b border-slate-50 hover:bg-slate-50/50"
+                        >
+                          <td
+                            className={tdClass + " font-semibold text-slate-800"}
+                          >
+                            {ex.title || ex.name || "—"}
+                          </td>
+                          <td className={tdClass}>
+                            {ex.subject?.name || ex.subjectName || "—"}
+                          </td>
+                          <td className={tdClass + " font-medium"}>
+                            {ex.date
+                              ? new Date(ex.date).toLocaleDateString("en-PK")
+                              : "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {/* Mobile view */}
+                  <div className="block sm:hidden space-y-2">
+                    {exams.map((ex, i) => (
+                      <div key={i} className="p-2.5 border border-slate-100 rounded-xl space-y-1 bg-slate-50/30">
+                        <div className="flex justify-between items-center">
+                          <strong className="text-xs font-bold text-slate-800">{ex.title || ex.name || "—"}</strong>
+                          <span className="text-[10px] text-slate-400">
+                            {ex.date ? new Date(ex.date).toLocaleDateString("en-PK") : "—"}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-slate-500">
+                          Subject: {ex.subject?.name || ex.subjectName || "—"}
+                        </div>
+                      </div>
                     ))}
-                  </tbody>
-                </table>
+                  </div>
+                </>
               ) : (
                 <p className="text-xs text-slate-400 text-center py-6">
                   No upcoming exams

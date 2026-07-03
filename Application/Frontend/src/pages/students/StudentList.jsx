@@ -328,7 +328,7 @@ const StudentFormModal = ({ isOpen, onClose, student, mode, onSave }) => {
             {/* Personal Info */}
             <div>
               <SectionHeader title="Personal Information" />
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Input label="Full Name" name="name" value={formData.name} onChange={handleChange} required error={errors.name} disabled={isViewOnly} />
                 <Select label="Gender" name="gender" options={["Male", "Female", "Other"]} value={formData.gender} onChange={handleChange} required error={errors.gender} disabled={isViewOnly} />
                 <Input label="Date of Birth" type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} disabled={isViewOnly} />
@@ -342,7 +342,7 @@ const StudentFormModal = ({ isOpen, onClose, student, mode, onSave }) => {
             {/* Contact Info */}
             <div>
               <SectionHeader title="Contact Information" />
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Input label="Phone" type="tel" name="phone" value={formData.phone} onChange={handleChange} required error={errors.phone} disabled={isViewOnly} />
                 <Input label="Email" type="email" name="email" value={formData.email} onChange={handleChange} required error={errors.email} disabled={isViewOnly} />
                 <Input label="Address" name="address" value={formData.address} onChange={handleChange} disabled={isViewOnly} />
@@ -356,7 +356,7 @@ const StudentFormModal = ({ isOpen, onClose, student, mode, onSave }) => {
             {/* Academic Info */}
             <div>
               <SectionHeader title="Academic Information" />
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Select
                   label="Class"
                   name="class"
@@ -380,6 +380,7 @@ const StudentFormModal = ({ isOpen, onClose, student, mode, onSave }) => {
                   onChange={handleChange}
                   disabled={isViewOnly}
                   required
+                  error={errors.schoolSection}
                 />
                 <Input label="Admission Date" type="date" name="admissionDate" value={formData.admissionDate} onChange={handleChange} disabled={isViewOnly} />
                 <Input label="Previous School" name="previousSchool" value={formData.previousSchool} onChange={handleChange} disabled={isViewOnly} />
@@ -402,7 +403,7 @@ const StudentFormModal = ({ isOpen, onClose, student, mode, onSave }) => {
                     placeholder="Medical Information / Allergies..."
                     className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-800 bg-white outline-none resize-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
                 )}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Input label="Emergency Contact Name" name="emergencyName" value={formData.emergencyName} onChange={handleChange} disabled={isViewOnly} />
                   <Input label="Emergency Contact Phone" type="tel" name="emergencyPhone" value={formData.emergencyPhone} onChange={handleChange} disabled={isViewOnly} />
                 </div>
@@ -613,35 +614,41 @@ export default function StudentList() {
   const handleBackupData = () => {
     const headers = [
       "firstName", "lastName", "gender", "dateOfBirth", "email", "phone",
-      "address", "city", "fatherName", "parentPhone", "rollNumber", "section", "schoolSection",
+      "address", "city", "fatherName", "motherName", "parentPhone", "rollNumber", "section", "schoolSection",
       "admissionDate", "className", "cnic", "bloodGroup", "religion",
       "nationality", "previousSchool", "medicalInfo", "emergencyName", "emergencyPhone"
     ];
-    const rows = students.map((s) => [
-      s.firstName || "",
-      s.lastName || "",
-      s.gender || "",
-      s.dateOfBirth ? s.dateOfBirth.split("T")[0] : "",
-      s.email || "",
-      s.phone || "",
-      s.address || "",
-      s.city || "",
-      s.guardian?.name || s.fatherName || "",
-      s.guardian?.phone || s.parentPhone || "",
-      s.rollNumber || "",
-      s.section || "",
-      s.schoolSection || "",
-      s.admissionDate ? s.admissionDate.split("T")[0] : "",
-      s.class?.name || s.className || "",
-      s.CNIC || "",
-      s.bloodGroup || "",
-      s.religion || "",
-      s.nationality || "",
-      s.previousSchool || "",
-      s.medicalInfo || "",
-      s.emergencyName || "",
-      s.emergencyPhone || ""
-    ]);
+    const rows = students.map((s) => {
+      const nameParts = (s.name || "").trim().split(/\s+/);
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(" ") || "";
+      return [
+        firstName,
+        lastName,
+        s.gender || "",
+        s.dateOfBirth ? s.dateOfBirth.split("T")[0] : "",
+        s.email || "",
+        s.phone || "",
+        s.address || "",
+        s.city || "",
+        s.fatherName || "",
+        s.motherName || "",
+        s.parentPhone || "",
+        s.rollNumber || "",
+        s.section || "",
+        s.schoolSection || "",
+        s.admissionDate ? s.admissionDate.split("T")[0] : "",
+        s.class || "",
+        s.cnic || "",
+        s.bloodGroup || "",
+        s.religion || "",
+        s.nationality || "",
+        s.previousSchool || "",
+        s.medicalInfo || "",
+        s.emergencyName || "",
+        s.emergencyPhone || ""
+      ];
+    });
     const csvContent = [headers.join(","), ...rows.map(r => r.map(val => `"${String(val).replace(/"/g, '""')}"`).join(","))].join("\n");
     saveAs(new Blob([csvContent], { type: "text/csv;charset=utf-8;" }), "students_backup.csv");
     toast.success("Students backup downloaded successfully!");
@@ -666,37 +673,68 @@ export default function StudentList() {
         const loadingToastId = toast.loading("Uploading students...");
         for (const row of parsed) {
           try {
-            const matchedClass = classesList.find(c => c.name.toLowerCase() === (row.className || "").toLowerCase());
+            // Case-insensitive key lookup helper
+            const getVal = (r, ...keys) => {
+              for (const k of keys) {
+                if (r[k] !== undefined) return r[k];
+                const foundKey = Object.keys(r).find(rk => rk.trim().toLowerCase() === k.toLowerCase());
+                if (foundKey) return r[foundKey];
+              }
+              return "";
+            };
+
+            const classNameVal = getVal(row, "className", "class");
+            const matchedClass = classesList.find(c => c.name.toLowerCase() === classNameVal.toLowerCase());
+            
+            let firstName = getVal(row, "firstName", "first name");
+            let lastName = getVal(row, "lastName", "last name");
+            const fullName = getVal(row, "name", "studentName", "student name");
+
+            if (!firstName && fullName) {
+              const parts = fullName.trim().split(/\s+/);
+              firstName = parts[0] || "";
+              lastName = parts.slice(1).join(" ") || "";
+            }
+
+            // Fallback default names to prevent validation crash if file is corrupt
+            if (!firstName) firstName = "Student";
+            if (!lastName) lastName = `Uploaded-${Math.floor(100 + Math.random() * 900)}`;
+
             const fd = new FormData();
-            fd.append("firstName", row.firstName || "");
-            fd.append("lastName", row.lastName || "");
-            fd.append("gender", (row.gender || "male").toLowerCase());
-            fd.append("dateOfBirth", row.dateOfBirth || "");
-            fd.append("email", row.email || "");
-            fd.append("phone", row.phone || "");
-            fd.append("address", row.address || "");
-            fd.append("city", row.city || "");
-            fd.append("guardian[name]", row.fatherName || "");
-            fd.append("guardian[phone]", row.parentPhone || "");
+            fd.append("firstName", firstName);
+            fd.append("lastName", lastName);
+            fd.append("gender", (getVal(row, "gender").toLowerCase() || "male"));
+            fd.append("dateOfBirth", getVal(row, "dateOfBirth", "dob"));
+            fd.append("email", getVal(row, "email"));
+            fd.append("phone", getVal(row, "phone"));
+            fd.append("address", getVal(row, "address"));
+            fd.append("city", getVal(row, "city"));
+            fd.append("guardian[name]", getVal(row, "fatherName", "guardianName", "father name"));
+            fd.append("guardian[phone]", getVal(row, "parentPhone", "guardianPhone", "parent phone"));
             fd.append("guardian[relationship]", "father");
-            fd.append("rollNumber", row.rollNumber || "");
-            fd.append("section", row.section || "");
-            fd.append("schoolSection", (row.schoolSection || localStorage.getItem("activeSection") || "girls").toLowerCase());
-            fd.append("admissionDate", row.admissionDate || new Date().toISOString().split("T")[0]);
+            fd.append("rollNumber", getVal(row, "rollNumber", "roll number", "roll no"));
+            fd.append("section", getVal(row, "section"));
+            fd.append("schoolSection", (getVal(row, "schoolSection", "school section") || localStorage.getItem("activeSection") || "girls").toLowerCase());
+            fd.append("admissionDate", getVal(row, "admissionDate", "admission date") || new Date().toISOString().split("T")[0]);
             if (matchedClass) fd.append("class", matchedClass._id);
-            if (row.cnic) fd.append("CNIC", row.cnic);
-            if (row.bloodGroup) fd.append("bloodGroup", row.bloodGroup);
-            if (row.religion) fd.append("religion", row.religion);
-            if (row.nationality) fd.append("nationality", row.nationality);
-            if (row.previousSchool) fd.append("previousSchool", row.previousSchool);
-            if (row.medicalInfo) fd.append("medicalInfo", row.medicalInfo);
-            if (row.emergencyName) fd.append("emergencyName", row.emergencyName);
-            if (row.emergencyPhone) fd.append("emergencyPhone", row.emergencyPhone);
+            if (getVal(row, "cnic")) fd.append("CNIC", getVal(row, "cnic"));
+            if (getVal(row, "motherName", "mother name")) fd.append("motherName", getVal(row, "motherName", "mother name"));
+            if (getVal(row, "bloodGroup", "blood group")) fd.append("bloodGroup", getVal(row, "bloodGroup", "blood group"));
+            if (getVal(row, "religion")) fd.append("religion", getVal(row, "religion"));
+            if (getVal(row, "nationality")) fd.append("nationality", getVal(row, "nationality"));
+            if (getVal(row, "previousSchool", "previous school")) fd.append("previousSchool", getVal(row, "previousSchool", "previous school"));
+            if (getVal(row, "medicalInfo", "medical info")) fd.append("medicalInfo", getVal(row, "medicalInfo", "medical info"));
+            if (getVal(row, "emergencyName", "emergency name")) fd.append("emergencyName", getVal(row, "emergencyName", "emergency name"));
+            if (getVal(row, "emergencyPhone", "emergency phone")) fd.append("emergencyPhone", getVal(row, "emergencyPhone", "emergency phone"));
+
             await createStudent(fd);
             successCount++;
           } catch (err) {
             console.error("Failed to create student from CSV row:", row, err);
-            toast.error(`Row "${row.firstName} ${row.lastName}": ${err.message}`);
+            const firstNameVal = getVal(row, "firstName");
+            const nameVal = getVal(row, "name");
+            const rowLabel = firstNameVal || nameVal || "Unknown Row";
+            toast.error(`Row "${rowLabel}": ${err.message}`);
             failCount++;
           }
         }
@@ -736,19 +774,19 @@ export default function StudentList() {
       fd.append("guardian[name]", data.fatherName || "");
       fd.append("guardian[phone]", data.parentPhone || "");
       fd.append("guardian[relationship]", data.fatherName ? "father" : "mother");
-      if (data.dateOfBirth)    fd.append("dateOfBirth", data.dateOfBirth);
-      if (data.bloodGroup)     fd.append("bloodGroup", data.bloodGroup);
-      if (data.cnic)           fd.append("CNIC", data.cnic);
-      if (data.class)          fd.append("class", data.class);
-      if (data.previousSchool) fd.append("previousSchool", data.previousSchool);
-      if (data.medicalInfo)    fd.append("medicalInfo", data.medicalInfo);
-      if (data.emergencyName)  fd.append("emergencyName", data.emergencyName);
-      if (data.emergencyPhone) fd.append("emergencyPhone", data.emergencyPhone);
-      if (data.religion)       fd.append("religion", data.religion);
-      if (data.nationality)    fd.append("nationality", data.nationality);
-      if (data.address)        fd.append("address", data.address);
-      if (data.city)           fd.append("city", data.city);
-      if (data.motherName)     fd.append("motherName", data.motherName);
+      fd.append("dateOfBirth", data.dateOfBirth || "");
+      fd.append("bloodGroup", data.bloodGroup || "");
+      fd.append("CNIC", data.cnic || "");
+      fd.append("class", data.class || "");
+      fd.append("previousSchool", data.previousSchool || "");
+      fd.append("medicalInfo", data.medicalInfo || "");
+      fd.append("emergencyName", data.emergencyName || "");
+      fd.append("emergencyPhone", data.emergencyPhone || "");
+      fd.append("religion", data.religion || "");
+      fd.append("nationality", data.nationality || "");
+      fd.append("address", data.address || "");
+      fd.append("city", data.city || "");
+      fd.append("motherName", data.motherName || "");
       if (imageFile)           fd.append("profileImage", imageFile);
 
       await updateStudent(data.id, fd);
@@ -842,8 +880,8 @@ export default function StudentList() {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+      {/* Table - Desktop View */}
+      <div className="hidden md:block bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
         <DataTable
           columns={columns}
           data={filteredStudents}
@@ -860,6 +898,39 @@ export default function StudentList() {
           highlightOnHover
           pointerOnHover
         />
+      </div>
+
+      {/* Mobile Card List View */}
+      <div className="block md:hidden space-y-2.5">
+        {loading ? (
+          <div className="p-10 text-center text-slate-500 bg-white rounded-xl border border-slate-100 text-sm">Loading students...</div>
+        ) : filteredStudents.length === 0 ? (
+          <div className="p-10 text-center text-slate-500 bg-white rounded-xl border border-slate-100 text-sm">No students found</div>
+        ) : (
+          filteredStudents.map((student) => (
+            <div key={student.id} className="bg-white p-3 border border-slate-100 shadow-sm flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <Avatar src={student.picture} name={student.name} />
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-bold text-slate-800 truncate">{student.name}</h3>
+                  <p className="text-xs text-slate-500">Roll# {student.rollNumber} • {student.class || "No Class"}</p>
+                </div>
+                <ActionButtons
+                  row={student}
+                  onView={() => openModal(student, "view")}
+                  onEdit={() => openModal(student, "edit")}
+                  onDelete={() => handleDeleteStudent(student)}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1 pt-2 border-t border-slate-50 text-[11px] text-slate-500">
+                <div><span className="text-slate-400">Section:</span> <strong className="text-slate-700 font-medium">{student.section || "—"}</strong></div>
+                <div><span className="text-slate-400">Gender:</span> <strong className="text-slate-700 font-medium capitalize">{student.gender || "—"}</strong></div>
+                <div className="col-span-2"><span className="text-slate-400">Father:</span> <strong className="text-slate-700 font-medium">{student.fatherName || "—"}</strong></div>
+                <div className="col-span-2"><span className="text-slate-400">Phone:</span> <strong className="text-slate-700 font-medium">{student.phone || "—"}</strong></div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       <StudentFormModal

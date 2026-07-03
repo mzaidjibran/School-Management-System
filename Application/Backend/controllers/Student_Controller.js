@@ -94,6 +94,11 @@ export const createStudent = async (request, response) => {
     studentData.schoolSection =
       studentData.schoolSection || request.headers["x-section"];
 
+    // Auto-generate unique admission number if not provided to prevent index duplicate key errors
+    if (!studentData.admissionNumber) {
+      studentData.admissionNumber = `ADM-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    }
+
     const student = await Student.create(studentData);
     const populated = await Student.findById(student._id).populate(
       "currentClass",
