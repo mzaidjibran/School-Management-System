@@ -258,12 +258,14 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
     );
   };
 
-  const FS = ({ label, name, options, required }) => {
+  const FS = ({ label, name, options = [], required }) => {
     if (isViewOnly) {
+      const selectedOpt = options.find(o => typeof o === "object" ? o.value === formData[name] : o === formData[name]);
+      const displayVal = selectedOpt ? (typeof selectedOpt === "object" ? selectedOpt.label : selectedOpt) : (formData[name] || "—");
       return (
         <div className="relative">
           <div className="w-full px-3 pt-5 pb-1.5 border border-slate-200 rounded-lg bg-slate-50 text-sm text-slate-700 min-h-[52px]">
-            {formData[name] || "—"}
+            {displayVal}
           </div>
           <label className="absolute left-3 top-1 text-[10px] text-indigo-500 pointer-events-none">{label}</label>
         </div>
@@ -277,7 +279,11 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
             focus:ring-2`}
         >
           <option value=""></option>
-          {options.map((o) => <option key={o} value={o}>{o}</option>)}
+          {options.map((o) => {
+            const val = typeof o === "object" ? o.value : o;
+            const lbl = typeof o === "object" ? o.label : o;
+            return <option key={val} value={val}>{lbl}</option>;
+          })}
         </select>
         <label htmlFor={name}
           className={`absolute left-3 pointer-events-none transition-all duration-150

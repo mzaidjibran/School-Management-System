@@ -78,11 +78,15 @@ const Select = ({
         focus:ring-2`}
     >
       <option value=""></option>
-      {options.map((opt) => (
-        <option key={opt} value={opt}>
-          {opt}
-        </option>
-      ))}
+      {options.map((opt) => {
+        const val = typeof opt === "object" ? opt.value : opt;
+        const lbl = typeof opt === "object" ? opt.label : opt;
+        return (
+          <option key={val} value={val}>
+            {lbl}
+          </option>
+        );
+      })}
     </select>
     <label
       htmlFor={name}
@@ -208,7 +212,6 @@ export default function AddTeacherPage() {
       else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Invalid email";
       if (!formData.phone.trim()) newErrors.phone = "Phone number is required";
       if (!formData.gender) newErrors.gender = "Gender is required";
-      if (!formData.dateOfBirth) newErrors.dateOfBirth = "Date of birth is required";
     } else if (currentStep === 2) {
       if (!formData.subject.trim()) newErrors.subject = "Subject is required";
       if (!formData.qualification.trim()) newErrors.qualification = "Qualification is required";

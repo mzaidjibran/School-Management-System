@@ -56,6 +56,7 @@ function transformTeacherDoc(doc) {
 
 export const createTeacher = async (request, response) => {
   try {
+    console.log("createTeacher received body:", request.body);
     const teacherData = normalizePayload(request.body, request.file);
     teacherData.userId = request.userId;
     if (request.headers["x-branch-id"]) teacherData.branch = request.headers["x-branch-id"];
