@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FaSearch, FaMoneyBillWave, FaPrint, FaSave } from "react-icons/fa";
 import { getStudentFees, payFee, createFee } from "../../api/Fee_Api.js";
+import { getHeaders } from "../../Api/Api_Helper.js";
 import toast from "react-hot-toast";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
@@ -182,7 +183,7 @@ export default function CollectFee() {
       else params.append("name", searchQuery.trim());
 
       const res = await fetch(`${API_BASE}/api/students?${params}`, {
-        headers: { "Content-Type": "application/json" },
+        headers: getHeaders(),
       });
       const json = await res.json();
 

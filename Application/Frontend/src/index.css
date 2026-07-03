@@ -16,3 +16,48 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Lora', serif;
 }
+
+/* Scoped layout rules: Flatten pages, page cards, page buttons, and page inputs */
+main .bg-white,
+main button,
+main input:not([type="checkbox"]):not([type="radio"]),
+main select,
+main textarea,
+main table,
+main th,
+main td,
+main tr,
+main .bg-indigo-50,
+main .bg-slate-50 {
+  border-radius: 0px !important;
+}
+
+/* Flatten modal containers and their inner controls */
+.fixed.inset-0.z-50 .bg-white,
+.fixed.inset-0.z-50 button,
+.fixed.inset-0.z-50 input:not([type="checkbox"]):not([type="radio"]),
+.fixed.inset-0.z-50 select,
+.fixed.inset-0.z-50 textarea,
+.fixed.inset-0.z-50 .bg-indigo-50,
+.fixed.inset-0.z-50 .bg-slate-50 {
+  border-radius: 0px !important;
+}
+
+/* Keep top tabs and nav pills rounded as requested */
+.top-tabs-container {
+  border-radius: 16px !important;
+}
+.top-tab-link {
+  border-radius: 12px !important;
+}
+
+/* Explicitly keep loaders, circular avatars, toggle pills, and status indicators round */
+.rounded-full,
+[class*="rounded-full"],
+.animate-spin,
+.w-14.h-14.bg-indigo-600,
+.w-10.h-10.bg-indigo-600 {
+  border-radius: 9999px !important;
+}
+
+

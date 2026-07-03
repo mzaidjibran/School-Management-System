@@ -137,8 +137,8 @@ export default function BranchSectionModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9000] flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-md p-5 sm:p-6 relative animate-in fade-in zoom-in duration-200 max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9000] flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-md p-4 sm:p-6 relative animate-in fade-in zoom-in duration-200 max-h-[95vh] flex flex-col">
         
         {/* Top Header */}
         <div className="flex items-center gap-3 mb-5 shrink-0">
@@ -256,8 +256,8 @@ export default function BranchSectionModal({ isOpen, onClose }) {
                       <div className={`p-1.5 rounded-lg ${selectedBranch === b._id ? "bg-indigo-100 text-indigo-700" : "bg-slate-100 text-slate-500"}`}>
                         <School className="w-4 h-4" />
                       </div>
-                      <div className="flex flex-col text-left">
-                        <span className="font-bold text-xs sm:text-sm">{b.name}</span>
+                      <div className="flex flex-col text-left overflow-hidden">
+                        <span className="font-bold text-xs sm:text-sm truncate max-w-[150px] sm:max-w-[200px]">{b.name}</span>
                         <span className="text-[9px] text-slate-400 font-medium">Code: {b.code}</span>
                       </div>
                     </div>
@@ -295,14 +295,14 @@ export default function BranchSectionModal({ isOpen, onClose }) {
                     key={sec}
                     type="button"
                     onClick={() => setSelectedSection(sec)}
-                    className={`py-3 px-4 rounded-xl border text-sm font-semibold capitalize transition flex items-center justify-center gap-2 ${
+                    className={`py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl border text-xs sm:text-sm font-semibold capitalize transition flex items-center justify-center gap-1.5 sm:gap-2 ${
                       selectedSection === sec
                         ? "border-indigo-600 bg-indigo-50/70 text-indigo-700 shadow-sm shadow-indigo-100"
                         : "border-slate-200 hover:bg-slate-50 text-slate-600 bg-white"
                     }`}
                   >
-                    <Layers className="w-4 h-4" />
-                    {sec} Section
+                    <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    {sec === "girls" ? "Girls" : "Boys"}
                   </button>
                 ))}
               </div>

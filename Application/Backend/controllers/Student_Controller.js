@@ -1,6 +1,10 @@
 import { Student } from "../models/Student_Model.js";
 import path from "path";
 
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 // ─── Helper: Normalize Incoming Data ─────────────────────────────
 function normalizePayload(body, file) {
   const data = { ...body };
@@ -67,7 +71,11 @@ function transformStudentDoc(doc) {
     cnic: raw.CNIC || raw.cnic || "",
     dateofBirth: raw.dateOfBirth || null,
     dateOfJoining: raw.admissionDate || null,
-    class: raw.currentClass ? (typeof raw.currentClass === "object" ? raw.currentClass.name : raw.currentClass) : "",
+    class: raw.currentClass
+      ? typeof raw.currentClass === "object"
+        ? raw.currentClass.name
+        : raw.currentClass
+      : "",
     profileImage: raw.profileImage
       ? raw.profileImage.startsWith("/image/")
         ? raw.profileImage
@@ -81,11 +89,15 @@ export const createStudent = async (request, response) => {
   try {
     const studentData = normalizePayload(request.body, request.file);
     studentData.createdBy = request.userId;
-    if (request.headers["x-branch-id"]) studentData.branch = request.headers["x-branch-id"];
-    studentData.schoolSection = studentData.schoolSection || request.headers["x-section"];
+    if (request.headers["x-branch-id"])
+      studentData.branch = request.headers["x-branch-id"];
+    studentData.schoolSection =
+      studentData.schoolSection || request.headers["x-section"];
 
     const student = await Student.create(studentData);
-    const populated = await Student.findById(student._id).populate("currentClass");
+    const populated = await Student.findById(student._id).populate(
+      "currentClass",
+    );
     response.status(201).json({
       success: true,
       error: false,
@@ -93,7 +105,7 @@ export const createStudent = async (request, response) => {
       data: transformStudentDoc(populated),
     });
   } catch (error) {
-    console.log("Validation error:", error.message); 
+    console.log("Validation error:", error.message);
     response.status(400).json({
       success: false,
       error: true,
@@ -106,8 +118,43 @@ export const createStudent = async (request, response) => {
 export const getAllStudents = async (request, response) => {
   try {
     const query = { createdBy: request.userId };
+    const { rollNumber, name, search } = request.query;
+
     if (request.query.currentClass) {
       query.currentClass = request.query.currentClass;
+    }
+    if (rollNumber) {
+      query.rollNumber = String(rollNumber).trim();
+    }
+    const searchTerm = String(name || search || "").trim();
+    if (searchTerm) {
+      const regex = new RegExp(escapeRegExp(searchTerm), "i");
+      const words = searchTerm.split(/\s+/);
+      if (words.length > 1) {
+        const firstRegex = new RegExp(escapeRegExp(words[0]), "i");
+        const lastRegex = new RegExp(escapeRegExp(words.slice(1).join(" ")), "i");
+        query.$or = [
+          { firstName: regex },
+          { lastName: regex },
+          {
+            $and: [
+              { firstName: firstRegex },
+              { lastName: lastRegex }
+            ]
+          },
+          {
+            $and: [
+              { firstName: lastRegex },
+              { lastName: firstRegex }
+            ]
+          }
+        ];
+      } else {
+        query.$or = [
+          { firstName: regex },
+          { lastName: regex }
+        ];
+      }
     }
     if (request.query.section) {
       query.schoolSection = request.query.section;
@@ -136,8 +183,10 @@ export const getAllStudents = async (request, response) => {
 export const getSingleStudent = async (request, response) => {
   try {
     const query = { _id: request.params.id, createdBy: request.userId };
-    if (request.headers["x-branch-id"]) query.branch = request.headers["x-branch-id"];
-    if (request.headers["x-section"]) query.schoolSection = request.headers["x-section"];
+    if (request.headers["x-branch-id"])
+      query.branch = request.headers["x-branch-id"];
+    if (request.headers["x-section"])
+      query.schoolSection = request.headers["x-section"];
 
     const student = await Student.findOne(query).populate("currentClass");
     if (!student) {
@@ -168,14 +217,15 @@ export const updateStudent = async (request, response) => {
     const updateData = normalizePayload(request.body, request.file);
 
     const query = { _id: request.params.id, createdBy: request.userId };
-    if (request.headers["x-branch-id"]) query.branch = request.headers["x-branch-id"];
-    if (request.headers["x-section"]) query.schoolSection = request.headers["x-section"];
+    if (request.headers["x-branch-id"])
+      query.branch = request.headers["x-branch-id"];
+    if (request.headers["x-section"])
+      query.schoolSection = request.headers["x-section"];
 
-    const updatedStudent = await Student.findOneAndUpdate(
-      query,
-      updateData,
-      { new: true, runValidators: true }
-    ).populate("currentClass");
+    const updatedStudent = await Student.findOneAndUpdate(query, updateData, {
+      new: true,
+      runValidators: true,
+    }).populate("currentClass");
 
     if (!updatedStudent) {
       return response.status(404).json({
@@ -203,8 +253,10 @@ export const updateStudent = async (request, response) => {
 export const deleteStudent = async (request, response) => {
   try {
     const query = { _id: request.params.id, createdBy: request.userId };
-    if (request.headers["x-branch-id"]) query.branch = request.headers["x-branch-id"];
-    if (request.headers["x-section"]) query.schoolSection = request.headers["x-section"];
+    if (request.headers["x-branch-id"])
+      query.branch = request.headers["x-branch-id"];
+    if (request.headers["x-section"])
+      query.schoolSection = request.headers["x-section"];
 
     const deletedStudent = await Student.findOneAndDelete(query);
 

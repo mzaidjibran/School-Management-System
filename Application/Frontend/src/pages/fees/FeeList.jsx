@@ -328,6 +328,190 @@ const FeeSlipModal = ({ record, onClose }) => {
   );
 };
 
+// ---------- Collect Fee Modal ----------
+const CollectFeeModal = ({ students, classes, onClose, onSuccess }) => {
+  const [studentSearch, setStudentSearch] = useState("");
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [feeData, setFeeData] = useState({
+    feeType: "tuition", month: new Date().getMonth() + 1,
+    year: new Date().getFullYear(), amount: "", paidAmount: "",
+    dueDate: new Date(new Date().getFullYear(), new Date().getMonth(), 10).toISOString().split("T")[0],
+    status: "pending", remarks: "",
+  });
+  const [saving, setSaving] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClick = (e) => { if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setShowDropdown(false); };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const filteredStudents = studentSearch.length >= 1
+    ? students.filter(s => {
+        const fullName = `${s.firstName} ${s.lastName}`.toLowerCase();
+        const roll = String(s.rollNumber || "").toLowerCase();
+        const q = studentSearch.toLowerCase();
+        return fullName.includes(q) || roll.includes(q);
+      }).slice(0, 15)
+    : [];
+
+  const handleSelectStudent = (s) => {
+    setSelectedStudent(s);
+    setStudentSearch(`${s.firstName} ${s.lastName} (${s.rollNumber})`);
+    setShowDropdown(false);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFeeData(prev => ({ ...prev, [name]: name === "amount" || name === "paidAmount" ? parseFloat(value) || "" : value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedStudent) { toast.error("Pehle student select karein!"); return; }
+    if (!feeData.amount || feeData.amount <= 0) { toast.error("Amount daalna zaroori hai!"); return; }
+    setSaving(true);
+    try {
+      const payload = {
+        student: selectedStudent._id,
+        class: selectedStudent.currentClass?._id || selectedStudent.currentClass || selectedStudent.class?._id || selectedStudent.class,
+        feeType: feeData.feeType,
+        month: Number(feeData.month),
+        year: Number(feeData.year),
+        amount: Number(feeData.amount),
+        paidAmount: Number(feeData.paidAmount) || 0,
+        dueDate: feeData.dueDate,
+        status: feeData.paidAmount >= feeData.amount ? "paid" : feeData.paidAmount > 0 ? "partial" : "pending",
+        remarks: feeData.remarks,
+      };
+      await createFee(payload);
+      toast.success(`Fee collected for ${selectedStudent.firstName} ${selectedStudent.lastName}`);
+      onSuccess();
+    } catch (err) {
+      toast.error(err.message || "Fee create failed");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+          <h2 className="text-sm font-semibold text-slate-700">Collect Fee</h2>
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 transition">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 px-6 py-5 space-y-4">
+          {/* Student Search */}
+          <div className="relative" ref={dropdownRef}>
+            <label className="block text-xs font-semibold text-slate-500 mb-1">Search Student (Name or Roll Number)</label>
+            <div className="relative">
+              <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs" />
+              <input type="text" value={studentSearch} placeholder="Type student name or roll number..."
+                onChange={(e) => { setStudentSearch(e.target.value); setSelectedStudent(null); setShowDropdown(true); }}
+                onFocus={() => { if (studentSearch.length >= 1) setShowDropdown(true); }}
+                className="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-lg outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
+            </div>
+            {showDropdown && filteredStudents.length > 0 && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                {filteredStudents.map(s => (
+                  <button type="button" key={s._id} onClick={() => handleSelectStudent(s)}
+                    className="w-full text-left px-4 py-2.5 hover:bg-indigo-50 transition flex items-center justify-between border-b border-slate-50 last:border-0">
+                    <div>
+                      <span className="text-sm font-medium text-slate-800">{s.firstName} {s.lastName}</span>
+                      <span className="text-xs text-slate-400 ml-2">{s.currentClass?.name || ""}</span>
+                    </div>
+                    <code className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs">{s.rollNumber}</code>
+                  </button>
+                ))}
+              </div>
+            )}
+            {showDropdown && studentSearch.length >= 1 && filteredStudents.length === 0 && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg p-4 text-center text-sm text-slate-400">
+                No students found
+              </div>
+            )}
+          </div>
+
+          {/* Selected student info */}
+          {selectedStudent && (
+            <div className="bg-indigo-50 rounded-xl p-3 flex items-center gap-3">
+              <div className="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                {selectedStudent.firstName?.[0]}{selectedStudent.lastName?.[0]}
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-800">{selectedStudent.firstName} {selectedStudent.lastName}</p>
+                <p className="text-xs text-slate-500">Roll# {selectedStudent.rollNumber} • {selectedStudent.currentClass?.name || "—"}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Fee details */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 mb-1">Fee Type</label>
+              <select name="feeType" value={feeData.feeType} onChange={handleChange}
+                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100">
+                {["tuition", "admission", "exam", "library", "transport", "other"].map(t => (
+                  <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 mb-1">Month</label>
+              <select name="month" value={feeData.month} onChange={handleChange}
+                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100">
+                {MONTHS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 mb-1">Year</label>
+              <input type="number" name="year" value={feeData.year} onChange={handleChange}
+                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 mb-1">Due Date</label>
+              <input type="date" name="dueDate" value={feeData.dueDate} onChange={handleChange}
+                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 mb-1">Total Amount (PKR) *</label>
+              <input type="number" name="amount" value={feeData.amount} onChange={handleChange} required min="1"
+                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 mb-1">Paid Amount (PKR)</label>
+              <input type="number" name="paidAmount" value={feeData.paidAmount} onChange={handleChange} min="0"
+                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 mb-1">Remarks (Optional)</label>
+            <textarea name="remarks" value={feeData.remarks} onChange={handleChange} rows={2}
+              className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 resize-none" />
+          </div>
+
+          <div className="flex justify-end gap-2.5 pt-2">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-xs border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition">Cancel</button>
+            <button type="submit" disabled={saving || !selectedStudent}
+              className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5">
+              {saving ? "Saving..." : "Collect Fee"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 // ---------- Main Component ----------
 export default function FeeRecords() {
   const [records, setRecords] = useState([]);
@@ -341,6 +525,9 @@ export default function FeeRecords() {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [viewRecord, setViewRecord] = useState(null);
   const [editRecord, setEditRecord] = useState(null);
+  const [showCollectModal, setShowCollectModal] = useState(false);
+  const [allStudents, setAllStudents] = useState([]);
+  const [allClasses, setAllClasses] = useState([]);
 
   const fetchFees = async () => {
     setLoading(true);
@@ -357,9 +544,20 @@ export default function FeeRecords() {
     }
   };
 
+  const fetchStudentsAndClasses = async () => {
+    try {
+      const [sRes, cRes] = await Promise.all([getAllStudents(), getAllClasses()]);
+      setAllStudents(sRes.data || []);
+      setAllClasses(cRes.data || []);
+    } catch (err) {
+      console.error("Failed to fetch students/classes", err);
+    }
+  };
+
   useEffect(() => {
     fetchFees();
-    window.addEventListener("branch-changed", fetchFees);
+    fetchStudentsAndClasses();
+    window.addEventListener("branch-changed", () => { fetchFees(); fetchStudentsAndClasses(); });
     return () => {
       window.removeEventListener("branch-changed", fetchFees);
     };
@@ -430,11 +628,12 @@ export default function FeeRecords() {
   const csvFileInputRef = useRef(null);
 
   const handleBackupData = () => {
-    const headers = ["rollNumber", "studentName", "className", "month", "year", "amount", "paidAmount", "dueDate", "status"];
+    const headers = ["rollNumber", "studentName", "className", "feeType", "month", "year", "amount", "paidAmount", "dueDate", "status"];
     const rows = records.map((r) => [
       r.student?.rollNumber || "",
       `${r.student?.firstName || ""} ${r.student?.lastName || ""}`.trim(),
       r.class?.name || "",
+      r.feeType || "tuition",
       r.month || 1,
       r.year || new Date().getFullYear(),
       r.amount || 0,
@@ -459,27 +658,26 @@ export default function FeeRecords() {
           toast.error("CSV file is empty");
           return;
         }
-        const [classesRes, studentsRes] = await Promise.all([
-          getAllClasses(),
-          getAllStudents()
-        ]);
-        const classesList = classesRes.data || [];
-        const studentsList = studentsRes.data || [];
+        const classesList = allClasses.length ? allClasses : (await getAllClasses()).data || [];
+        const studentsList = allStudents.length ? allStudents : (await getAllStudents()).data || [];
         let successCount = 0;
         let failCount = 0;
         const loadingToastId = toast.loading("Uploading fee records...");
         for (const row of parsed) {
           try {
             const matchedClass = classesList.find(c => c.name.toLowerCase() === (row.className || "").toLowerCase());
-            const matchedStudent = studentsList.find(s => s.rollNumber === row.rollNumber);
+            const matchedStudent = studentsList.find(s => String(s.rollNumber) === String(row.rollNumber));
             if (!matchedStudent) {
-              console.warn(`Student with roll number ${row.rollNumber} not found.`);
+              toast.error(`Roll# ${row.rollNumber}: Student not found in database`);
               failCount++;
               continue;
             }
+            const feeType = (row.feeType || "tuition").toLowerCase();
+            const validFeeTypes = ["tuition", "admission", "exam", "library", "transport", "other"];
             const payload = {
               student: matchedStudent._id,
               class: matchedClass ? matchedClass._id : matchedStudent.class?._id || matchedStudent.class,
+              feeType: validFeeTypes.includes(feeType) ? feeType : "tuition",
               month: Number(row.month) || 1,
               year: Number(row.year) || new Date().getFullYear(),
               amount: Number(row.amount) || 0,
@@ -553,10 +751,15 @@ export default function FeeRecords() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-xs text-slate-400 mb-1">Dashboard / Fee Records</p>
-        <h1 className="text-2xl font-bold text-slate-800">Fee Records</h1>
-        <p className="text-sm text-slate-500">View complete fee history and status</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs text-slate-400 mb-1">Dashboard / Fee Records</p>
+          <h1 className="text-2xl font-bold text-slate-800">Fee Records</h1>
+          <p className="text-sm text-slate-500">View complete fee history and status</p>
+        </div>
+        <button onClick={() => setShowCollectModal(true)} className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-sm transition flex items-center gap-2">
+          <FaMoneyBillWave className="w-4 h-4" /> Collect Fee
+        </button>
       </div>
 
       {/* Stats */}
@@ -660,6 +863,16 @@ export default function FeeRecords() {
       <FeeSlipModal record={selectedRecord} onClose={() => setSelectedRecord(null)} />
       <FeeRecordModal record={viewRecord} mode="view" onClose={() => setViewRecord(null)} onSave={() => {}} />
       <FeeRecordModal record={editRecord} mode="edit" onClose={() => setEditRecord(null)} onSave={handleSaveRecord} />
+
+      {/* ─── Collect Fee Modal ─── */}
+      {showCollectModal && (
+        <CollectFeeModal
+          students={allStudents}
+          classes={allClasses}
+          onClose={() => setShowCollectModal(false)}
+          onSuccess={() => { setShowCollectModal(false); fetchFees(); }}
+        />
+      )}
     </div>
   );
 }

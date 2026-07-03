@@ -144,7 +144,7 @@ export default function ProHeader() {
             <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-xl flex items-center justify-center shadow-md shrink-0">
               <span className="text-white text-lg font-bold">S</span>
             </div>
-            <div className="flex flex-col select-none">
+            <div className="flex flex-col select-none hidden sm:flex">
               <span className="text-sm font-black text-slate-800 font-serif leading-none tracking-tight">Punjab Public</span>
               <span className="text-[10px] font-bold text-indigo-600 tracking-widest uppercase mt-0.5">High School</span>
             </div>
@@ -188,7 +188,7 @@ export default function ProHeader() {
             {/* Active Branch & Section Badge */}
             <div 
               onClick={() => window.dispatchEvent(new Event("open-branch-modal"))}
-              className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50/60 hover:bg-indigo-50 border border-indigo-100/60 rounded-xl cursor-pointer select-none transition-all group shrink-0"
+              className="flex items-center gap-1 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-1.5 bg-indigo-50/60 hover:bg-indigo-50 border border-indigo-100/60 rounded-xl cursor-pointer select-none transition-all group shrink-0"
               title="Click to Switch Branch or Section"
             >
               <div className="hidden sm:flex flex-col text-right">

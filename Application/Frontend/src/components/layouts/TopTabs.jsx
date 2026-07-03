@@ -8,7 +8,7 @@ import { NavLink } from "react-router-dom";
  */
 export default function TopHeader({ tabs = [] }) {
   return (
-    <div className="bg-white rounded-2xl border border-slate-100/80 shadow-sm p-3 mb-6">
+    <div className="top-tabs-container bg-white rounded-2xl border border-slate-100/80 shadow-sm p-3 mb-6">
       <div className="w-full">
         {/* Horizontal scroll container – scrollbar hidden for clean mobile layout */}
         <div className="flex flex-wrap gap-2 overflow-x-auto scrollbar-none">
@@ -18,7 +18,7 @@ export default function TopHeader({ tabs = [] }) {
               to={tab.path}
               end
               className={({ isActive }) =>
-                `px-4 py-2 text-xs font-bold rounded-xl transition-all duration-200 whitespace-nowrap outline-none flex items-center gap-1.5
+                `top-tab-link px-4 py-2 text-xs font-bold rounded-xl transition-all duration-200 whitespace-nowrap outline-none flex items-center gap-1.5
                 ${
                   isActive
                     ? "bg-indigo-50 text-indigo-700 shadow-sm"
