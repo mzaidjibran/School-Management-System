@@ -39,7 +39,7 @@ const StatusBadge = ({ status }) => {
 
 // ---------- Stats Card ----------
 const StatsCard = ({ label, value, bgColor, iconColor, icon }) => (
-  <div className="bg-white rounded-xl shadow-sm border border-slate-100">
+  <div className="bg-white rounded-md shadow-sm border border-slate-100">
     <div className="p-4 flex justify-between items-center">
       <div>
         <p className="text-sm text-slate-500">{label}</p>
@@ -160,7 +160,7 @@ const FeeRecordModal = ({ record, mode, onClose, onSave }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="bg-white rounded-lg shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <h2 className="text-sm font-semibold text-slate-700">{isView ? "Fee Record Details" : "Edit Fee Record"}</h2>
           <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 transition">
@@ -175,14 +175,14 @@ const FeeRecordModal = ({ record, mode, onClose, onSave }) => {
             <div className="space-y-5">
               <div>
                 <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3">Student</p>
-                <div className="bg-slate-50 rounded-xl p-4">
+                <div className="bg-slate-50 rounded-md p-4">
                   <InfoRow label="Name" value={studentName} />
                   <InfoRow label="Roll No" value={rollNo} />
                 </div>
               </div>
               <div>
                 <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3">Fee Details</p>
-                <div className="bg-slate-50 rounded-xl p-4">
+                <div className="bg-slate-50 rounded-md p-4">
                   <InfoRow label="Fee Type" value={formData.feeType} />
                   <InfoRow label="Month/Year" value={`${formData.month ? MONTHS[formData.month - 1] : "—"} / ${formData.year}`} />
                   <InfoRow label="Due Date" value={formData.dueDate?.split("T")[0] || "—"} />
@@ -215,7 +215,7 @@ const FeeRecordModal = ({ record, mode, onClose, onSave }) => {
                 <Input label="Discount (PKR)" type="number" name="discount" value={formData.discount || 0} onChange={handleChange} />
                 <Input label="Fine (PKR)" type="number" name="fine" value={formData.fine || 0} onChange={handleChange} />
               </div>
-              <div className="bg-slate-50 rounded-xl px-4 py-3 flex justify-between text-sm">
+              <div className="bg-slate-50 rounded-md px-4 py-3 flex justify-between text-sm">
                 <span className="text-slate-500">Remaining Amount</span>
                 <span className="font-semibold text-rose-600">PKR {(formData.amount + (Number(formData.fine) || 0) - (Number(formData.discount) || 0) - formData.paidAmount).toLocaleString()}</span>
               </div>
@@ -260,7 +260,7 @@ const FeeSlipModal = ({ record, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="bg-white rounded-lg shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <h3 className="text-sm font-semibold text-slate-700">Fee Slip</h3>
           <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 transition">
@@ -289,7 +289,7 @@ const FeeSlipModal = ({ record, onClose }) => {
               <div key={k}><span className="text-slate-400">{k}: </span><strong className="text-slate-700">{v}</strong></div>
             ))}
           </div>
-          <div className="border border-slate-100 rounded-xl overflow-hidden mb-4">
+          <div className="border border-slate-100 rounded-md overflow-hidden mb-4">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 border-b border-slate-100">
                 <tr>
@@ -405,7 +405,7 @@ const CollectFeeModal = ({ students, classes, onClose, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="bg-white rounded-lg shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <h2 className="text-sm font-semibold text-slate-700">Collect Fee</h2>
           <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 transition">
@@ -427,7 +427,7 @@ const CollectFeeModal = ({ students, classes, onClose, onSuccess }) => {
                 className="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-lg outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
             </div>
             {showDropdown && filteredStudents.length > 0 && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+              <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
                 {filteredStudents.map(s => (
                   <button type="button" key={s._id} onClick={() => handleSelectStudent(s)}
                     className="w-full text-left px-4 py-2.5 hover:bg-indigo-50 transition flex items-center justify-between border-b border-slate-50 last:border-0">
@@ -441,7 +441,7 @@ const CollectFeeModal = ({ students, classes, onClose, onSuccess }) => {
               </div>
             )}
             {showDropdown && studentSearch.length >= 1 && filteredStudents.length === 0 && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg p-4 text-center text-sm text-slate-400">
+              <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-md shadow-lg p-4 text-center text-sm text-slate-400">
                 No students found
               </div>
             )}
@@ -449,7 +449,7 @@ const CollectFeeModal = ({ students, classes, onClose, onSuccess }) => {
 
           {/* Selected student info */}
           {selectedStudent && (
-            <div className="bg-indigo-50 rounded-xl p-3 flex items-center gap-3">
+            <div className="bg-indigo-50 rounded-md p-3 flex items-center gap-3">
               <div className="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
                 {selectedStudent.firstName?.[0]}{selectedStudent.lastName?.[0]}
               </div>
@@ -763,7 +763,7 @@ export default function FeeRecords() {
           <h1 className="text-2xl font-bold text-slate-800">Fee Records</h1>
           <p className="text-sm text-slate-500">View complete fee history and status</p>
         </div>
-        <button onClick={() => setShowCollectModal(true)} className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-sm transition flex items-center gap-2">
+        <button onClick={() => setShowCollectModal(true)} className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-md shadow-sm transition flex items-center gap-2">
           <FaMoneyBillWave className="w-4 h-4" /> Collect Fee
         </button>
       </div>
@@ -778,7 +778,7 @@ export default function FeeRecords() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+      <div className="bg-white rounded-md shadow-sm border border-slate-100 p-4">
         <div className="flex flex-wrap gap-3 items-center">
           <div className="relative min-w-[160px] flex-1">
             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
@@ -809,7 +809,7 @@ export default function FeeRecords() {
 
       {/* Table */}
       {/* Table / Mobile Cards */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+      <div className="bg-white rounded-md shadow-sm border border-slate-100 overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
           <span className="font-semibold text-slate-800 text-sm">Fee Records</span>
           <span className="bg-indigo-50 text-indigo-600 text-xs font-semibold px-3 py-1 rounded-full">{filtered.length} records</span>
@@ -870,7 +870,7 @@ export default function FeeRecords() {
                 const remaining = r.amount - r.paidAmount;
                 const avatarColor = idx % 2 === 0 ? "bg-indigo-100 text-indigo-700" : "bg-purple-100 text-purple-700";
                 return (
-                  <div key={r._id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-3 transition duration-200 hover:shadow-md hover:border-indigo-100">
+                  <div key={r._id} className="bg-white p-4 rounded-lg border border-slate-100 shadow-sm flex flex-col gap-3 transition duration-200 hover:shadow-md hover:border-indigo-100">
                     <div className="flex justify-between items-start">
                       <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-full ${avatarColor} font-bold text-xs flex items-center justify-center`}>
@@ -886,7 +886,7 @@ export default function FeeRecords() {
                       <StatusBadge status={r.status} />
                     </div>
                     
-                    <div className="grid grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100/80 text-center text-xs mt-1">
+                    <div className="grid grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded-md border border-slate-100/80 text-center text-xs mt-1">
                       <div>
                         <p className="text-[9px] text-slate-400 font-bold uppercase">Total</p>
                         <p className="font-semibold text-slate-700 mt-0.5">PKR {r.amount?.toLocaleString()}</p>
@@ -907,9 +907,9 @@ export default function FeeRecords() {
                         <span>Due: <strong className="text-slate-700">{r.dueDate?.split("T")[0] || "—"}</strong></span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <button onClick={() => setViewRecord(r)} className="p-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition" title="View"><FaEye className="w-3.5 h-3.5" /></button>
-                        <button onClick={() => setSelectedRecord(r)} className="p-2 text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-xl transition" title="Print Slip"><FaPrint className="w-3.5 h-3.5" /></button>
-                        <button onClick={() => setEditRecord(r)} className="p-2 text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-xl transition" title="Edit"><FaEdit className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => setViewRecord(r)} className="p-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-md transition" title="View"><FaEye className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => setSelectedRecord(r)} className="p-2 text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-md transition" title="Print Slip"><FaPrint className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => setEditRecord(r)} className="p-2 text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-md transition" title="Edit"><FaEdit className="w-3.5 h-3.5" /></button>
                       </div>
                     </div>
                   </div>

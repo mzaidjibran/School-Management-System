@@ -168,7 +168,7 @@ export default function MarkAttendance() {
 
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-3 bg-indigo-100 rounded-2xl">
+          <div className="p-3 bg-indigo-100 rounded-lg">
             <FaCheckCircle className="w-6 h-6 text-indigo-600" />
           </div>
           <div>
@@ -178,7 +178,7 @@ export default function MarkAttendance() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 mb-6">
+        <div className="bg-white rounded-lg shadow-sm border border-slate-100 p-5 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-medium text-slate-500 mb-1.5">
@@ -187,7 +187,7 @@ export default function MarkAttendance() {
               <select
                 value={selectedSection}
                 onChange={(e) => setSelectedSection(e.target.value)}
-                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-white text-sm outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
+                className="w-full px-4 py-2.5 border border-slate-200 rounded-md bg-white text-sm outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
               >
                 <option value="girls">Girls</option>
                 <option value="boys">Boys</option>
@@ -201,7 +201,7 @@ export default function MarkAttendance() {
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
                 disabled={loadingClasses}
-                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-white text-sm outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
+                className="w-full px-4 py-2.5 border border-slate-200 rounded-md bg-white text-sm outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
               >
                 <option value="">
                   {loadingClasses ? "Loading classes..." : "-- Select Class --"}
@@ -223,7 +223,7 @@ export default function MarkAttendance() {
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-white text-sm outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-4 py-2.5 border border-slate-200 rounded-md bg-white text-sm outline-none focus:ring-2 focus:ring-indigo-400"
               />
             </div>
           </div>
@@ -239,7 +239,7 @@ export default function MarkAttendance() {
               { label: "Leave",   value: counts.Leave,    cls: "bg-amber-50 text-amber-700" },
               { label: "Late",    value: counts.Late,     cls: "bg-blue-50 text-blue-700" },
             ].map((card) => (
-              <div key={card.label} className={`${card.cls} rounded-xl p-3 text-center shadow-sm border border-slate-100`}>
+              <div key={card.label} className={`${card.cls} rounded-md p-3 text-center shadow-sm border border-slate-100`}>
                 <p className="text-xs opacity-70">{card.label}</p>
                 <p className="text-xl font-bold">{card.value}</p>
               </div>
@@ -249,7 +249,7 @@ export default function MarkAttendance() {
 
         {/* Student Table */}
         {selectedClass && (
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+          <div className="bg-white rounded-lg shadow-sm border border-slate-100 overflow-hidden">
             {loadingStudents ? (
               <div className="p-10 text-center text-slate-500">
                 <div className="animate-spin w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto mb-3" />
@@ -304,7 +304,7 @@ export default function MarkAttendance() {
                   {students.map((student, idx) => {
                     const avatarColor = idx % 2 === 0 ? "bg-indigo-100 text-indigo-700" : "bg-purple-100 text-purple-700";
                     return (
-                      <div key={student._id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-3.5 transition duration-200 hover:shadow-md hover:border-indigo-100">
+                      <div key={student._id} className="bg-white p-4 rounded-lg border border-slate-100 shadow-sm flex flex-col gap-3.5 transition duration-200 hover:shadow-md hover:border-indigo-100">
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-3">
                             <div className={`w-8 h-8 rounded-full ${avatarColor} font-bold text-xs flex items-center justify-center`}>
@@ -335,7 +335,7 @@ export default function MarkAttendance() {
                               <button
                                 key={status}
                                 onClick={() => handleStatusChange(student._id, status)}
-                                className={`py-2 px-1 rounded-xl text-[10px] font-bold border transition duration-150 text-center min-w-0 truncate ${
+                                className={`py-2 px-1 rounded-md text-[10px] font-bold border transition duration-150 text-center min-w-0 truncate ${
                                   isSelected
                                     ? activeStyles[status]
                                     : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100"
@@ -356,19 +356,19 @@ export default function MarkAttendance() {
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => markAll("Present")}
-                      className="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition text-xs font-bold flex items-center justify-center gap-1.5"
+                      className="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition text-xs font-bold flex items-center justify-center gap-1.5"
                     >
                       <FaUserCheck /> Present All
                     </button>
                     <button
                       onClick={() => markAll("Absent")}
-                      className="flex-1 sm:flex-none px-4 py-2 bg-rose-600 text-white rounded-xl hover:bg-rose-700 transition text-xs font-bold flex items-center justify-center gap-1.5"
+                      className="flex-1 sm:flex-none px-4 py-2 bg-rose-600 text-white rounded-md hover:bg-rose-700 transition text-xs font-bold flex items-center justify-center gap-1.5"
                     >
                       <FaUserTimes /> Absent All
                     </button>
                     <button
                       onClick={() => markAll("Present")}
-                      className="flex-1 sm:flex-none px-4 py-2 border border-slate-200 rounded-xl hover:bg-slate-50 transition text-xs font-bold flex items-center justify-center gap-1.5"
+                      className="flex-1 sm:flex-none px-4 py-2 border border-slate-200 rounded-md hover:bg-slate-50 transition text-xs font-bold flex items-center justify-center gap-1.5"
                     >
                       <FaBed /> Reset
                     </button>
@@ -376,7 +376,7 @@ export default function MarkAttendance() {
                   <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="w-full sm:w-auto px-6 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition flex items-center justify-center gap-2 disabled:opacity-50 text-xs font-bold shadow-md shadow-indigo-100"
+                    className="w-full sm:w-auto px-6 py-2.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition flex items-center justify-center gap-2 disabled:opacity-50 text-xs font-bold shadow-md shadow-indigo-100"
                   >
                     {saving ? (
                       <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />

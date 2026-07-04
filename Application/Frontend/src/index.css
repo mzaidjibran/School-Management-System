@@ -17,31 +17,7 @@ h1, h2, h3, h4, h5, h6 {
   font-family: 'Lora', serif;
 }
 
-/* Scoped layout rules: Flatten pages, page cards, page buttons, and page inputs */
-main .bg-white,
-main button,
-main input:not([type="checkbox"]):not([type="radio"]),
-main select,
-main textarea,
-main table,
-main th,
-main td,
-main tr,
-main .bg-indigo-50,
-main .bg-slate-50 {
-  border-radius: 0px !important;
-}
-
-/* Flatten modal containers and their inner controls */
-.fixed.inset-0.z-50 .bg-white,
-.fixed.inset-0.z-50 button,
-.fixed.inset-0.z-50 input:not([type="checkbox"]):not([type="radio"]),
-.fixed.inset-0.z-50 select,
-.fixed.inset-0.z-50 textarea,
-.fixed.inset-0.z-50 .bg-indigo-50,
-.fixed.inset-0.z-50 .bg-slate-50 {
-  border-radius: 0px !important;
-}
+/* Styles */
 
 /* Keep top tabs and nav pills rounded as requested */
 .top-tabs-container {

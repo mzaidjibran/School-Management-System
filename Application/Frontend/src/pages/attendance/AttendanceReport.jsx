@@ -203,13 +203,13 @@ export default function AttendanceReport() {
           <div className="flex items-center gap-2">
             <button
               onClick={exportCSV}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition duration-150 cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-md border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition duration-150 cursor-pointer"
             >
               CSV
             </button>
             <button
               onClick={exportExcel}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 transition duration-150 cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-md border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 transition duration-150 cursor-pointer"
             >
               Excel
             </button>
@@ -221,13 +221,13 @@ export default function AttendanceReport() {
           {statCards.map(({ label, value, color, icon, bg }) => (
             <div
               key={label}
-              className="bg-white rounded-2xl p-4 border border-slate-100/80 shadow-sm flex justify-between items-center h-22"
+              className="bg-white rounded-lg p-4 border border-slate-100/80 shadow-sm flex justify-between items-center h-22"
             >
               <div>
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{label}</span>
                 <span className={`text-2xl font-black ${color} mt-1 block`}>{value}</span>
               </div>
-              <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center shrink-0`}>
+              <div className={`w-10 h-10 rounded-md ${bg} flex items-center justify-center shrink-0`}>
                 {icon}
               </div>
             </div>
@@ -235,7 +235,7 @@ export default function AttendanceReport() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 mb-6">
+        <div className="bg-white rounded-lg shadow-sm border border-slate-100 p-5 mb-6">
           <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Filter Records</label>
           <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
             <input
@@ -243,12 +243,12 @@ export default function AttendanceReport() {
               placeholder="Search name or roll no..."
               value={studentFilter}
               onChange={(e) => setStudentFilter(e.target.value)}
-              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:border-indigo-400 focus:bg-white outline-none transition font-semibold text-slate-700"
+              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-md bg-slate-50 focus:border-indigo-400 focus:bg-white outline-none transition font-semibold text-slate-700"
             />
             <select
               value={sectionFilter}
               onChange={(e) => setSectionFilter(e.target.value)}
-              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-semibold text-slate-700 cursor-pointer"
+              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-md bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-semibold text-slate-700 cursor-pointer"
             >
               <option value="girls">Girls</option>
               <option value="boys">Boys</option>
@@ -256,7 +256,7 @@ export default function AttendanceReport() {
             <select
               value={classFilter}
               onChange={(e) => setClassFilter(e.target.value)}
-              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-semibold text-slate-700 cursor-pointer"
+              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-md bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-semibold text-slate-700 cursor-pointer"
             >
               <option value="">All Classes</option>
               {classes
@@ -270,7 +270,7 @@ export default function AttendanceReport() {
             <select
               value={month}
               onChange={(e) => setMonth(e.target.value)}
-              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-semibold text-slate-700 cursor-pointer"
+              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-md bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-semibold text-slate-700 cursor-pointer"
             >
               {months.map((m, i) => (
                 <option key={m} value={m}>
@@ -281,7 +281,7 @@ export default function AttendanceReport() {
             <select
               value={year}
               onChange={(e) => setYear(e.target.value)}
-              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-semibold text-slate-700 cursor-pointer"
+              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-md bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-semibold text-slate-700 cursor-pointer"
             >
               {years.map((y) => (
                 <option key={y} value={y}>
@@ -293,7 +293,7 @@ export default function AttendanceReport() {
         </div>
 
         {/* Main Table */}
-        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100/80 mb-6">
+        <div className="bg-white rounded-lg overflow-hidden shadow-sm border border-slate-100/80 mb-6">
           <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
             <span className="font-bold text-sm text-slate-800 font-serif">Student Attendance</span>
             <span className="bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full">
@@ -344,7 +344,7 @@ export default function AttendanceReport() {
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-3">
-                              <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white font-bold text-xs ${avatarColors[i % avatarColors.length]}`}>
+                              <div className={`w-8 h-8 rounded-md flex items-center justify-center text-white font-bold text-xs ${avatarColors[i % avatarColors.length]}`}>
                                 {s.firstName?.charAt(0)}
                               </div>
                               <div>
@@ -385,10 +385,10 @@ export default function AttendanceReport() {
                 {filteredData.map((s, i) => {
                   const badge = getPctBadge(s.percent);
                   return (
-                    <div key={s._id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-3.5 transition duration-200 hover:shadow-md hover:border-indigo-100">
+                    <div key={s._id} className="bg-white p-4 rounded-lg border border-slate-100 shadow-sm flex flex-col gap-3.5 transition duration-200 hover:shadow-md hover:border-indigo-100">
                       <div className="flex justify-between items-start">
                         <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white font-bold text-xs ${avatarColors[i % avatarColors.length]}`}>
+                          <div className={`w-8 h-8 rounded-md flex items-center justify-center text-white font-bold text-xs ${avatarColors[i % avatarColors.length]}`}>
                             {s.firstName?.charAt(0)}
                           </div>
                           <div>
@@ -413,7 +413,7 @@ export default function AttendanceReport() {
                       </div>
 
                       {/* Stat Breakdown Grid */}
-                      <div className="grid grid-cols-4 gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100/80 text-center">
+                      <div className="grid grid-cols-4 gap-2 bg-slate-50 p-2.5 rounded-md border border-slate-100/80 text-center">
                         <div>
                           <p className="text-[9px] text-slate-400 font-bold uppercase">Present</p>
                           <p className="text-xs text-emerald-600 font-extrabold mt-0.5">{s.present}</p>
@@ -442,7 +442,7 @@ export default function AttendanceReport() {
         {/* Top & Low */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Top Performers */}
-          <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100/80">
+          <div className="bg-white rounded-lg overflow-hidden shadow-sm border border-slate-100/80">
             <div className="px-4 py-3.5 border-b border-slate-100/80 bg-emerald-50/50 flex items-center gap-2 font-bold text-xs text-emerald-800 uppercase tracking-wider">
               <Award className="w-4 h-4 text-emerald-600" />
               <span>Top Performers ≥ 90%</span>
@@ -452,7 +452,7 @@ export default function AttendanceReport() {
                 topPerformers.map((s, i) => (
                   <div key={s._id} className="flex justify-between items-center px-5 py-3 hover:bg-emerald-50/10 transition-colors">
                     <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white font-bold text-xs ${avatarColors[i % avatarColors.length]}`}>
+                      <div className={`w-8 h-8 rounded-md flex items-center justify-center text-white font-bold text-xs ${avatarColors[i % avatarColors.length]}`}>
                         {s.firstName?.charAt(0)}
                       </div>
                       <div>
@@ -472,7 +472,7 @@ export default function AttendanceReport() {
           </div>
 
           {/* Low Attendance */}
-          <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100/80">
+          <div className="bg-white rounded-lg overflow-hidden shadow-sm border border-slate-100/80">
             <div className="px-4 py-3.5 border-b border-slate-100/80 bg-rose-50/50 flex items-center gap-2 font-bold text-xs text-rose-800 uppercase tracking-wider">
               <AlertTriangle className="w-4 h-4 text-rose-600" />
               <span>Low Attendance &lt; 75%</span>
@@ -482,7 +482,7 @@ export default function AttendanceReport() {
                 lowAttendance.map((s, i) => (
                   <div key={s._id} className="flex justify-between items-center px-5 py-3 hover:bg-rose-50/10 transition-colors">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600 font-bold text-xs">
+                      <div className="w-8 h-8 rounded-md bg-rose-100 flex items-center justify-center text-rose-600 font-bold text-xs">
                         {s.firstName?.charAt(0)}
                       </div>
                       <div>

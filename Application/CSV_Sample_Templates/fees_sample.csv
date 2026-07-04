@@ -1,3 +1,0 @@
-rollNumber,studentName,className,feeType,month,year,amount,paidAmount,dueDate,status
-1001,Zain Ali,Class 10,tuition,7,2026,5000,5000,2026-07-10,paid
-1002,Ayesha Fatima,Class 9,tuition,7,2026,4500,0,2026-07-10,pending

@@ -339,14 +339,14 @@ export default function AttendanceList() {
         </div>
 
         {/* Class + Date selector */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-6">
+        <div className="bg-white rounded-lg shadow-sm border border-slate-100 p-4 mb-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-medium text-slate-500 mb-1.5">Select Section</label>
               <select
                 value={selectedSection}
                 onChange={(e) => setSelectedSection(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md bg-white outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
               >
                 <option value="girls">Girls</option>
                 <option value="boys">Boys</option>
@@ -358,7 +358,7 @@ export default function AttendanceList() {
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
                 disabled={loadingClasses}
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md bg-white outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
               >
                 <option value="">{loadingClasses ? "Loading..." : "-- Select Class --"}</option>
                 {classes
@@ -376,7 +376,7 @@ export default function AttendanceList() {
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md bg-white outline-none focus:ring-2 focus:ring-indigo-400"
               />
             </div>
           </div>
@@ -392,19 +392,19 @@ export default function AttendanceList() {
               { label: "Leave",      value: leaveCount,     color: "text-amber-600",   bg: "bg-amber-100"   },
               { label: "Attendance", value: `${attendancePct}%`, color: "text-blue-600", bg: "bg-blue-100"  },
             ].map((card) => (
-              <div key={card.label} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex justify-between items-center">
+              <div key={card.label} className="bg-white rounded-lg shadow-sm border border-slate-100 p-4 flex justify-between items-center">
                 <div>
                   <p className="text-xs text-slate-500">{card.label}</p>
                   <p className={`text-xl font-bold mt-0.5 ${card.color}`}>{card.value}</p>
                 </div>
-                <div className={`w-9 h-9 ${card.bg} rounded-xl`} />
+                <div className={`w-9 h-9 ${card.bg} rounded-md`} />
               </div>
             ))}
           </div>
         )}
 
         {/* Filters */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 px-4 py-3 mb-5">
+        <div className="bg-white rounded-lg shadow-sm border border-slate-100 px-4 py-3 mb-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 items-center">
             <div className="relative">
               <FaSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs" />
@@ -431,7 +431,7 @@ export default function AttendanceList() {
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="bg-white rounded-lg shadow-sm border border-slate-100 overflow-hidden">
           {loading ? (
             <TableSkeleton />
           ) : !selectedClass ? (
@@ -480,7 +480,7 @@ export default function AttendanceList() {
                 {paginatedData.map((record, idx) => {
                   const avatarColor = idx % 2 === 0 ? "bg-indigo-100 text-indigo-700" : "bg-purple-100 text-purple-700";
                   return (
-                    <div key={record._id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-3 transition duration-200 hover:shadow-md hover:border-indigo-100">
+                    <div key={record._id} className="bg-white p-4 rounded-lg border border-slate-100 shadow-sm flex flex-col gap-3 transition duration-200 hover:shadow-md hover:border-indigo-100">
                       <div className="flex justify-between items-start">
                         <div className="flex items-center gap-3">
                           <div className={`w-8 h-8 rounded-full ${avatarColor} font-bold text-xs flex items-center justify-center`}>
@@ -504,7 +504,7 @@ export default function AttendanceList() {
                       </div>
 
                       {record.remarks && (
-                        <p className="text-xs text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-100/80 italic mt-0.5">
+                        <p className="text-xs text-slate-500 bg-slate-50 p-2.5 rounded-md border border-slate-100/80 italic mt-0.5">
                           <strong className="text-[10px] text-slate-400 uppercase font-bold not-italic block mb-0.5">Remarks</strong>
                           {record.remarks}
                         </p>

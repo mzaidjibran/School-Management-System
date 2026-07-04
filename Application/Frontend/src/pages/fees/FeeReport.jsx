@@ -11,7 +11,7 @@ const MONTHS_FULL = ["January","February","March","April","May","June","July","A
 
 // ---------- Stats Card ----------
 const StatsCard = ({ label, value, bgColor, iconColor, icon }) => (
-  <div className="bg-white rounded-xl shadow-sm border border-slate-100">
+  <div className="bg-white rounded-md shadow-sm border border-slate-100">
     <div className="p-4 flex justify-between items-center">
       <div>
         <p className="text-sm text-slate-500">{label}</p>
@@ -206,7 +206,7 @@ export default function FeeReports() {
       </div>
 
       {error && (
-        <p className="text-rose-500 text-sm bg-rose-50 rounded-xl px-4 py-3">{error}</p>
+        <p className="text-rose-500 text-sm bg-rose-50 rounded-md px-4 py-3">{error}</p>
       )}
 
       {/* Stats */}
@@ -244,7 +244,7 @@ export default function FeeReports() {
       </div>
 
       {/* Filters + Exports */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+      <div className="bg-white rounded-md shadow-sm border border-slate-100 p-4">
         <div className="flex flex-wrap gap-3 items-center">
           <input
             type="date" value={startDate}
@@ -282,7 +282,7 @@ export default function FeeReports() {
 
       {/* Charts */}
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+        <div className="bg-white rounded-md shadow-sm border border-slate-100 p-5">
           <p className="text-sm font-semibold text-slate-700 mb-4">Monthly Collection Trend</p>
           <div className="space-y-3">
             {monthlyData.map((m) => (
@@ -290,7 +290,7 @@ export default function FeeReports() {
             ))}
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+        <div className="bg-white rounded-md shadow-sm border border-slate-100 p-5">
           <p className="text-sm font-semibold text-slate-700 mb-4">Fee Type Wise Collection</p>
           {feeTypeData.length === 0 ? (
             <p className="text-slate-400 text-sm">Koi paid fee record nahi mila.</p>
@@ -311,7 +311,7 @@ export default function FeeReports() {
       </div>
 
       {/* Overdue Students */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+      <div className="bg-white rounded-md shadow-sm border border-slate-100 p-5">
         <p className="text-sm font-semibold text-rose-600 mb-4 flex items-center gap-2">
           <span className="w-2 h-2 bg-rose-500 rounded-full inline-block"></span>
           Students With Overdue Dues
@@ -321,7 +321,7 @@ export default function FeeReports() {
         ) : (
           <>
             {/* Desktop View Table */}
-            <div className="hidden md:block border border-slate-100 rounded-xl overflow-hidden">
+            <div className="hidden md:block border border-slate-100 rounded-md overflow-hidden">
               <table className="w-full text-sm">
                 <thead className="bg-slate-50 border-b border-slate-100">
                   <tr>
@@ -352,7 +352,7 @@ export default function FeeReports() {
               {overdueStudents.map((s, i) => {
                 const avatarColor = i % 2 === 0 ? "bg-indigo-100 text-indigo-700" : "bg-purple-100 text-purple-700";
                 return (
-                  <div key={i} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-2.5 transition duration-200 hover:shadow-md hover:border-indigo-100">
+                  <div key={i} className="bg-white p-4 rounded-lg border border-slate-100 shadow-sm flex flex-col gap-2.5 transition duration-200 hover:shadow-md hover:border-indigo-100">
                     <div className="flex justify-between items-start">
                       <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-full ${avatarColor} font-bold text-xs flex items-center justify-center`}>
