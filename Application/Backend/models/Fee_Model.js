@@ -71,6 +71,18 @@ const feeSchema = new mongoose.Schema(
       default: null,
     },
 
+    discount: {
+      type: Number,
+      default: 0,
+      min: [0, "Discount cannot be negative"],
+    },
+
+    fine: {
+      type: Number,
+      default: 0,
+      min: [0, "Fine cannot be negative"],
+    },
+
     // TODO: auth lagane par required: true karna
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

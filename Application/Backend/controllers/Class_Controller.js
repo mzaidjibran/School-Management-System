@@ -38,7 +38,15 @@ export const getAllClasses = async (request, response) => {
     if (academicYear) filter.academicYear = academicYear;
     if (isActive !== undefined) filter.isActive = isActive === "true";
     if (request.headers["x-branch-id"]) filter.branch = request.headers["x-branch-id"];
-    if (request.headers["x-section"]) filter.schoolSection = request.headers["x-section"];
+    
+    const sectionParam = request.query.schoolSection || request.query.section;
+    if (sectionParam) {
+      if (sectionParam !== "all") {
+        filter.schoolSection = sectionParam;
+      }
+    } else if (request.headers["x-section"]) {
+      filter.schoolSection = request.headers["x-section"];
+    }
 
     const classes = await Class.find(filter)
       .populate("classTeacher", "firstName lastName name email profileImage")

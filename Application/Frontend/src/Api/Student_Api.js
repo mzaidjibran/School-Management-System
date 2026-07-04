@@ -18,8 +18,19 @@ const createStudent = async (data) => {
 export default createStudent;
 
 // ─── Get All Students ─────────────────────────────────────────────
-export const getAllStudents = async () => {
-  const response = await fetch(`${API_BASE}/api/students`, {
+export const getAllStudents = async (params = {}) => {
+  let url = `${API_BASE}/api/students`;
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([key, val]) => {
+    if (val !== undefined && val !== null && val !== "") {
+      query.append(key, val);
+    }
+  });
+  const queryString = query.toString();
+  if (queryString) {
+    url += `?${queryString}`;
+  }
+  const response = await fetch(url, {
     method: "GET",
     headers: getHeaders(),
   });

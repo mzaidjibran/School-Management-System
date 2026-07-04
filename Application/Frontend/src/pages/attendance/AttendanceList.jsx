@@ -63,15 +63,22 @@ export default function AttendanceList() {
   );
   const [search, setSearch]           = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [selectedSection, setSelectedSection] = useState("girls");
+  const [selectedSection, setSelectedSection] = useState(
+    localStorage.getItem("activeSection") || "girls"
+  );
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  // Reset class when section changes
+  useEffect(() => {
+    setSelectedClass("");
+  }, [selectedSection]);
 
   // ── Load classes ───────────────────────────────────────────────
   useEffect(() => {
     const fetch = async () => {
       try {
-        const result = await getAllClasses();
+        const result = await getAllClasses({ section: "all" });
         setClasses(result.data || []);
       } catch (e) {
         console.error(e);
@@ -226,7 +233,7 @@ export default function AttendanceList() {
           return;
         }
         const [classesRes, studentsRes] = await Promise.all([
-          getAllClasses(),
+          getAllClasses({ section: "all" }),
           getAllStudents()
         ]);
         const classesList = classesRes.data || [];
@@ -335,30 +342,32 @@ export default function AttendanceList() {
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
+              <label className="block text-xs font-medium text-slate-500 mb-1.5">Select Section</label>
+              <select
+                value={selectedSection}
+                onChange={(e) => setSelectedSection(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
+              >
+                <option value="girls">Girls</option>
+                <option value="boys">Boys</option>
+              </select>
+            </div>
+            <div>
               <label className="block text-xs font-medium text-slate-500 mb-1.5">Select Class</label>
               <select
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
                 disabled={loadingClasses}
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
               >
                 <option value="">{loadingClasses ? "Loading..." : "-- Select Class --"}</option>
-                {classes.map((c) => (
-                  <option key={c._id} value={c._id}>
-                    {c.name} — Section {c.section}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1.5">Select Section</label>
-              <select
-                value={selectedSection}
-                onChange={(e) => setSelectedSection(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-400"
-              >
-                <option value="girls">Girls</option>
-                <option value="boys">Boys</option>
+                {classes
+                  .filter((c) => c.schoolSection === selectedSection)
+                  .map((c) => (
+                    <option key={c._id} value={c._id}>
+                      {c.name} — Section {c.section}
+                    </option>
+                  ))}
               </select>
             </div>
             <div>
@@ -423,47 +432,89 @@ export default function AttendanceList() {
 
         {/* Table */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 border-b border-slate-200">
-                <tr>
-                  {["#", "Roll No", "Student Name", "Date", "Status", "Remarks"].map((h) => (
-                    <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-slate-600 whitespace-nowrap uppercase">
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr><td colSpan="6"><TableSkeleton /></td></tr>
-                ) : !selectedClass ? (
-                  <tr><td colSpan="6"><EmptyState message="Pehle class aur date select karo" /></td></tr>
-                ) : paginatedData.length === 0 ? (
-                  <tr><td colSpan="6"><EmptyState message="Is date ke liye koi record nahi mila" /></td></tr>
-                ) : (
-                  paginatedData.map((record, idx) => (
-                    <tr key={record._id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition">
-                      <td className="py-2.5 px-4 text-slate-400">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
-                      <td className="py-2.5 px-4 text-slate-500">{record.student?.rollNumber || "—"}</td>
-                      <td className="py-2.5 px-4 font-medium text-slate-800">
-                        {record.student?.firstName} {record.student?.lastName}
-                      </td>
-                      <td className="py-2.5 px-4 text-slate-600">
-                        {new Date(record.date).toLocaleDateString()}
-                      </td>
-                      <td className="py-2.5 px-4">
-                        <StatusBadge status={record.status} />
-                      </td>
-                      <td className="py-2.5 px-4 text-slate-400 italic">
-                        {record.remarks || "—"}
-                      </td>
+          {loading ? (
+            <TableSkeleton />
+          ) : !selectedClass ? (
+            <EmptyState message="Pehle class aur date select karo" />
+          ) : paginatedData.length === 0 ? (
+            <EmptyState message="Is date ke liye koi record nahi mila" />
+          ) : (
+            <>
+              {/* Desktop View Table */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                      {["#", "Roll No", "Student Name", "Date", "Status", "Remarks"].map((h) => (
+                        <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-slate-600 whitespace-nowrap uppercase">
+                          {h}
+                        </th>
+                      ))}
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  </thead>
+                  <tbody>
+                    {paginatedData.map((record, idx) => (
+                      <tr key={record._id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition">
+                        <td className="py-2.5 px-4 text-slate-400">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
+                        <td className="py-2.5 px-4 text-slate-500">{record.student?.rollNumber || "—"}</td>
+                        <td className="py-2.5 px-4 font-medium text-slate-800">
+                          {record.student?.firstName} {record.student?.lastName}
+                        </td>
+                        <td className="py-2.5 px-4 text-slate-600">
+                          {new Date(record.date).toLocaleDateString()}
+                        </td>
+                        <td className="py-2.5 px-4">
+                          <StatusBadge status={record.status} />
+                        </td>
+                        <td className="py-2.5 px-4 text-slate-400 italic">
+                          {record.remarks || "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile View Cards */}
+              <div className="block md:hidden p-4 space-y-3 bg-slate-50/50">
+                {paginatedData.map((record, idx) => {
+                  const avatarColor = idx % 2 === 0 ? "bg-indigo-100 text-indigo-700" : "bg-purple-100 text-purple-700";
+                  return (
+                    <div key={record._id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-3 transition duration-200 hover:shadow-md hover:border-indigo-100">
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-full ${avatarColor} font-bold text-xs flex items-center justify-center`}>
+                            {record.student?.firstName?.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-slate-800 text-sm">
+                              {record.student?.firstName} {record.student?.lastName}
+                            </p>
+                            <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono font-bold border border-slate-200/40">
+                              Roll: {record.student?.rollNumber || "—"}
+                            </span>
+                          </div>
+                        </div>
+                        <StatusBadge status={record.status} />
+                      </div>
+                      
+                      <div className="flex justify-between items-center text-[11px] text-slate-500 border-t border-slate-50 pt-2.5">
+                        <span>Date: {new Date(record.date).toLocaleDateString()}</span>
+                        <span className="text-slate-400">#{(currentPage - 1) * itemsPerPage + idx + 1}</span>
+                      </div>
+
+                      {record.remarks && (
+                        <p className="text-xs text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-100/80 italic mt-0.5">
+                          <strong className="text-[10px] text-slate-400 uppercase font-bold not-italic block mb-0.5">Remarks</strong>
+                          {record.remarks}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
 
           {/* Pagination */}
           {!loading && paginatedData.length > 0 && (

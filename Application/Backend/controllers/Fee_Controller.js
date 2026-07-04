@@ -164,7 +164,7 @@ export const payFee = async (request, response) => {
 
     fee.paidAmount += Number(payingAmount);
     fee.paymentMethod = paymentMethod;
-    fee.paidDate = new Date();
+    fee.paidDate = request.body.paidDate ? new Date(request.body.paidDate) : new Date();
 
     if (fee.paidAmount >= fee.amount) {
       fee.status = "paid";

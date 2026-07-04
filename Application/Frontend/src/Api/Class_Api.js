@@ -17,11 +17,21 @@ export const createClass = async (data) => {
 };
 
 // ─── Get All Classes ──────────────────────────────────────────────
-export const getAllClasses = async (academicYear, isActive) => {
+export const getAllClasses = async (academicYearOrParams, isActive) => {
   let url = `${API_BASE}/api/classes`;
   const params = new URLSearchParams();
-  if (academicYear) params.append("academicYear", academicYear);
-  if (isActive !== undefined) params.append("isActive", isActive);
+
+  if (typeof academicYearOrParams === "object" && academicYearOrParams !== null) {
+    Object.entries(academicYearOrParams).forEach(([key, val]) => {
+      if (val !== undefined && val !== null && val !== "") {
+        params.append(key, val);
+      }
+    });
+  } else {
+    if (academicYearOrParams) params.append("academicYear", academicYearOrParams);
+    if (isActive !== undefined) params.append("isActive", isActive);
+  }
+
   if ([...params].length > 0) url += `?${params.toString()}`;
 
   const response = await fetch(url, {

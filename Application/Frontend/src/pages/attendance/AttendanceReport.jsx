@@ -37,7 +37,14 @@ export default function AttendanceReport() {
 
   const [classFilter, setClassFilter]     = useState("");
   const [studentFilter, setStudentFilter] = useState("");
-  const [sectionFilter, setSectionFilter] = useState("girls");
+  const [sectionFilter, setSectionFilter] = useState(
+    localStorage.getItem("activeSection") || "girls"
+  );
+
+  // Reset class when section changes
+  useEffect(() => {
+    setClassFilter("");
+  }, [sectionFilter]);
 
   // Current month default
   const now = new Date();
@@ -46,7 +53,7 @@ export default function AttendanceReport() {
 
   // ── Load classes ───────────────────────────────────────────────
   useEffect(() => {
-    getAllClasses()
+    getAllClasses({ section: "all" })
       .then((r) => setClasses(r.data || []))
       .catch((err) => {
         console.error(err);
@@ -239,24 +246,26 @@ export default function AttendanceReport() {
               className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:border-indigo-400 focus:bg-white outline-none transition font-semibold text-slate-700"
             />
             <select
-              value={classFilter}
-              onChange={(e) => setClassFilter(e.target.value)}
-              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-semibold text-slate-700 cursor-pointer"
-            >
-              <option value="">All Classes</option>
-              {classes.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name} — Section {c.section}
-                </option>
-              ))}
-            </select>
-            <select
               value={sectionFilter}
               onChange={(e) => setSectionFilter(e.target.value)}
               className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-semibold text-slate-700 cursor-pointer"
             >
               <option value="girls">Girls</option>
               <option value="boys">Boys</option>
+            </select>
+            <select
+              value={classFilter}
+              onChange={(e) => setClassFilter(e.target.value)}
+              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-semibold text-slate-700 cursor-pointer"
+            >
+              <option value="">All Classes</option>
+              {classes
+                .filter((c) => c.schoolSection === sectionFilter)
+                .map((c) => (
+                  <option key={c._id} value={c._id}>
+                    {c.name} — Section {c.section}
+                  </option>
+                ))}
             </select>
             <select
               value={month}
@@ -291,87 +300,143 @@ export default function AttendanceReport() {
               {filteredData.length} Students
             </span>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-100">
-                  {["Roll No", "Student", "Present", "Absent", "Leave", "Late", "Attendance"].map((h) => (
-                    <th
-                      key={h}
-                      className="px-4 py-3 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider"
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {loading ? (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-slate-400 font-medium">
-                      <div className="flex justify-center mb-2">
-                        <Loader2 className="w-6 h-6 animate-spin text-indigo-600" />
-                      </div>
-                      Loading records...
-                    </td>
-                  </tr>
-                ) : filteredData.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-slate-400 font-medium">
-                      <div className="flex justify-center mb-2">
-                        <Search className="w-6 h-6 text-slate-400" />
-                      </div>
-                      No records found
-                    </td>
-                  </tr>
-                ) : (
-                  filteredData.map((s, i) => {
-                    const badge = getPctBadge(s.percent);
-                    return (
-                      <tr key={s._id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="px-4 py-3 text-xs">
-                          <span className="bg-slate-100 px-2 py-0.5 rounded-lg text-[10px] font-mono text-slate-500 font-bold border border-slate-200/50">
-                            {s.rollNumber || "—"}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white font-bold text-xs ${avatarColors[i % avatarColors.length]}`}>
-                              {s.firstName?.charAt(0)}
-                            </div>
-                            <div>
-                              <div className="font-semibold text-slate-800 text-xs">{s.firstName} {s.lastName}</div>
-                              <div className="text-[10px] text-slate-400 font-medium">Total: {s.total} days</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-xs text-emerald-600 font-bold">{s.present}</td>
-                        <td className="px-4 py-3 text-xs text-rose-600 font-bold">{s.absent}</td>
-                        <td className="px-4 py-3 text-xs text-amber-600 font-bold">{s.leave}</td>
-                        <td className="px-4 py-3 text-xs text-blue-600 font-bold">{s.late}</td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2.5">
-                            <div className="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200/40">
-                              <div
-                                className="h-full rounded-full"
-                                style={{ width: `${s.percent}%`, background: getBarColor(s.percent) }}
-                              />
-                            </div>
-                            <span
-                              className="px-2.5 py-0.5 rounded-full text-[10px] font-bold"
-                              style={{ backgroundColor: badge.bg, color: badge.color }}
-                            >
-                              {s.percent}%
+
+          {loading ? (
+            <div className="px-6 py-12 text-center text-slate-400 font-medium bg-white">
+              <div className="flex justify-center mb-2">
+                <Loader2 className="w-6 h-6 animate-spin text-indigo-600" />
+              </div>
+              Loading records...
+            </div>
+          ) : filteredData.length === 0 ? (
+            <div className="px-6 py-12 text-center text-slate-400 font-medium bg-white">
+              <div className="flex justify-center mb-2">
+                <Search className="w-6 h-6 text-slate-400" />
+              </div>
+              No records found
+            </div>
+          ) : (
+            <>
+              {/* Desktop View Table */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full border-collapse text-sm">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-100">
+                      {["Roll No", "Student", "Present", "Absent", "Leave", "Late", "Attendance"].map((h) => (
+                        <th
+                          key={h}
+                          className="px-4 py-3 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider"
+                        >
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredData.map((s, i) => {
+                      const badge = getPctBadge(s.percent);
+                      return (
+                        <tr key={s._id} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="px-4 py-3 text-xs">
+                            <span className="bg-slate-100 px-2 py-0.5 rounded-lg text-[10px] font-mono text-slate-500 font-bold border border-slate-200/50">
+                              {s.rollNumber || "—"}
                             </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white font-bold text-xs ${avatarColors[i % avatarColors.length]}`}>
+                                {s.firstName?.charAt(0)}
+                              </div>
+                              <div>
+                                <div className="font-semibold text-slate-800 text-xs">{s.firstName} {s.lastName}</div>
+                                <div className="text-[10px] text-slate-400 font-medium">Total: {s.total} days</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-xs text-emerald-600 font-bold">{s.present}</td>
+                          <td className="px-4 py-3 text-xs text-rose-600 font-bold">{s.absent}</td>
+                          <td className="px-4 py-3 text-xs text-amber-600 font-bold">{s.leave}</td>
+                          <td className="px-4 py-3 text-xs text-blue-600 font-bold">{s.late}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200/40">
+                                <div
+                                  className="h-full rounded-full"
+                                  style={{ width: `${s.percent}%`, background: getBarColor(s.percent) }}
+                                />
+                              </div>
+                              <span
+                                className="px-2.5 py-0.5 rounded-full text-[10px] font-bold"
+                                style={{ backgroundColor: badge.bg, color: badge.color }}
+                              >
+                                {s.percent}%
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile View Cards */}
+              <div className="block md:hidden p-4 space-y-3 bg-slate-50/50">
+                {filteredData.map((s, i) => {
+                  const badge = getPctBadge(s.percent);
+                  return (
+                    <div key={s._id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-3.5 transition duration-200 hover:shadow-md hover:border-indigo-100">
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white font-bold text-xs ${avatarColors[i % avatarColors.length]}`}>
+                            {s.firstName?.charAt(0)}
                           </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+                          <div>
+                            <div className="font-semibold text-slate-800 text-sm">{s.firstName} {s.lastName}</div>
+                            <div className="text-[10px] text-slate-400 font-medium">Total: {s.total} days · Roll: {s.rollNumber || "—"}</div>
+                          </div>
+                        </div>
+                        <span
+                          className="px-2.5 py-0.5 rounded-full text-[10px] font-bold"
+                          style={{ backgroundColor: badge.bg, color: badge.color }}
+                        >
+                          {s.percent}%
+                        </span>
+                      </div>
+                      
+                      {/* Attendance Progress Bar */}
+                      <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200/40">
+                        <div
+                          className="h-full rounded-full"
+                          style={{ width: `${s.percent}%`, background: getBarColor(s.percent) }}
+                        />
+                      </div>
+
+                      {/* Stat Breakdown Grid */}
+                      <div className="grid grid-cols-4 gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100/80 text-center">
+                        <div>
+                          <p className="text-[9px] text-slate-400 font-bold uppercase">Present</p>
+                          <p className="text-xs text-emerald-600 font-extrabold mt-0.5">{s.present}</p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] text-slate-400 font-bold uppercase">Absent</p>
+                          <p className="text-xs text-rose-600 font-extrabold mt-0.5">{s.absent}</p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] text-slate-400 font-bold uppercase">Leave</p>
+                          <p className="text-xs text-amber-600 font-extrabold mt-0.5">{s.leave}</p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] text-slate-400 font-bold uppercase">Late</p>
+                          <p className="text-xs text-blue-600 font-extrabold mt-0.5">{s.late}</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Top & Low */}

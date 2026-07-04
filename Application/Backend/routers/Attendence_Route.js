@@ -15,8 +15,8 @@ router.use(protect);
 // Attendance routes
 router.post("/", markAttendance);                              // POST   /api/attendance
 router.get("/",getAttendanceByClassAndDate);                  // GET    /api/attendance?classId=&date=
+router.get("/today-summary", getTodayAttendanceSummary);      // GET    /api/attendance/today-summary
 router.get("/student/:studentId",getAttendanceByStudent);     // GET    /api/attendance/student/:studentId
 router.put("/:id",updateAttendance);                          // PUT    /api/attendance/:id
-router.get("/today-summary", getTodayAttendanceSummary);
 
 export default router;

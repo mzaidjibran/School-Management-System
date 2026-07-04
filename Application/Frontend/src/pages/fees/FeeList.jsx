@@ -136,6 +136,8 @@ const FeeRecordModal = ({ record, mode, onClose, onSave }) => {
         dueDate: formData.dueDate,
         amount: formData.amount,
         paidAmount: formData.paidAmount,
+        discount: Number(formData.discount) || 0,
+        fine: Number(formData.fine) || 0,
         remarks: formData.remarks,
       });
       toast.success("Fee details updated successfully!");
@@ -185,8 +187,10 @@ const FeeRecordModal = ({ record, mode, onClose, onSave }) => {
                   <InfoRow label="Month/Year" value={`${formData.month ? MONTHS[formData.month - 1] : "—"} / ${formData.year}`} />
                   <InfoRow label="Due Date" value={formData.dueDate?.split("T")[0] || "—"} />
                   <InfoRow label="Total Fee" value={`PKR ${formData.amount?.toLocaleString()}`} />
+                  {formData.discount > 0 && <InfoRow label="Discount" value={`PKR ${formData.discount}`} valueClass="text-emerald-600" />}
+                  {formData.fine > 0 && <InfoRow label="Fine" value={`PKR ${formData.fine}`} valueClass="text-amber-600" />}
                   <InfoRow label="Paid Amount" value={`PKR ${formData.paidAmount?.toLocaleString()}`} valueClass="text-emerald-600" />
-                  <InfoRow label="Remaining" value={`PKR ${(formData.amount - formData.paidAmount).toLocaleString()}`} valueClass="text-rose-600" />
+                  <InfoRow label="Remaining" value={`PKR ${(formData.amount + (formData.fine || 0) - (formData.discount || 0) - formData.paidAmount).toLocaleString()}`} valueClass="text-rose-600" />
                   <div className="flex justify-between items-center py-2">
                     <span className="text-xs text-slate-400">Status</span>
                     <StatusBadge status={formData.status} />
@@ -208,10 +212,12 @@ const FeeRecordModal = ({ record, mode, onClose, onSave }) => {
                 <SelectField label="Status" name="status" options={["pending", "partial", "paid", "overdue"]} value={formData.status} onChange={handleChange} />
                 <Input label="Total Fee (PKR)" type="number" name="amount" value={formData.amount} onChange={handleChange} />
                 <Input label="Paid Amount (PKR)" type="number" name="paidAmount" value={formData.paidAmount} onChange={handleChange} />
+                <Input label="Discount (PKR)" type="number" name="discount" value={formData.discount || 0} onChange={handleChange} />
+                <Input label="Fine (PKR)" type="number" name="fine" value={formData.fine || 0} onChange={handleChange} />
               </div>
               <div className="bg-slate-50 rounded-xl px-4 py-3 flex justify-between text-sm">
                 <span className="text-slate-500">Remaining Amount</span>
-                <span className="font-semibold text-rose-600">PKR {(formData.amount - formData.paidAmount).toLocaleString()}</span>
+                <span className="font-semibold text-rose-600">PKR {(formData.amount + (Number(formData.fine) || 0) - (Number(formData.discount) || 0) - formData.paidAmount).toLocaleString()}</span>
               </div>
             </form>
           )}
@@ -802,57 +808,116 @@ export default function FeeRecords() {
       </div>
 
       {/* Table */}
+      {/* Table / Mobile Cards */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
           <span className="font-semibold text-slate-800 text-sm">Fee Records</span>
           <span className="bg-indigo-50 text-indigo-600 text-xs font-semibold px-3 py-1 rounded-full">{filtered.length} records</span>
         </div>
         {error && <p className="text-rose-500 text-sm px-5 py-3 bg-rose-50">{error}</p>}
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                {["Roll No", "Student", "Fee Type", "Month/Year", "Due Date", "Total (PKR)", "Paid (PKR)", "Remaining (PKR)", "Status", "Actions"].map((h) => (
-                  <th key={h} className="text-left px-4 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr><td colSpan={10} className="px-5 py-12 text-center text-slate-400 text-sm">Loading fee records...</td></tr>
-              ) : filtered.length === 0 ? (
-                <tr><td colSpan={10} className="px-5 py-12 text-center text-slate-400 text-sm">No records found</td></tr>
-              ) : (
-                filtered.map((r) => {
-                  const name = r.student ? `${r.student.firstName} ${r.student.lastName}` : "—";
-                  const remaining = r.amount - r.paidAmount;
-                  return (
-                    <tr key={r._id} className="border-b border-slate-100 hover:bg-slate-50 transition">
-                      <td className="px-4 py-3.5">
-                        <code className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs">{r.student?.rollNumber || "—"}</code>
-                      </td>
-                      <td className="px-4 py-3.5 font-medium text-slate-800">{name}</td>
-                      <td className="px-4 py-3.5 capitalize text-slate-600">{r.feeType}</td>
-                      <td className="px-4 py-3.5 text-slate-600">{r.month ? MONTHS[r.month - 1] : "—"} / {r.year}</td>
-                      <td className="px-4 py-3.5 text-slate-600">{r.dueDate?.split("T")[0] || "—"}</td>
-                      <td className="px-4 py-3.5 font-medium text-slate-700">{r.amount?.toLocaleString()}</td>
-                      <td className="px-4 py-3.5 font-medium text-emerald-600">{r.paidAmount?.toLocaleString()}</td>
-                      <td className="px-4 py-3.5 font-medium text-rose-600">{remaining?.toLocaleString()}</td>
-                      <td className="px-4 py-3.5"><StatusBadge status={r.status} /></td>
-                      <td className="px-4 py-3.5">
-                        <div className="flex items-center gap-1.5">
-                          <button onClick={() => setViewRecord(r)} className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="View"><FaEye className="w-3.5 h-3.5" /></button>
-                          <button onClick={() => setSelectedRecord(r)} className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-lg transition" title="Print Slip"><FaPrint className="w-3.5 h-3.5" /></button>
-                          <button onClick={() => setEditRecord(r)} className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition" title="Edit"><FaEdit className="w-3.5 h-3.5" /></button>
+        
+        {loading ? (
+          <div className="px-5 py-12 text-center text-slate-400 text-sm">Loading fee records...</div>
+        ) : filtered.length === 0 ? (
+          <div className="px-5 py-12 text-center text-slate-400 text-sm">No records found</div>
+        ) : (
+          <>
+            {/* Desktop View Table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    {["Roll No", "Student", "Fee Type", "Month/Year", "Due Date", "Total (PKR)", "Paid (PKR)", "Remaining (PKR)", "Status", "Actions"].map((h) => (
+                      <th key={h} className="text-left px-4 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((r) => {
+                    const name = r.student ? `${r.student.firstName} ${r.student.lastName}` : "—";
+                    const remaining = r.amount - r.paidAmount;
+                    return (
+                      <tr key={r._id} className="border-b border-slate-100 hover:bg-slate-50 transition">
+                        <td className="px-4 py-3.5">
+                          <code className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs">{r.student?.rollNumber || "—"}</code>
+                        </td>
+                        <td className="px-4 py-3.5 font-medium text-slate-800">{name}</td>
+                        <td className="px-4 py-3.5 capitalize text-slate-600">{r.feeType}</td>
+                        <td className="px-4 py-3.5 text-slate-600">{r.month ? MONTHS[r.month - 1] : "—"} / {r.year}</td>
+                        <td className="px-4 py-3.5 text-slate-600">{r.dueDate?.split("T")[0] || "—"}</td>
+                        <td className="px-4 py-3.5 font-medium text-slate-700">{r.amount?.toLocaleString()}</td>
+                        <td className="px-4 py-3.5 font-medium text-emerald-600">{r.paidAmount?.toLocaleString()}</td>
+                        <td className="px-4 py-3.5 font-medium text-rose-600">{remaining?.toLocaleString()}</td>
+                        <td className="px-4 py-3.5"><StatusBadge status={r.status} /></td>
+                        <td className="px-4 py-3.5">
+                          <div className="flex items-center gap-1.5">
+                            <button onClick={() => setViewRecord(r)} className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="View"><FaEye className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => setSelectedRecord(r)} className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-lg transition" title="Print Slip"><FaPrint className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => setEditRecord(r)} className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition" title="Edit"><FaEdit className="w-3.5 h-3.5" /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile View Cards */}
+            <div className="block md:hidden p-4 space-y-3 bg-slate-50/50">
+              {filtered.map((r, idx) => {
+                const name = r.student ? `${r.student.firstName} ${r.student.lastName}` : "—";
+                const remaining = r.amount - r.paidAmount;
+                const avatarColor = idx % 2 === 0 ? "bg-indigo-100 text-indigo-700" : "bg-purple-100 text-purple-700";
+                return (
+                  <div key={r._id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-3 transition duration-200 hover:shadow-md hover:border-indigo-100">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-full ${avatarColor} font-bold text-xs flex items-center justify-center`}>
+                          {r.student?.firstName?.charAt(0) || "—"}
                         </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                        <div>
+                          <p className="font-semibold text-slate-800 text-sm">{name}</p>
+                          <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono font-bold border border-slate-200/40">
+                            Roll: {r.student?.rollNumber || "—"}
+                          </span>
+                        </div>
+                      </div>
+                      <StatusBadge status={r.status} />
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100/80 text-center text-xs mt-1">
+                      <div>
+                        <p className="text-[9px] text-slate-400 font-bold uppercase">Total</p>
+                        <p className="font-semibold text-slate-700 mt-0.5">PKR {r.amount?.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] text-slate-400 font-bold uppercase">Paid</p>
+                        <p className="font-semibold text-emerald-600 mt-0.5">PKR {r.paidAmount?.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] text-slate-400 font-bold uppercase">Balance</p>
+                        <p className="font-semibold text-rose-600 mt-0.5">PKR {remaining?.toLocaleString()}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center text-[11px] text-slate-500 border-t border-slate-50 pt-2.5">
+                      <div className="flex flex-col gap-0.5">
+                        <span>Type: <strong className="capitalize text-slate-700">{r.feeType}</strong></span>
+                        <span>Due: <strong className="text-slate-700">{r.dueDate?.split("T")[0] || "—"}</strong></span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button onClick={() => setViewRecord(r)} className="p-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition" title="View"><FaEye className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => setSelectedRecord(r)} className="p-2 text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-xl transition" title="Print Slip"><FaPrint className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => setEditRecord(r)} className="p-2 text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-xl transition" title="Edit"><FaEdit className="w-3.5 h-3.5" /></button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
         {!loading && filtered.length > 0 && (
           <div className="px-5 py-3.5 border-t border-slate-100 bg-slate-50 flex justify-between text-xs text-slate-400">
             <span>Showing {filtered.length} of {records.length} records</span>

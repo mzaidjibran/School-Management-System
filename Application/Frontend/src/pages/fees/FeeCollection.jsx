@@ -242,6 +242,8 @@ export default function CollectFee() {
         year: new Date(form.paymentDate).getFullYear(),
         dueDate: form.dueDate,
         remarks: form.remarks || null,
+        discount: Number(form.discount) || 0,
+        fine: Number(form.fine) || 0,
       };
 
       const created = await createFee(feePayload);
@@ -251,6 +253,7 @@ export default function CollectFee() {
       const paid = await payFee(feeId, {
         payingAmount: amountReceived,
         paymentMethod: form.paymentMethod,
+        paidDate: form.paymentDate,
       });
 
       const feeData = paid.data;

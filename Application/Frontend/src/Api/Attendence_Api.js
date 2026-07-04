@@ -4,7 +4,7 @@ const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
 // ─── Mark Attendance (Array of records) ──────────────────────────
 export const markAttendance = async (records) => {
-  const response = await fetch(`${API_BASE}/api/attendence`, {
+  const response = await fetch(`${API_BASE}/api/attendance`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify({ records }),

@@ -319,31 +319,65 @@ export default function FeeReports() {
         {overdueStudents.length === 0 ? (
           <p className="text-slate-400 text-sm">Koi overdue student nahi.</p>
         ) : (
-          <div className="border border-slate-100 rounded-xl overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 border-b border-slate-100">
-                <tr>
-                  {["Name", "Roll No", "Amount Due", "Days Overdue"].map((h) => (
-                    <th key={h} className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {overdueStudents.map((s, i) => (
-                  <tr key={i} className="border-b border-slate-50 hover:bg-slate-50 transition">
-                    <td className="px-4 py-3 font-medium text-slate-700">{s.name}</td>
-                    <td className="px-4 py-3">
-                      <code className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-xs">{s.rollNo}</code>
-                    </td>
-                    <td className="px-4 py-3 font-semibold text-rose-600">PKR {s.amount.toLocaleString()}</td>
-                    <td className="px-4 py-3">
-                      <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs font-medium">{s.daysOverdue} days</span>
-                    </td>
+          <>
+            {/* Desktop View Table */}
+            <div className="hidden md:block border border-slate-100 rounded-xl overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50 border-b border-slate-100">
+                  <tr>
+                    {["Name", "Roll No", "Amount Due", "Days Overdue"].map((h) => (
+                      <th key={h} className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {overdueStudents.map((s, i) => (
+                    <tr key={i} className="border-b border-slate-50 hover:bg-slate-50 transition">
+                      <td className="px-4 py-3 font-medium text-slate-700">{s.name}</td>
+                      <td className="px-4 py-3">
+                        <code className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-xs">{s.rollNo}</code>
+                      </td>
+                      <td className="px-4 py-3 font-semibold text-rose-600">PKR {s.amount.toLocaleString()}</td>
+                      <td className="px-4 py-3">
+                        <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs font-medium">{s.daysOverdue} days</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile View Cards */}
+            <div className="block md:hidden space-y-3">
+              {overdueStudents.map((s, i) => {
+                const avatarColor = i % 2 === 0 ? "bg-indigo-100 text-indigo-700" : "bg-purple-100 text-purple-700";
+                return (
+                  <div key={i} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-2.5 transition duration-200 hover:shadow-md hover:border-indigo-100">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-full ${avatarColor} font-bold text-xs flex items-center justify-center`}>
+                          {s.name?.charAt(0) || "—"}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-800 text-sm">{s.name}</p>
+                          <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono font-bold border border-slate-200/40">
+                            Roll: {s.rollNo}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-[10px] font-bold text-center">
+                        {s.daysOverdue} days
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs border-t border-slate-50 pt-2 mt-0.5">
+                      <span className="text-slate-400 font-medium">Amount Due:</span>
+                      <strong className="text-rose-600 font-bold">PKR {s.amount.toLocaleString()}</strong>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
     </div>

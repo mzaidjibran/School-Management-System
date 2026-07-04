@@ -54,13 +54,20 @@ export default function MarkAttendance() {
   const [saving, setSaving]                 = useState(false);
   const [success, setSuccess]               = useState(false);
   const [apiError, setApiError]             = useState("");
-  const [selectedSection, setSelectedSection] = useState("girls");
+  const [selectedSection, setSelectedSection] = useState(
+    localStorage.getItem("activeSection") || "girls"
+  );
+
+  // Reset class when section changes
+  useEffect(() => {
+    setSelectedClass("");
+  }, [selectedSection]);
 
   // ── Classes fetch ──────────────────────────────────────────────
   useEffect(() => {
     const fetch = async () => {
       try {
-        const result = await getAllClasses();
+        const result = await getAllClasses({ section: "all" });
         setClasses(result.data || []);
       } catch (e) {
         console.error(e);
@@ -175,35 +182,37 @@ export default function MarkAttendance() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                Select Section <span className="text-rose-500">*</span>
+              </label>
+              <select
+                value={selectedSection}
+                onChange={(e) => setSelectedSection(e.target.value)}
+                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-white text-sm outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
+              >
+                <option value="girls">Girls</option>
+                <option value="boys">Boys</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-500 mb-1.5">
                 Select Class <span className="text-rose-500">*</span>
               </label>
               <select
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
                 disabled={loadingClasses}
-                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-white text-sm outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-white text-sm outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
               >
                 <option value="">
                   {loadingClasses ? "Loading classes..." : "-- Select Class --"}
                 </option>
-                {classes.map((c) => (
-                  <option key={c._id} value={c._id}>
-                    {c.name} — Section {c.section}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                Select Section <span className="text-rose-500">*</span>
-              </label>
-              <select
-                value={selectedSection}
-                onChange={(e) => setSelectedSection(e.target.value)}
-                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-white text-sm outline-none focus:ring-2 focus:ring-indigo-400"
-              >
-                <option value="girls">Girls</option>
-                <option value="boys">Boys</option>
+                {classes
+                  .filter((c) => c.schoolSection === selectedSection)
+                  .map((c) => (
+                    <option key={c._id} value={c._id}>
+                      {c.name} — Section {c.section}
+                    </option>
+                  ))}
               </select>
             </div>
             <div>
@@ -253,16 +262,8 @@ export default function MarkAttendance() {
               </div>
             ) : (
               <>
-                {/* Class info bar */}
-                {selectedClassObj && (
-                  <div className="px-5 py-3 bg-indigo-50 border-b border-indigo-100 text-sm text-indigo-700 font-medium">
-                    {selectedClassObj.name} — Section {selectedClassObj.section}
-                    {selectedClassObj.shift && ` | ${selectedClassObj.shift} Shift`}
-                    {" "}· {selectedDate}
-                  </div>
-                )}
-
-                <div className="overflow-x-auto">
+                {/* Class info                {/* Desktop View Table */}
+                <div className="hidden md:block overflow-x-auto">
                   <table className="w-full">
                     <thead className="bg-slate-50 border-b border-slate-200">
                       <tr>
@@ -298,24 +299,76 @@ export default function MarkAttendance() {
                   </table>
                 </div>
 
+                {/* Mobile View Cards */}
+                <div className="block md:hidden p-4 space-y-3 bg-slate-50/50">
+                  {students.map((student, idx) => {
+                    const avatarColor = idx % 2 === 0 ? "bg-indigo-100 text-indigo-700" : "bg-purple-100 text-purple-700";
+                    return (
+                      <div key={student._id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-3.5 transition duration-200 hover:shadow-md hover:border-indigo-100">
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-full ${avatarColor} font-bold text-xs flex items-center justify-center`}>
+                              {student.firstName?.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-slate-800 text-sm">{student.firstName} {student.lastName}</p>
+                              <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono font-bold border border-slate-200/40">
+                                Roll No: {student.rollNumber || "—"}
+                              </span>
+                            </div>
+                          </div>
+                          <span className="text-[10px] text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full font-semibold border border-slate-200/20">
+                            #{idx + 1}
+                          </span>
+                        </div>
+                        
+                        <div className="grid grid-cols-4 gap-1.5">
+                          {STATUS_OPTIONS.map((status) => {
+                            const isSelected = attendance[student._id] === status;
+                            const activeStyles = {
+                              Present: "bg-emerald-600 text-white border-emerald-600 shadow-sm ring-2 ring-emerald-100",
+                              Absent: "bg-rose-600 text-white border-rose-600 shadow-sm ring-2 ring-rose-100",
+                              Leave: "bg-amber-600 text-white border-amber-600 shadow-sm ring-2 ring-amber-100",
+                              Late: "bg-blue-600 text-white border-blue-600 shadow-sm ring-2 ring-blue-100",
+                            };
+                            return (
+                              <button
+                                key={status}
+                                onClick={() => handleStatusChange(student._id, status)}
+                                className={`py-2 px-1 rounded-xl text-[10px] font-bold border transition duration-150 text-center min-w-0 truncate ${
+                                  isSelected
+                                    ? activeStyles[status]
+                                    : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100"
+                                }`}
+                              >
+                                {status}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
                 {/* Footer actions */}
-                <div className="flex flex-wrap gap-3 justify-between items-center px-5 py-4 border-t border-slate-100">
-                  <div className="flex gap-2 flex-wrap">
+                <div className="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center px-5 py-4 border-t border-slate-100">
+                  <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => markAll("Present")}
-                      className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition text-sm flex items-center gap-1.5"
+                      className="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition text-xs font-bold flex items-center justify-center gap-1.5"
                     >
-                      <FaUserCheck /> Mark All Present
+                      <FaUserCheck /> Present All
                     </button>
                     <button
                       onClick={() => markAll("Absent")}
-                      className="px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition text-sm flex items-center gap-1.5"
+                      className="flex-1 sm:flex-none px-4 py-2 bg-rose-600 text-white rounded-xl hover:bg-rose-700 transition text-xs font-bold flex items-center justify-center gap-1.5"
                     >
-                      <FaUserTimes /> Mark All Absent
+                      <FaUserTimes /> Absent All
                     </button>
                     <button
                       onClick={() => markAll("Present")}
-                      className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition text-sm flex items-center gap-1.5"
+                      className="flex-1 sm:flex-none px-4 py-2 border border-slate-200 rounded-xl hover:bg-slate-50 transition text-xs font-bold flex items-center justify-center gap-1.5"
                     >
                       <FaBed /> Reset
                     </button>
@@ -323,7 +376,7 @@ export default function MarkAttendance() {
                   <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center gap-2 disabled:opacity-50 text-sm"
+                    className="w-full sm:w-auto px-6 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition flex items-center justify-center gap-2 disabled:opacity-50 text-xs font-bold shadow-md shadow-indigo-100"
                   >
                     {saving ? (
                       <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
