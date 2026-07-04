@@ -20,7 +20,7 @@ const Input = ({ label, type = "text", name, value, onChange, required, error })
         style={isDate && !value ? { color: "transparent" } : {}}
         onFocus={(e) => { if (isDate) e.target.style.color = "inherit"; }}
         onBlur={(e) => { if (isDate && !value) e.target.style.color = "transparent"; }}
-        className={`peer w-full px-4 pt-5 pb-2 border rounded-md bg-white text-slate-800 outline-none transition-all text-sm
+        className={`peer w-full px-4 pt-5 pb-2 border rounded bg-white text-slate-800 outline-none transition-all text-sm
           ${error ? "border-rose-400 focus:ring-rose-100" : "border-slate-200 focus:border-indigo-500 focus:ring-indigo-100"}
           focus:ring-2`}
       />
@@ -41,7 +41,7 @@ const Select = ({ label, name, options = [], value, onChange, required }) => (
       name={name}
       value={value}
       onChange={onChange}
-      className="peer w-full px-4 pt-5 pb-2 border border-slate-200 rounded-md bg-white text-slate-800 outline-none transition-all appearance-none text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+      className="peer w-full px-4 pt-5 pb-2 border border-slate-200 rounded bg-white text-slate-800 outline-none transition-all appearance-none text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
     >
       <option value=""></option>
       {options.map((o) => <option key={o.value ?? o} value={o.value ?? o}>{o.label ?? o}</option>)}
@@ -70,10 +70,10 @@ const ReceiptModal = ({ receiptData, onClose }) => {
   };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-lg shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="bg-white rounded-md shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <h3 className="text-sm font-semibold text-slate-700">Payment Receipt</h3>
-          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 transition">
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 transition">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -100,7 +100,7 @@ const ReceiptModal = ({ receiptData, onClose }) => {
               </div>
             ))}
           </div>
-          <div className="border border-slate-100 rounded-md overflow-hidden mb-4">
+          <div className="border border-slate-100 rounded overflow-hidden mb-4">
             <table className="w-full text-sm">
               <tbody>
                 {[
@@ -119,8 +119,8 @@ const ReceiptModal = ({ receiptData, onClose }) => {
           <p className="text-center text-xs text-slate-400 border-t border-slate-100 pt-3">Thank you for your payment!</p>
         </div>
         <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-2.5">
-          <button onClick={onClose} className="px-4 py-2 text-xs border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition">Close</button>
-          <button onClick={handlePrint} className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition flex items-center gap-1.5">
+          <button onClick={onClose} className="px-4 py-2 text-xs border border-slate-200 rounded-md text-slate-500 hover:bg-slate-50 transition">Close</button>
+          <button onClick={handlePrint} className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition flex items-center gap-1.5">
             <FaPrint className="w-3 h-3" /> Print
           </button>
         </div>
@@ -308,13 +308,13 @@ export default function CollectFee() {
       </div>
 
       {/* Search */}
-      <div className="bg-white rounded-md shadow-sm border border-slate-100 p-5">
+      <div className="bg-white rounded shadow-sm border border-slate-100 p-5">
         <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">Find Student</p>
         <div className="flex gap-3 flex-wrap">
           <select
             value={searchType}
             onChange={(e) => setSearchType(e.target.value)}
-            className="px-3 py-2 text-sm border border-slate-300 rounded-md bg-white outline-none focus:ring-2 focus:ring-indigo-500"
+            className="px-3 py-2 text-sm border border-slate-300 rounded bg-white outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option value="roll">Roll Number</option>
             <option value="name">Student Name</option>
@@ -327,13 +327,13 @@ export default function CollectFee() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              className="w-full pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-md outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full pl-9 pr-4 py-2 text-sm border border-slate-300 rounded outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
           <button
             onClick={handleSearch}
             disabled={searching}
-            className="px-5 py-2 text-sm bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white rounded-md transition flex items-center gap-2"
+            className="px-5 py-2 text-sm bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white rounded transition flex items-center gap-2"
           >
             <FaSearch className="w-3.5 h-3.5" /> {searching ? "Searching..." : "Search"}
           </button>
@@ -346,7 +346,7 @@ export default function CollectFee() {
       {selectedStudent && (
         <div className="grid md:grid-cols-2 gap-6">
           {/* Student Info */}
-          <div className="bg-white rounded-md shadow-sm border border-slate-100 p-5">
+          <div className="bg-white rounded shadow-sm border border-slate-100 p-5">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">Student Details</p>
             <div className="flex items-center gap-4 mb-5">
               <div className="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-lg ring-2 ring-slate-200">
@@ -391,7 +391,7 @@ export default function CollectFee() {
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Fee History</p>
                 <div className="space-y-2 max-h-40 overflow-y-auto">
                   {studentFees.slice(0, 6).map((f) => (
-                    <div key={f._id} className="flex justify-between text-xs text-slate-600 bg-slate-50 rounded-lg px-3 py-2">
+                    <div key={f._id} className="flex justify-between text-xs text-slate-600 bg-slate-50 rounded-md px-3 py-2">
                       <span className="capitalize">{f.feeType} — {f.month}/{f.year}</span>
                       <span className={`font-semibold ${f.status === "paid" ? "text-emerald-600" : "text-rose-500"}`}>
                         {f.status}
@@ -404,9 +404,9 @@ export default function CollectFee() {
           </div>
 
           {/* Payment Form */}
-          <div className="bg-white rounded-md shadow-sm border border-slate-100 p-5">
+          <div className="bg-white rounded shadow-sm border border-slate-100 p-5">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">Payment Details</p>
-            {error && <p className="text-rose-500 text-xs mb-3 bg-rose-50 rounded-lg px-3 py-2">{error}</p>}
+            {error && <p className="text-rose-500 text-xs mb-3 bg-rose-50 rounded-md px-3 py-2">{error}</p>}
             <div className="space-y-4">
               <Select
                 label="Fee Type"
@@ -466,21 +466,21 @@ export default function CollectFee() {
                   onChange={(e) => setForm({ ...form, remarks: e.target.value })}
                   rows={2}
                   placeholder="Remarks (optional)..."
-                  className="w-full px-4 py-3 border border-slate-200 rounded-md text-sm outline-none resize-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-4 py-3 border border-slate-200 rounded text-sm outline-none resize-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
               <div className="flex gap-3 pt-1">
                 <button
                   onClick={() => handleCollect(false)}
                   disabled={submitting}
-                  className="px-5 py-2.5 text-sm bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white rounded-md transition flex items-center gap-2"
+                  className="px-5 py-2.5 text-sm bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white rounded transition flex items-center gap-2"
                 >
                   <FaMoneyBillWave className="w-3.5 h-3.5" /> {submitting ? "Processing..." : "Collect Fee"}
                 </button>
                 <button
                   onClick={() => handleCollect(true)}
                   disabled={submitting}
-                  className="px-5 py-2.5 text-sm border border-slate-300 hover:bg-slate-50 disabled:opacity-60 text-slate-600 rounded-md transition flex items-center gap-2"
+                  className="px-5 py-2.5 text-sm border border-slate-300 hover:bg-slate-50 disabled:opacity-60 text-slate-600 rounded transition flex items-center gap-2"
                 >
                   <FaSave className="w-3.5 h-3.5" /> Save & Print
                 </button>

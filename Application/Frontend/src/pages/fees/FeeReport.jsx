@@ -11,7 +11,7 @@ const MONTHS_FULL = ["January","February","March","April","May","June","July","A
 
 // ---------- Stats Card ----------
 const StatsCard = ({ label, value, bgColor, iconColor, icon }) => (
-  <div className="bg-white rounded-md shadow-sm border border-slate-100">
+  <div className="bg-white rounded shadow-sm border border-slate-100">
     <div className="p-4 flex justify-between items-center">
       <div>
         <p className="text-sm text-slate-500">{label}</p>
@@ -206,7 +206,7 @@ export default function FeeReports() {
       </div>
 
       {error && (
-        <p className="text-rose-500 text-sm bg-rose-50 rounded-md px-4 py-3">{error}</p>
+        <p className="text-rose-500 text-sm bg-rose-50 rounded px-4 py-3">{error}</p>
       )}
 
       {/* Stats */}
@@ -244,22 +244,22 @@ export default function FeeReports() {
       </div>
 
       {/* Filters + Exports */}
-      <div className="bg-white rounded-md shadow-sm border border-slate-100 p-4">
+      <div className="bg-white rounded shadow-sm border border-slate-100 p-4">
         <div className="flex flex-wrap gap-3 items-center">
           <input
             type="date" value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="px-3 py-2 text-sm border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+            className="px-3 py-2 text-sm border border-slate-300 rounded-md outline-none focus:ring-2 focus:ring-indigo-500"
           />
           <input
             type="date" value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="px-3 py-2 text-sm border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+            className="px-3 py-2 text-sm border border-slate-300 rounded-md outline-none focus:ring-2 focus:ring-indigo-500"
           />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-indigo-500"
+            className="px-3 py-2 text-sm border border-slate-300 rounded-md bg-white outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option value="">All Status</option>
             {["paid", "pending", "partial", "overdue"].map((s) => (
@@ -267,13 +267,13 @@ export default function FeeReports() {
             ))}
           </select>
           <div className="flex gap-2 ml-auto">
-            <button onClick={exportCSV} title="CSV" className="p-2 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
+            <button onClick={exportCSV} title="CSV" className="p-2 bg-slate-100 hover:bg-slate-200 rounded-md transition">
               <FaFileCsv className="text-slate-600 w-4 h-4" />
             </button>
-            <button onClick={exportExcel} title="Excel" className="p-2 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition">
+            <button onClick={exportExcel} title="Excel" className="p-2 bg-emerald-50 hover:bg-emerald-100 rounded-md transition">
               <FaFileExcel className="text-emerald-600 w-4 h-4" />
             </button>
-            <button onClick={exportPDF} title="PDF" className="p-2 bg-rose-50 hover:bg-rose-100 rounded-lg transition">
+            <button onClick={exportPDF} title="PDF" className="p-2 bg-rose-50 hover:bg-rose-100 rounded-md transition">
               <FaFilePdf className="text-rose-600 w-4 h-4" />
             </button>
           </div>
@@ -282,7 +282,7 @@ export default function FeeReports() {
 
       {/* Charts */}
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-md shadow-sm border border-slate-100 p-5">
+        <div className="bg-white rounded shadow-sm border border-slate-100 p-5">
           <p className="text-sm font-semibold text-slate-700 mb-4">Monthly Collection Trend</p>
           <div className="space-y-3">
             {monthlyData.map((m) => (
@@ -290,7 +290,7 @@ export default function FeeReports() {
             ))}
           </div>
         </div>
-        <div className="bg-white rounded-md shadow-sm border border-slate-100 p-5">
+        <div className="bg-white rounded shadow-sm border border-slate-100 p-5">
           <p className="text-sm font-semibold text-slate-700 mb-4">Fee Type Wise Collection</p>
           {feeTypeData.length === 0 ? (
             <p className="text-slate-400 text-sm">Koi paid fee record nahi mila.</p>
@@ -311,7 +311,7 @@ export default function FeeReports() {
       </div>
 
       {/* Overdue Students */}
-      <div className="bg-white rounded-md shadow-sm border border-slate-100 p-5">
+      <div className="bg-white rounded shadow-sm border border-slate-100 p-5">
         <p className="text-sm font-semibold text-rose-600 mb-4 flex items-center gap-2">
           <span className="w-2 h-2 bg-rose-500 rounded-full inline-block"></span>
           Students With Overdue Dues
@@ -321,7 +321,7 @@ export default function FeeReports() {
         ) : (
           <>
             {/* Desktop View Table */}
-            <div className="hidden md:block border border-slate-100 rounded-md overflow-hidden">
+            <div className="hidden md:block border border-slate-100 rounded overflow-hidden">
               <table className="w-full text-sm">
                 <thead className="bg-slate-50 border-b border-slate-100">
                   <tr>
@@ -335,7 +335,7 @@ export default function FeeReports() {
                     <tr key={i} className="border-b border-slate-50 hover:bg-slate-50 transition">
                       <td className="px-4 py-3 font-medium text-slate-700">{s.name}</td>
                       <td className="px-4 py-3">
-                        <code className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-xs">{s.rollNo}</code>
+                        <code className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md text-xs">{s.rollNo}</code>
                       </td>
                       <td className="px-4 py-3 font-semibold text-rose-600">PKR {s.amount.toLocaleString()}</td>
                       <td className="px-4 py-3">
@@ -352,7 +352,7 @@ export default function FeeReports() {
               {overdueStudents.map((s, i) => {
                 const avatarColor = i % 2 === 0 ? "bg-indigo-100 text-indigo-700" : "bg-purple-100 text-purple-700";
                 return (
-                  <div key={i} className="bg-white p-4 rounded-lg border border-slate-100 shadow-sm flex flex-col gap-2.5 transition duration-200 hover:shadow-md hover:border-indigo-100">
+                  <div key={i} className="bg-white p-4 rounded-md border border-slate-100 shadow-sm flex flex-col gap-2.5 transition duration-200 hover:shadow-md hover:border-indigo-100">
                     <div className="flex justify-between items-start">
                       <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-full ${avatarColor} font-bold text-xs flex items-center justify-center`}>
@@ -360,7 +360,7 @@ export default function FeeReports() {
                         </div>
                         <div>
                           <p className="font-semibold text-slate-800 text-sm">{s.name}</p>
-                          <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono font-bold border border-slate-200/40">
+                          <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md font-mono font-bold border border-slate-200/40">
                             Roll: {s.rollNo}
                           </span>
                         </div>

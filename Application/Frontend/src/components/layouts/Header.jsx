@@ -141,7 +141,7 @@ export default function ProHeader() {
 
           {/* Logo & School Name */}
           <div className="flex items-center gap-2.5 shrink-0">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-xl flex items-center justify-center shadow-md shrink-0">
+            <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-md flex items-center justify-center shadow-md shrink-0">
               <span className="text-white text-lg font-bold">S</span>
             </div>
             <div className="flex flex-col select-none hidden sm:flex">
@@ -159,7 +159,7 @@ export default function ProHeader() {
                   to={item.path}
                   end={item.path === "/"}
                   className={({ isActive }) =>
-                    `relative px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 whitespace-nowrap
+                    `relative px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 whitespace-nowrap
                     ${isActive
                       ? "text-indigo-700 bg-indigo-50/80"
                       : "text-slate-600 hover:text-indigo-600 hover:bg-slate-100/60"
@@ -188,7 +188,7 @@ export default function ProHeader() {
             {/* Active Branch & Section Badge */}
             <div 
               onClick={() => window.dispatchEvent(new Event("open-branch-modal"))}
-              className="flex items-center gap-1 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-1.5 bg-indigo-50/60 hover:bg-indigo-50 border border-indigo-100/60 rounded-xl cursor-pointer select-none transition-all group shrink-0"
+              className="flex items-center gap-1 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-1.5 bg-indigo-50/60 hover:bg-indigo-50 border border-indigo-100/60 rounded-md cursor-pointer select-none transition-all group shrink-0"
               title="Click to Switch Branch or Section"
             >
               <div className="hidden sm:flex flex-col text-right">
@@ -199,7 +199,7 @@ export default function ProHeader() {
                   {activeSection ? `${activeSection} Section` : "Select Section"}
                 </span>
               </div>
-              <div className="w-7 h-7 rounded-lg bg-indigo-600/10 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
+              <div className="w-7 h-7 rounded-md bg-indigo-600/10 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
                 <School size={14} />
               </div>
             </div>
@@ -219,7 +219,7 @@ export default function ProHeader() {
               </button>
 
               {notifDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-xl border border-slate-100 py-2 z-50">
                   <div className="px-4 py-2 border-b border-slate-100">
                     <h3 className="font-semibold text-slate-700">Notifications</h3>
                   </div>
@@ -245,7 +245,7 @@ export default function ProHeader() {
               </button>
 
               {userDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-1 z-50 animate-fadeIn">
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-xl border border-slate-100 py-1 z-50 animate-fadeIn">
                   {/* User info */}
                   <div className="px-4 py-3 border-b border-slate-100">
                     <p className="text-sm font-medium text-slate-700 truncate">
@@ -265,7 +265,7 @@ export default function ProHeader() {
                         setEditModalOpen(true);
                         setUserDropdownOpen(false);
                       }}
-                      className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg transition flex items-center gap-1.5 cursor-pointer font-semibold"
+                      className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-md transition flex items-center gap-1.5 cursor-pointer font-semibold"
                     >
                       <User size={14} className="text-slate-400" /> Edit Profile
                     </button>
@@ -313,7 +313,7 @@ export default function ProHeader() {
                 end={item.path === "/"}
                 onClick={() => setMobileMenuOpen(false)}
                 className={({ isActive }) =>
-                  `block px-3 py-2 text-sm font-medium rounded-lg transition-all
+                  `block px-3 py-2 text-sm font-medium rounded-md transition-all
                   ${isActive ? "bg-indigo-50 text-indigo-700" : "text-slate-600 hover:bg-slate-50"}`
                 }
               >
@@ -326,7 +326,7 @@ export default function ProHeader() {
             <hr className="my-2 border-slate-100" />
             <button
               onClick={handleLogout}
-              className="text-left px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition flex items-center gap-1.5"
+              className="text-left px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md transition flex items-center gap-1.5"
             >
               <LogOutIcon size={14} /> Logout
             </button>
@@ -346,14 +346,14 @@ export default function ProHeader() {
       {/* Edit Profile Modal */}
       {editModalOpen && createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md bg-white rounded-2xl border border-slate-100 shadow-2xl p-6 overflow-hidden animate-scaleIn">
+          <div className="w-full max-w-md bg-white rounded-md border border-slate-100 shadow-2xl p-6 overflow-hidden animate-scaleIn">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <h2 className="text-lg font-black text-slate-800 flex items-center gap-2">
                 <User size={20} className="text-indigo-600" /> Edit Profile
               </h2>
               <button
                 onClick={() => setEditModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-50 rounded-lg transition"
+                className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-50 rounded-md transition"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -399,7 +399,7 @@ export default function ProHeader() {
                   type="text"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm bg-slate-50/50 border border-slate-200 rounded-xl focus:border-indigo-500 focus:bg-white transition outline-none font-semibold text-slate-800"
+                  className="w-full px-3.5 py-2 text-sm bg-slate-50/50 border border-slate-200 rounded-md focus:border-indigo-500 focus:bg-white transition outline-none font-semibold text-slate-800"
                   required
                 />
               </div>
@@ -411,7 +411,7 @@ export default function ProHeader() {
                   type="email"
                   value={userEmail || ""}
                   disabled
-                  className="w-full px-3.5 py-2 text-sm bg-slate-100 border border-slate-200 rounded-xl font-semibold text-slate-400 cursor-not-allowed"
+                  className="w-full px-3.5 py-2 text-sm bg-slate-100 border border-slate-200 rounded-md font-semibold text-slate-400 cursor-not-allowed"
                 />
                 <p className="text-[10px] text-slate-400/80 font-semibold italic">Email cannot be changed.</p>
               </div>
@@ -421,14 +421,14 @@ export default function ProHeader() {
                 <button
                   type="button"
                   onClick={() => setEditModalOpen(false)}
-                  className="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-bold text-slate-600 transition cursor-pointer"
+                  className="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 rounded-md text-xs font-bold text-slate-600 transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/10 transition cursor-pointer flex items-center justify-center gap-1.5"
+                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-bold shadow-md shadow-indigo-600/10 transition cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   {saving ? (
                     <>

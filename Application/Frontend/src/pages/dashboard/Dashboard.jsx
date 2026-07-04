@@ -304,7 +304,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-slate-50/50 py-6 px-4 sm:px-6 lg:px-8">
       {/* Header Greeting */}
-      <div className="bg-white rounded-2xl border border-slate-100/80 shadow-sm p-6 mb-6 flex flex-col gap-1">
+      <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-6 mb-6 flex flex-col gap-1">
         <div>
           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider text-indigo-600 bg-indigo-50 uppercase">
             Punjab Public High School
@@ -332,9 +332,9 @@ export default function Dashboard() {
             {overviewStats.map((stat, idx) => (
               <div
                 key={idx}
-                className="bg-white rounded-2xl border border-slate-100/80 shadow-sm p-4 flex items-center gap-3.5 hover:shadow-md transition duration-200"
+                className="bg-white rounded-md border border-slate-100/80 shadow-sm p-4 flex items-center gap-3.5 hover:shadow-md transition duration-200"
               >
-                <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center shadow-sm shrink-0">
+                <div className="w-10 h-10 bg-indigo-50 rounded-md flex items-center justify-center shadow-sm shrink-0">
                   {stat.icon}
                 </div>
                 <div className="min-w-0">
@@ -350,7 +350,7 @@ export default function Dashboard() {
           </div>
 
           {/* Recent Fees */}
-          <div className="bg-white rounded-2xl border border-slate-100/80 shadow-sm p-5">
+          <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-5">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-bold text-slate-800">
                 Recent Fee Collections
@@ -408,7 +408,7 @@ export default function Dashboard() {
                 {/* Mobile view */}
                 <div className="block sm:hidden space-y-2">
                   {recentFees.map((fee, i) => (
-                    <div key={i} className="p-2.5 border border-slate-100 rounded-xl space-y-1.5 bg-slate-50/30">
+                    <div key={i} className="p-2.5 border border-slate-100 rounded-md space-y-1.5 bg-slate-50/30">
                       <div className="flex justify-between items-center">
                         <strong className="text-xs font-bold text-slate-800">{fee.studentId?.name || fee.studentName || "—"}</strong>
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold capitalize ${feeStatusColor(fee.status)}`}>
@@ -436,7 +436,7 @@ export default function Dashboard() {
           {/* Upcoming Exams + Notices Side by Side */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Upcoming Exams */}
-            <div className="bg-white rounded-2xl border border-slate-100/80 shadow-sm p-5">
+            <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-5">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-bold text-slate-800">
                   Upcoming Exams
@@ -484,7 +484,7 @@ export default function Dashboard() {
                   {/* Mobile view */}
                   <div className="block sm:hidden space-y-2">
                     {exams.map((ex, i) => (
-                      <div key={i} className="p-2.5 border border-slate-100 rounded-xl space-y-1 bg-slate-50/30">
+                      <div key={i} className="p-2.5 border border-slate-100 rounded-md space-y-1 bg-slate-50/30">
                         <div className="flex justify-between items-center">
                           <strong className="text-xs font-bold text-slate-800">{ex.title || ex.name || "—"}</strong>
                           <span className="text-[10px] text-slate-400">
@@ -506,7 +506,7 @@ export default function Dashboard() {
             </div>
 
             {/* Notices */}
-            <div className="bg-white rounded-2xl border border-slate-100/80 shadow-sm p-5">
+            <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-5">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
                   <Megaphone size={16} className="text-indigo-600" /> Notice
@@ -524,7 +524,7 @@ export default function Dashboard() {
                   {notices.map((n, i) => (
                     <div
                       key={i}
-                      className={`p-3 rounded-xl border border-slate-100/40 ${priorityStyle(n.priority)}`}
+                      className={`p-3 rounded-md border border-slate-100/40 ${priorityStyle(n.priority)}`}
                     >
                       <div className="flex justify-between items-start gap-2">
                         <span className="text-xs font-semibold text-slate-700 line-clamp-1">
@@ -557,7 +557,7 @@ export default function Dashboard() {
         {/* Right Side: Sidebar (1/3 width) */}
         <div className="space-y-6">
           {/* Today's Attendance */}
-          <div className="bg-white rounded-2xl border border-slate-100/80 shadow-sm p-5">
+          <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-5">
             <h3 className="text-sm font-bold text-slate-800 mb-4">
               Today's Attendance
             </h3>
@@ -589,7 +589,7 @@ export default function Dashboard() {
                   ].map((a) => (
                     <div
                       key={a.label}
-                      className={`text-center p-3 rounded-xl border ${a.color}`}
+                      className={`text-center p-3 rounded-md border ${a.color}`}
                     >
                       <p className="text-xl font-extrabold">{a.val}</p>
                       <p className="text-xs font-semibold opacity-90 mt-0.5">
@@ -615,7 +615,7 @@ export default function Dashboard() {
           </div>
 
           {/* Quick Links */}
-          <div className="bg-white rounded-2xl border border-slate-100/80 shadow-sm p-5">
+          <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-5">
             <h3 className="text-sm font-bold text-slate-800 mb-4">
               Quick Links
             </h3>
@@ -624,9 +624,9 @@ export default function Dashboard() {
                 <button
                   key={link.name}
                   onClick={() => navigate(link.path)}
-                  className="flex flex-col items-center gap-1.5 p-2.5 bg-slate-50 border border-slate-100 rounded-xl hover:bg-indigo-50 hover:border-indigo-100 transition group text-center cursor-pointer"
+                  className="flex flex-col items-center gap-1.5 p-2.5 bg-slate-50 border border-slate-100 rounded-md hover:bg-indigo-50 hover:border-indigo-100 transition group text-center cursor-pointer"
                 >
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                  <div className="w-8 h-8 rounded-md flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                     {link.icon}
                   </div>
                   <span className="text-[11px] text-slate-600 group-hover:text-indigo-600 font-bold leading-tight">

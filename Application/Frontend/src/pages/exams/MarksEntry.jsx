@@ -93,7 +93,7 @@ export default function MarksEntry() {
   };
 
   const marksEntered = marksData.filter((m) => m.obtainedMarks > 0).length;
-  const selectClass  = "text-sm px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400 bg-white";
+  const selectClass  = "text-sm px-3 py-2 border border-slate-200 rounded-md outline-none focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400 bg-white";
 
   return (
     <div className="min-h-screen bg-slate-50 py-6 px-4 sm:px-6 lg:px-8">
@@ -103,7 +103,7 @@ export default function MarksEntry() {
           <span className="text-indigo-600">Marks Entry</span>
         </nav>
         <div className="flex items-center gap-3 mb-5">
-          <div className="p-2.5 bg-indigo-100 rounded-xl"><FaSave className="w-5 h-5 text-indigo-600" /></div>
+          <div className="p-2.5 bg-indigo-100 rounded-md"><FaSave className="w-5 h-5 text-indigo-600" /></div>
           <div>
             <h1 className="text-lg font-bold text-slate-800">Marks Entry</h1>
             <p className="text-xs text-slate-500">Enter and update student marks with auto grade calculation</p>
@@ -111,7 +111,7 @@ export default function MarksEntry() {
         </div>
 
         {/* Exam selector */}
-        <div className="bg-white rounded-xl border border-slate-100 shadow-sm px-4 py-3 mb-4">
+        <div className="bg-white rounded-md border border-slate-100 shadow-sm px-4 py-3 mb-4">
           <label className="block text-xs font-medium text-slate-500 mb-1.5">Select Exam</label>
           <select value={selectedExam} onChange={(e) => setSelectedExam(e.target.value)} className={selectClass + " w-full"}>
             <option value="">-- Select Exam --</option>
@@ -138,8 +138,8 @@ export default function MarksEntry() {
               { icon:<FaCheckCircle />, label:"Marks Entered", val:marksEntered, color:"text-emerald-600", bg:"bg-emerald-50" },
               { icon:<FaSave />, label:"Remaining", val:students.length - marksEntered, color:"text-amber-600", bg:"bg-amber-50" },
             ].map((c) => (
-              <div key={c.label} className="bg-white rounded-xl border border-slate-100 shadow-sm px-4 py-3 flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${c.bg} ${c.color} text-sm`}>{c.icon}</div>
+              <div key={c.label} className="bg-white rounded-md border border-slate-100 shadow-sm px-4 py-3 flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-md flex items-center justify-center ${c.bg} ${c.color} text-sm`}>{c.icon}</div>
                 <div>
                   <p className="text-xs text-slate-500">{c.label}</p>
                   <p className={`text-lg font-bold ${c.color}`}>{c.val}</p>
@@ -151,7 +151,7 @@ export default function MarksEntry() {
 
         {/* Table */}
         {selectedExam && (
-          <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-md border border-slate-100 shadow-sm overflow-hidden">
             {loading ? (
               <div className="p-8 text-center text-sm text-slate-400">Loading students...</div>
             ) : students.length === 0 ? (
@@ -183,7 +183,7 @@ export default function MarksEntry() {
                               <div className="flex items-center gap-2">
                                 <input type="number" value={m.obtainedMarks}
                                   onChange={(e) => handleMarksChange(s._id, e.target.value)}
-                                  className="w-16 px-2 py-1 text-sm border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-indigo-400"
+                                  className="w-16 px-2 py-1 text-sm border border-slate-200 rounded-md outline-none focus:ring-1 focus:ring-indigo-400"
                                   min="0" max={totalMarks} />
                                 <span className="text-xs text-slate-400">/ {totalMarks}</span>
                               </div>
@@ -199,14 +199,14 @@ export default function MarksEntry() {
                     </tbody>
                   </table>
                 </div>
-                {apiError && <div className="mx-4 my-2 px-3 py-2 bg-rose-50 border border-rose-200 rounded-lg text-rose-600 text-xs">{apiError}</div>}
+                {apiError && <div className="mx-4 my-2 px-3 py-2 bg-rose-50 border border-rose-200 rounded-md text-rose-600 text-xs">{apiError}</div>}
                 <div className="flex justify-end gap-2 px-4 py-3 border-t border-slate-100">
                   <button onClick={handleSave} disabled={saving}
-                    className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition">
+                    className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 disabled:opacity-50 transition">
                     <FaSave className="w-3 h-3" /> {saving ? "Saving..." : "Save Marks"}
                   </button>
                   <button onClick={handleReset}
-                    className="flex items-center gap-1.5 px-4 py-2 border border-slate-200 text-slate-600 text-sm rounded-lg hover:bg-slate-50 transition">
+                    className="flex items-center gap-1.5 px-4 py-2 border border-slate-200 text-slate-600 text-sm rounded-md hover:bg-slate-50 transition">
                     <FaUndo className="w-3 h-3" /> Reset
                   </button>
                 </div>
@@ -216,7 +216,7 @@ export default function MarksEntry() {
         )}
 
         {success && (
-          <div className="fixed bottom-5 right-5 bg-emerald-500 text-white text-sm px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2 z-50">
+          <div className="fixed bottom-5 right-5 bg-emerald-500 text-white text-sm px-4 py-2.5 rounded-md shadow-lg flex items-center gap-2 z-50">
             <FaCheckCircle className="w-3.5 h-3.5" /> Marks saved successfully!
           </div>
         )}

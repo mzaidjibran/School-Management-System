@@ -370,7 +370,7 @@ export default function CreateTimetable() {
         {/* Header */}
         <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-100 rounded-2xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-indigo-100 rounded-md flex items-center justify-center">
               <FaCalendarAlt className="text-indigo-600" />
             </div>
             <div>
@@ -386,26 +386,26 @@ export default function CreateTimetable() {
             <button
               onClick={handleSave}
               disabled={loading}
-              className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors"
             >
               <FaSave className="text-xs" />
               {loading ? "Saving…" : "Save"}
             </button>
             <button
               onClick={handlePrint}
-              className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium border border-indigo-200 text-indigo-600 rounded-xl hover:bg-indigo-50 transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium border border-indigo-200 text-indigo-600 rounded-md hover:bg-indigo-50 transition-colors"
             >
               <FaPrint className="text-xs" /> Print
             </button>
             <button
               onClick={handleDuplicate}
-              className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium border border-slate-200 text-slate-600 rounded-md hover:bg-slate-50 transition-colors"
             >
               <FaCopy className="text-xs" /> Duplicate
             </button>
             <button
               onClick={handleReset}
-              className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium border border-slate-200 text-slate-600 rounded-md hover:bg-slate-50 transition-colors"
             >
               <FaUndo className="text-xs" /> Reset
             </button>
@@ -419,7 +419,7 @@ export default function CreateTimetable() {
         </div>
 
         {/* Class Info */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 mb-5">
+        <div className="bg-white rounded-md shadow-sm border border-slate-100 p-5 mb-5">
           <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
             Class Information
           </h2>
@@ -437,7 +437,7 @@ export default function CreateTimetable() {
                   value={form.classId}
                   onChange={handleFormChange}
                   disabled={isEdit}
-                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 disabled:bg-slate-50"
+                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300 disabled:bg-slate-50"
                 >
                   <option value="">Select Class…</option>
                   {classes.map((c) => (
@@ -458,7 +458,7 @@ export default function CreateTimetable() {
                   value={form.section}
                   readOnly
                   placeholder="Auto-filled from class"
-                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl bg-slate-50 text-slate-500 cursor-not-allowed"
+                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md bg-slate-50 text-slate-500 cursor-not-allowed"
                 />
               </div>
 
@@ -473,7 +473,7 @@ export default function CreateTimetable() {
                   value={form.academicYear}
                   onChange={handleFormChange}
                   placeholder="2025-2026"
-                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300"
                 />
               </div>
             </div>
@@ -481,7 +481,7 @@ export default function CreateTimetable() {
         </div>
 
         {/* Time Slots Manager */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 mb-5 no-print">
+        <div className="bg-white rounded-md shadow-sm border border-slate-100 p-5 mb-5 no-print">
           <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
             Time Slots
           </h2>
@@ -489,7 +489,7 @@ export default function CreateTimetable() {
             {slots.map((slot) => (
               <div
                 key={slot}
-                className="flex items-center gap-1.5 px-3 py-1 bg-indigo-50 border border-indigo-200 rounded-lg text-xs font-medium text-indigo-700"
+                className="flex items-center gap-1.5 px-3 py-1 bg-indigo-50 border border-indigo-200 rounded-md text-xs font-medium text-indigo-700"
               >
                 {slot}
                 <button
@@ -513,13 +513,13 @@ export default function CreateTimetable() {
                   }}
                   onKeyDown={(e) => e.key === "Enter" && addSlot()}
                   placeholder="HH:MM-HH:MM  e.g. 14:00-15:00"
-                  className={`h-8 px-3 text-xs border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 w-56 ${
+                  className={`h-8 px-3 text-xs border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300 w-56 ${
                     slotError ? "border-rose-400" : "border-slate-200"
                   }`}
                 />
                 <button
                   onClick={addSlot}
-                  className="h-8 px-3 text-xs font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-1.5"
+                  className="h-8 px-3 text-xs font-medium bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors flex items-center gap-1.5"
                 >
                   <FaPlus className="text-xs" /> Add Slot
                 </button>
@@ -532,7 +532,7 @@ export default function CreateTimetable() {
         </div>
 
         {/* Timetable Grid */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="bg-white rounded-md shadow-sm border border-slate-100 overflow-hidden">
           <div className="px-5 py-3 border-b border-slate-100 bg-slate-50">
             <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
               Timetable Grid

@@ -138,11 +138,11 @@ export default function BranchSectionModal({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9000] flex items-center justify-center p-3 sm:p-4">
-      <div className="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-md p-4 sm:p-6 relative animate-in fade-in zoom-in duration-200 max-h-[95vh] flex flex-col">
+      <div className="bg-white rounded-md shadow-2xl border border-slate-100 w-full max-w-md p-4 sm:p-6 relative animate-in fade-in zoom-in duration-200 max-h-[95vh] flex flex-col">
         
         {/* Top Header */}
         <div className="flex items-center gap-3 mb-5 shrink-0">
-          <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600 shrink-0">
+          <div className="p-3 bg-indigo-50 rounded-md text-indigo-600 shrink-0">
             <School className="w-6 h-6" />
           </div>
           <div>
@@ -174,7 +174,7 @@ export default function BranchSectionModal({ isOpen, onClose }) {
                   value={newBranchName}
                   onChange={(e) => setNewBranchName(e.target.value)}
                   placeholder="e.g. Model Town Campus"
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition font-medium text-slate-700"
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-md bg-slate-50 focus:bg-white text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition font-medium text-slate-700"
                 />
               </div>
 
@@ -188,7 +188,7 @@ export default function BranchSectionModal({ isOpen, onClose }) {
                   value={newBranchCode}
                   onChange={(e) => setNewBranchCode(e.target.value)}
                   placeholder="e.g. MTC03"
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition font-medium text-slate-700 uppercase"
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-md bg-slate-50 focus:bg-white text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition font-medium text-slate-700 uppercase"
                 />
               </div>
             </div>
@@ -197,7 +197,7 @@ export default function BranchSectionModal({ isOpen, onClose }) {
               <button
                 type="button"
                 onClick={() => setShowAddForm(false)}
-                className="flex-1 py-3 px-4 border border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-50 transition flex items-center justify-center gap-1.5"
+                className="flex-1 py-3 px-4 border border-slate-200 text-slate-600 rounded-md text-sm font-bold hover:bg-slate-50 transition flex items-center justify-center gap-1.5"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back
@@ -205,7 +205,7 @@ export default function BranchSectionModal({ isOpen, onClose }) {
               <button
                 type="submit"
                 disabled={creatingBranch}
-                className="flex-1 py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/10 transition flex items-center justify-center gap-1.5 disabled:opacity-50"
+                className="flex-1 py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-sm font-bold shadow-lg shadow-indigo-600/10 transition flex items-center justify-center gap-1.5 disabled:opacity-50"
               >
                 {creatingBranch ? (
                   <>
@@ -241,19 +241,19 @@ export default function BranchSectionModal({ isOpen, onClose }) {
                 </button>
               </div>
               
-              <div className="flex-1 overflow-y-auto pr-1 space-y-2 max-h-[170px] min-h-[100px] border border-slate-100 rounded-2xl p-2 bg-slate-50/50">
+              <div className="flex-1 overflow-y-auto pr-1 space-y-2 max-h-[170px] min-h-[100px] border border-slate-100 rounded-md p-2 bg-slate-50/50">
                 {branches.map((b) => (
                   <div
                     key={b._id}
                     onClick={() => setSelectedBranch(b._id)}
-                    className={`p-3 rounded-xl border text-sm font-semibold transition flex items-center justify-between cursor-pointer ${
+                    className={`p-3 rounded-md border text-sm font-semibold transition flex items-center justify-between cursor-pointer ${
                       selectedBranch === b._id
                         ? "border-indigo-600 bg-indigo-50/70 text-indigo-700 shadow-sm shadow-indigo-100/50"
                         : "border-slate-200/80 hover:bg-slate-50 text-slate-700 bg-white"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className={`p-1.5 rounded-lg ${selectedBranch === b._id ? "bg-indigo-100 text-indigo-700" : "bg-slate-100 text-slate-500"}`}>
+                      <div className={`p-1.5 rounded-md ${selectedBranch === b._id ? "bg-indigo-100 text-indigo-700" : "bg-slate-100 text-slate-500"}`}>
                         <School className="w-4 h-4" />
                       </div>
                       <div className="flex flex-col text-left overflow-hidden">
@@ -268,7 +268,7 @@ export default function BranchSectionModal({ isOpen, onClose }) {
                         e.stopPropagation();
                         handleDeleteBranch(b._id, b.name);
                       }}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                      className="p-1.5 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
                       title="Delete Branch"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -295,7 +295,7 @@ export default function BranchSectionModal({ isOpen, onClose }) {
                     key={sec}
                     type="button"
                     onClick={() => setSelectedSection(sec)}
-                    className={`py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl border text-xs sm:text-sm font-semibold capitalize transition flex items-center justify-center gap-1.5 sm:gap-2 ${
+                    className={`py-2.5 sm:py-3 px-3 sm:px-4 rounded-md border text-xs sm:text-sm font-semibold capitalize transition flex items-center justify-center gap-1.5 sm:gap-2 ${
                       selectedSection === sec
                         ? "border-indigo-600 bg-indigo-50/70 text-indigo-700 shadow-sm shadow-indigo-100"
                         : "border-slate-200 hover:bg-slate-50 text-slate-600 bg-white"
@@ -312,7 +312,7 @@ export default function BranchSectionModal({ isOpen, onClose }) {
             <button
               type="submit"
               disabled={submitting || !selectedBranch}
-              className="w-full py-3.5 px-4 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/10 transition flex items-center justify-center gap-2 disabled:opacity-50 shrink-0"
+              className="w-full py-3.5 px-4 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-md text-sm font-bold shadow-lg shadow-indigo-600/10 transition flex items-center justify-center gap-2 disabled:opacity-50 shrink-0"
             >
               {submitting ? (
                 <>

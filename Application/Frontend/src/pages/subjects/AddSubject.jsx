@@ -22,7 +22,7 @@ const EMPTY_FORM = {
 
 // ✅ Component ke BAHAR define kiya - focus issue fix
 const inputCls = (field, errors = {}) =>
-  `w-full px-3 py-2.5 text-sm border rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 transition-all ${
+  `w-full px-3 py-2.5 text-sm border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 transition-all ${
     errors[field] ? "border-rose-400 focus:ring-rose-300" : "border-slate-200"
   }`;
 
@@ -200,7 +200,7 @@ export default function AddSubject() {
 
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 bg-indigo-100 rounded-2xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-indigo-100 rounded-md flex items-center justify-center">
             <FaBook className="text-indigo-600" />
           </div>
           <div>
@@ -209,7 +209,7 @@ export default function AddSubject() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="bg-white rounded-md shadow-sm border border-slate-100 overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-100 bg-slate-50">
             <h2 className="text-sm font-semibold text-slate-700">Subject Information</h2>
           </div>
@@ -341,7 +341,7 @@ export default function AddSubject() {
                     onChange={handleChange}
                     rows={3}
                     placeholder="Optional description…"
-                    className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none"
+                    className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none"
                   />
                 </div>
               </div>
@@ -351,7 +351,7 @@ export default function AddSubject() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-5 py-2 text-sm bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 flex items-center gap-2 disabled:opacity-50 transition-colors font-medium"
+                  className="px-5 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center gap-2 disabled:opacity-50 transition-colors font-medium"
                 >
                   <FaSave className="text-xs" />
                   {loading && !saveAnother ? "Saving…" : "Save Subject"}
@@ -360,7 +360,7 @@ export default function AddSubject() {
                   type="button"
                   onClick={(e) => handleSubmit(e, true)}
                   disabled={loading}
-                  className="px-5 py-2 text-sm border border-indigo-600 text-indigo-600 rounded-xl hover:bg-indigo-50 flex items-center gap-2 disabled:opacity-50 transition-colors font-medium"
+                  className="px-5 py-2 text-sm border border-indigo-600 text-indigo-600 rounded-md hover:bg-indigo-50 flex items-center gap-2 disabled:opacity-50 transition-colors font-medium"
                 >
                   <FaPlus className="text-xs" />
                   {loading && saveAnother ? "Saving…" : "Save & Add Another"}
@@ -368,7 +368,7 @@ export default function AddSubject() {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-5 py-2 text-sm border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 flex items-center gap-2 transition-colors"
+                  className="px-5 py-2 text-sm border border-slate-200 text-slate-600 rounded-md hover:bg-slate-50 flex items-center gap-2 transition-colors"
                 >
                   <FaUndo className="text-xs" /> Reset
                 </button>

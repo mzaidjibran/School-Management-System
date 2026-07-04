@@ -71,7 +71,7 @@ const ViewModal = ({ tt, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+      <div className="bg-white rounded-md shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
         <div className="flex justify-between items-center px-6 py-4 border-b shrink-0">
           <div>
             <h3 className="text-base font-bold text-slate-800">
@@ -153,7 +153,7 @@ const ViewModal = ({ tt, onClose }) => {
         <div className="border-t px-6 py-3 flex justify-end shrink-0">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-colors"
+            className="px-4 py-2 text-sm border border-slate-200 text-slate-600 rounded-md hover:bg-slate-50 transition-colors"
           >
             Close
           </button>
@@ -302,7 +302,7 @@ export default function TimetableList() {
   const uniqueSections = [...new Set(timetables.map((t) => t.section))];
 
   const inputCls =
-    "h-8 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full";
+    "h-8 text-xs border border-slate-200 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full";
 
   const statCards = [
     {
@@ -360,7 +360,7 @@ export default function TimetableList() {
           </div>
           <button
             onClick={() => navigate("/timetable/create")}
-            className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors no-print"
+            className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors no-print"
           >
             <FaPlus className="text-xs" /> Create Timetable
           </button>
@@ -371,7 +371,7 @@ export default function TimetableList() {
           {statCards.map((c) => (
             <div
               key={c.label}
-              className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex justify-between items-center"
+              className="bg-white rounded-md shadow-sm border border-slate-100 p-4 flex justify-between items-center"
             >
               <div>
                 <p className="text-xs text-slate-500">{c.label}</p>
@@ -380,7 +380,7 @@ export default function TimetableList() {
                 </p>
               </div>
               <div
-                className={`w-10 h-10 ${c.bg} rounded-xl flex items-center justify-center text-lg`}
+                className={`w-10 h-10 ${c.bg} rounded-md flex items-center justify-center text-lg`}
               >
                 {c.icon}
               </div>
@@ -389,7 +389,7 @@ export default function TimetableList() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 px-4 py-3 mb-5 no-print">
+        <div className="bg-white rounded-md shadow-sm border border-slate-100 px-4 py-3 mb-5 no-print">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 items-center">
             <div className="relative">
               <FaSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs" />
@@ -427,7 +427,7 @@ export default function TimetableList() {
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="bg-white rounded-md shadow-sm border border-slate-100 overflow-hidden">
           <div className="overflow-x-auto">
             {loading ? (
               <div className="py-12 text-center text-sm text-slate-400">
@@ -502,7 +502,7 @@ export default function TimetableList() {
                             <button
                               onClick={() => setViewTimetable(tt)}
                               title="View"
-                              className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                              className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
                             >
                               <FaEye className="text-sm" />
                             </button>
@@ -511,28 +511,28 @@ export default function TimetableList() {
                                 navigate(`/timetable/${tt._id}`)
                               }
                               title="Edit"
-                              className="p-1.5 text-amber-500 hover:bg-amber-50 rounded-lg transition-colors text-xs font-bold"
+                              className="p-1.5 text-amber-500 hover:bg-amber-50 rounded-md transition-colors text-xs font-bold"
                             >
                               Edit
                             </button>
                             <button
                               onClick={() => handleDuplicate(tt)}
                               title="Duplicate"
-                              className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                              className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors"
                             >
                               <FaCopy className="text-sm" />
                             </button>
                             <button
                               onClick={() => handlePrint(tt)}
                               title="Print"
-                              className="p-1.5 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
+                              className="p-1.5 text-slate-500 hover:bg-slate-100 rounded-md transition-colors"
                             >
                               <FaPrint className="text-sm" />
                             </button>
                             <button
                               onClick={() => handleDelete(tt)}
                               title="Delete"
-                              className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                              className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-md transition-colors"
                               disabled={tt.timetableData.length === 0}
                             >
                               <FaTrash className="text-sm" />

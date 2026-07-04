@@ -12,9 +12,9 @@ import toast from "react-hot-toast";
 // ---------- Skeleton ----------
 const TableSkeleton = () => (
   <div className="animate-pulse px-4 py-3">
-    <div className="h-8 bg-slate-200 rounded mb-2" />
+    <div className="h-8 bg-slate-200 rounded-md mb-2" />
     {[...Array(5)].map((_, i) => (
-      <div key={i} className="h-10 bg-slate-100 mb-1 rounded" />
+      <div key={i} className="h-10 bg-slate-100 mb-1 rounded-md" />
     ))}
   </div>
 );
@@ -307,7 +307,7 @@ export default function AttendanceList() {
     doc.save("attendance.pdf");
   };
 
-  const inputCls = "h-8 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full";
+  const inputCls = "h-8 text-xs border border-slate-200 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4 sm:px-6 lg:px-8">
@@ -327,26 +327,26 @@ export default function AttendanceList() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <input type="file" accept=".csv" ref={csvFileInputRef} className="hidden" onChange={handleUploadCSV} />
-            <button type="button" onClick={() => csvFileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold transition">Upload CSV</button>
-            <button type="button" onClick={handleBackupData} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition">Backup Data</button>
-            <button onClick={exportExcel} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 transition">
+            <button type="button" onClick={() => csvFileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold transition">Upload CSV</button>
+            <button type="button" onClick={handleBackupData} className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition">Backup Data</button>
+            <button onClick={exportExcel} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 transition">
               <FaFileExcel className="text-sm" /> Excel
             </button>
-            <button onClick={exportPDF}   className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition">
+            <button onClick={exportPDF}   className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition">
               <FaFilePdf className="text-sm" /> PDF
             </button>
           </div>
         </div>
 
         {/* Class + Date selector */}
-        <div className="bg-white rounded-lg shadow-sm border border-slate-100 p-4 mb-6">
+        <div className="bg-white rounded-md shadow-sm border border-slate-100 p-4 mb-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-medium text-slate-500 mb-1.5">Select Section</label>
               <select
                 value={selectedSection}
                 onChange={(e) => setSelectedSection(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md bg-white outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded bg-white outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
               >
                 <option value="girls">Girls</option>
                 <option value="boys">Boys</option>
@@ -358,7 +358,7 @@ export default function AttendanceList() {
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
                 disabled={loadingClasses}
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md bg-white outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded bg-white outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
               >
                 <option value="">{loadingClasses ? "Loading..." : "-- Select Class --"}</option>
                 {classes
@@ -376,7 +376,7 @@ export default function AttendanceList() {
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md bg-white outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded bg-white outline-none focus:ring-2 focus:ring-indigo-400"
               />
             </div>
           </div>
@@ -392,19 +392,19 @@ export default function AttendanceList() {
               { label: "Leave",      value: leaveCount,     color: "text-amber-600",   bg: "bg-amber-100"   },
               { label: "Attendance", value: `${attendancePct}%`, color: "text-blue-600", bg: "bg-blue-100"  },
             ].map((card) => (
-              <div key={card.label} className="bg-white rounded-lg shadow-sm border border-slate-100 p-4 flex justify-between items-center">
+              <div key={card.label} className="bg-white rounded-md shadow-sm border border-slate-100 p-4 flex justify-between items-center">
                 <div>
                   <p className="text-xs text-slate-500">{card.label}</p>
                   <p className={`text-xl font-bold mt-0.5 ${card.color}`}>{card.value}</p>
                 </div>
-                <div className={`w-9 h-9 ${card.bg} rounded-md`} />
+                <div className={`w-9 h-9 ${card.bg} rounded`} />
               </div>
             ))}
           </div>
         )}
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow-sm border border-slate-100 px-4 py-3 mb-5">
+        <div className="bg-white rounded-md shadow-sm border border-slate-100 px-4 py-3 mb-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 items-center">
             <div className="relative">
               <FaSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs" />
@@ -431,7 +431,7 @@ export default function AttendanceList() {
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-lg shadow-sm border border-slate-100 overflow-hidden">
+        <div className="bg-white rounded-md shadow-sm border border-slate-100 overflow-hidden">
           {loading ? (
             <TableSkeleton />
           ) : !selectedClass ? (
@@ -480,7 +480,7 @@ export default function AttendanceList() {
                 {paginatedData.map((record, idx) => {
                   const avatarColor = idx % 2 === 0 ? "bg-indigo-100 text-indigo-700" : "bg-purple-100 text-purple-700";
                   return (
-                    <div key={record._id} className="bg-white p-4 rounded-lg border border-slate-100 shadow-sm flex flex-col gap-3 transition duration-200 hover:shadow-md hover:border-indigo-100">
+                    <div key={record._id} className="bg-white p-4 rounded-md border border-slate-100 shadow-sm flex flex-col gap-3 transition duration-200 hover:shadow-md hover:border-indigo-100">
                       <div className="flex justify-between items-start">
                         <div className="flex items-center gap-3">
                           <div className={`w-8 h-8 rounded-full ${avatarColor} font-bold text-xs flex items-center justify-center`}>
@@ -490,7 +490,7 @@ export default function AttendanceList() {
                             <p className="font-semibold text-slate-800 text-sm">
                               {record.student?.firstName} {record.student?.lastName}
                             </p>
-                            <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono font-bold border border-slate-200/40">
+                            <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md font-mono font-bold border border-slate-200/40">
                               Roll: {record.student?.rollNumber || "—"}
                             </span>
                           </div>
@@ -504,7 +504,7 @@ export default function AttendanceList() {
                       </div>
 
                       {record.remarks && (
-                        <p className="text-xs text-slate-500 bg-slate-50 p-2.5 rounded-md border border-slate-100/80 italic mt-0.5">
+                        <p className="text-xs text-slate-500 bg-slate-50 p-2.5 rounded border border-slate-100/80 italic mt-0.5">
                           <strong className="text-[10px] text-slate-400 uppercase font-bold not-italic block mb-0.5">Remarks</strong>
                           {record.remarks}
                         </p>
@@ -527,17 +527,17 @@ export default function AttendanceList() {
                 <button
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage((p) => p - 1)}
-                  className="px-3 py-1 text-xs border border-slate-200 rounded-lg disabled:opacity-40 hover:bg-slate-50"
+                  className="px-3 py-1 text-xs border border-slate-200 rounded-md disabled:opacity-40 hover:bg-slate-50"
                 >
                   Previous
                 </button>
-                <span className="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 font-semibold rounded-lg">
+                <span className="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 font-semibold rounded-md">
                   {currentPage}
                 </span>
                 <button
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage((p) => p + 1)}
-                  className="px-3 py-1 text-xs border border-slate-200 rounded-lg disabled:opacity-40 hover:bg-slate-50"
+                  className="px-3 py-1 text-xs border border-slate-200 rounded-md disabled:opacity-40 hover:bg-slate-50"
                 >
                   Next
                 </button>

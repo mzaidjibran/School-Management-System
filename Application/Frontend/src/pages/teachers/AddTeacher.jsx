@@ -36,7 +36,7 @@ const Input = ({
         onBlur={(e) => {
           if (isDate && !value) e.target.style.color = "transparent";
         }}
-        className={`peer w-full px-4 pt-5 pb-2 border rounded-xl bg-white
+        className={`peer w-full px-4 pt-5 pb-2 border rounded-md bg-white
           text-slate-800 outline-none transition-all text-sm
           ${error ? "border-red-400 focus:ring-red-100" : "border-slate-300 focus:border-indigo-500 focus:ring-indigo-100"}
           focus:ring-2 disabled:bg-slate-50 disabled:cursor-not-allowed`}
@@ -72,7 +72,7 @@ const Select = ({
       id={name}
       value={value}
       onChange={onChange}
-      className={`peer w-full px-4 pt-5 pb-2 border rounded-xl bg-white
+      className={`peer w-full px-4 pt-5 pb-2 border rounded-md bg-white
         text-slate-800 outline-none transition-all appearance-none text-sm
         ${error ? "border-red-400 focus:ring-red-100" : "border-slate-300 focus:border-indigo-500 focus:ring-indigo-100"}
         focus:ring-2`}
@@ -305,7 +305,7 @@ export default function AddTeacherPage() {
             <span className="text-indigo-600">Add Teacher</span>
           </nav>
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-100 rounded-xl">
+            <div className="p-2 bg-indigo-100 rounded-md">
               <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
@@ -318,7 +318,7 @@ export default function AddTeacherPage() {
         </div>
 
         {/* Progress */}
-        <div className="mb-8 bg-white/60 backdrop-blur-sm rounded-2xl p-4 shadow-sm">
+        <div className="mb-8 bg-white/60 backdrop-blur-sm rounded-md p-4 shadow-sm">
           <div className="flex justify-between items-center mb-2">
             <div className="flex gap-2">
               {[1, 2, 3].map((step) => (
@@ -343,7 +343,7 @@ export default function AddTeacherPage() {
 
         {/* API Error */}
         {submitError && (
-          <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl flex items-center justify-between">
+          <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-md flex items-center justify-between">
             <span>{submitError}</span>
             <button onClick={() => setSubmitError("")} className="text-red-400 hover:text-red-600 ml-3 flex-shrink-0">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -355,7 +355,7 @@ export default function AddTeacherPage() {
 
         {/* Form */}
         <form onSubmit={(e) => handleSubmit(e, false)}>
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100">
+          <div className="bg-white rounded-md shadow-sm border border-slate-100">
 
             {/* Profile Image */}
             <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-indigo-50/50 to-blue-50/50">
@@ -386,7 +386,7 @@ export default function AddTeacherPage() {
                 </div>
                 <div className="flex-1 text-center md:text-left">
                   <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                    <label className="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition shadow-sm">
+                    <label className="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition shadow-sm">
                       Upload Photo
                       <input
                         type="file"
@@ -399,14 +399,14 @@ export default function AddTeacherPage() {
                     <div
                       onDrop={handleImageDrop}
                       onDragOver={(e) => e.preventDefault()}
-                      className="border-2 border-dashed border-slate-300 rounded-xl px-4 py-2 text-sm text-slate-500 hover:border-indigo-500 transition cursor-pointer"
+                      className="border-2 border-dashed border-slate-300 rounded-md px-4 py-2 text-sm text-slate-500 hover:border-indigo-500 transition cursor-pointer"
                     >
                       Drag & Drop
                     </div>
                     <button
                       type="button"
                       onClick={removeImage}
-                      className="border border-slate-300 rounded-xl px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 transition"
+                      className="border border-slate-300 rounded-md px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 transition"
                     >
                       Remove
                     </button>
@@ -502,7 +502,7 @@ export default function AddTeacherPage() {
                           onChange={handleInputChange}
                           rows={3}
                           placeholder="Any additional notes..."
-                          className="w-full px-4 py-3 border border-slate-300 rounded-xl text-sm bg-white text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
+                          className="w-full px-4 py-3 border border-slate-300 rounded-md text-sm bg-white text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
                         />
                       </div>
                       <Input label="Emergency Contact Name" name="emergencyName" value={formData.emergencyName} onChange={handleInputChange} />
@@ -520,7 +520,7 @@ export default function AddTeacherPage() {
                   <button
                     type="button"
                     onClick={prevStep}
-                    className="px-6 py-2 text-sm border border-slate-300 rounded-xl text-slate-700 hover:bg-slate-100 transition"
+                    className="px-6 py-2 text-sm border border-slate-300 rounded-md text-slate-700 hover:bg-slate-100 transition"
                   >
                     Back
                   </button>
@@ -529,7 +529,7 @@ export default function AddTeacherPage() {
                   <button
                     type="button"
                     onClick={nextStep}
-                    className="px-6 py-2 text-sm bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition shadow-sm"
+                    className="px-6 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition shadow-sm"
                   >
                     Next Step
                   </button>
@@ -538,7 +538,7 @@ export default function AddTeacherPage() {
                     <button
                       type="submit"
                       disabled={isSaving}
-                      className="px-6 py-2 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition shadow-sm disabled:opacity-60 flex items-center gap-2"
+                      className="px-6 py-2 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition shadow-sm disabled:opacity-60 flex items-center gap-2"
                     >
                       {isSaving && (
                         <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -552,14 +552,14 @@ export default function AddTeacherPage() {
                       type="button"
                       onClick={(e) => handleSubmit(e, true)}
                       disabled={isSaving}
-                      className="px-6 py-2 text-sm border border-indigo-600 text-indigo-600 rounded-xl hover:bg-indigo-50 transition disabled:opacity-60"
+                      className="px-6 py-2 text-sm border border-indigo-600 text-indigo-600 rounded-md hover:bg-indigo-50 transition disabled:opacity-60"
                     >
                       Save & Add Another
                     </button>
                     <button
                       type="button"
                       onClick={resetForm}
-                      className="px-6 py-2 text-sm border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-100 transition"
+                      className="px-6 py-2 text-sm border border-slate-300 rounded-md text-slate-600 hover:bg-slate-100 transition"
                     >
                       Reset
                     </button>
@@ -579,7 +579,7 @@ export default function AddTeacherPage() {
 
         {/* Success Toast */}
         {saveSuccess && (
-          <div className="fixed bottom-6 right-6 bg-emerald-500 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-2">
+          <div className="fixed bottom-6 right-6 bg-emerald-500 text-white px-4 py-3 rounded-md shadow-lg flex items-center gap-2">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>

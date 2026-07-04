@@ -93,7 +93,7 @@ const ActionButtons = ({ row, onView, onEdit, onDelete }) => (
 );
 
 const StatsCard = ({ label, value, bgColor, iconColor, icon }) => (
-  <div className="bg-white rounded-xl shadow-sm border border-slate-100">
+  <div className="bg-white rounded-md shadow-sm border border-slate-100">
     <div className="p-4 flex justify-between items-center">
       <div>
         <p className="text-sm text-slate-500">{label}</p>
@@ -241,7 +241,7 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
             style={isDate && !hasValue ? { color: "transparent" } : {}}
             onFocus={(e) => { if (isDate) e.target.style.color = "inherit"; }}
             onBlur={(e) => { if (isDate && !formData[name]) e.target.style.color = "transparent"; }}
-            className={`peer w-full px-3 pt-5 pb-1.5 border rounded-lg bg-white text-slate-800 outline-none transition-all text-sm
+            className={`peer w-full px-3 pt-5 pb-1.5 border rounded-md bg-white text-slate-800 outline-none transition-all text-sm
               ${errors[name] ? "border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-indigo-400 focus:ring-indigo-100"}
               focus:ring-2 disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed`}
           />
@@ -264,7 +264,7 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
       const displayVal = selectedOpt ? (typeof selectedOpt === "object" ? selectedOpt.label : selectedOpt) : (formData[name] || "—");
       return (
         <div className="relative">
-          <div className="w-full px-3 pt-5 pb-1.5 border border-slate-200 rounded-lg bg-slate-50 text-sm text-slate-700 min-h-[52px]">
+          <div className="w-full px-3 pt-5 pb-1.5 border border-slate-200 rounded-md bg-slate-50 text-sm text-slate-700 min-h-[52px]">
             {displayVal}
           </div>
           <label className="absolute left-3 top-1 text-[10px] text-indigo-500 pointer-events-none">{label}</label>
@@ -274,7 +274,7 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
     return (
       <div className="relative">
         <select name={name} id={name} value={formData[name] || ""} onChange={handleChange}
-          className={`peer w-full px-3 pt-5 pb-1.5 border rounded-lg bg-white text-slate-800 outline-none transition-all appearance-none text-sm
+          className={`peer w-full px-3 pt-5 pb-1.5 border rounded-md bg-white text-slate-800 outline-none transition-all appearance-none text-sm
             ${errors[name] ? "border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-indigo-400 focus:ring-indigo-100"}
             focus:ring-2`}
         >
@@ -307,13 +307,13 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="bg-white rounded-md shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Top bar */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100">
           <h2 className="text-sm font-semibold text-slate-700">
             {mode === "edit" ? "Edit Teacher" : mode === "add" ? "Add Teacher" : "Teacher Profile"}
           </h2>
-          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -390,7 +390,7 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
 
             <div className="flex-1 overflow-y-auto px-5 py-4">
               {saveError && (
-                <div className="mb-4 px-4 py-2.5 bg-red-50 border border-red-200 rounded-lg text-red-600 text-xs">
+                <div className="mb-4 px-4 py-2.5 bg-red-50 border border-red-200 rounded-md text-red-600 text-xs">
                   {saveError}
                 </div>
               )}
@@ -458,7 +458,7 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
                       <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Notes</p>
                       <textarea name="notes" value={formData.notes} onChange={handleChange} disabled={isViewOnly} rows={3}
                         placeholder="Any additional notes..."
-                        className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-800 bg-white outline-none resize-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed"
+                        className="w-full px-3 py-2.5 border border-slate-200 rounded-md text-sm text-slate-800 bg-white outline-none resize-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed"
                       />
                     </div>
                   </div>
@@ -469,11 +469,11 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
             <div className="px-5 py-3.5 border-t border-slate-100 flex justify-end gap-2.5">
               {!isViewOnly ? (
                 <>
-                  <button type="button" onClick={onClose} className="px-4 py-2 text-xs border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition">
+                  <button type="button" onClick={onClose} className="px-4 py-2 text-xs border border-slate-200 rounded-md text-slate-500 hover:bg-slate-50 transition">
                     Cancel
                   </button>
                   <button type="submit" form="teacher-form" disabled={isSaving}
-                    className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition disabled:opacity-60 flex items-center gap-1.5"
+                    className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition disabled:opacity-60 flex items-center gap-1.5"
                   >
                     {isSaving && (
                       <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -485,7 +485,7 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
                   </button>
                 </>
               ) : (
-                <button type="button" onClick={onClose} className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition">
+                <button type="button" onClick={onClose} className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition">
                   Close
                 </button>
               )}
@@ -502,7 +502,7 @@ const DeleteModal = ({ isOpen, teacher, onConfirm, onCancel, isDeleting }) => {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+      <div className="bg-white rounded-md shadow-2xl w-full max-w-sm p-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
             <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -518,11 +518,11 @@ const DeleteModal = ({ isOpen, teacher, onConfirm, onCancel, isDeleting }) => {
           Are you sure you want to delete <span className="font-semibold text-slate-800">{teacher?.fullName || teacher?.name}</span>?
         </p>
         <div className="flex gap-2.5 justify-end">
-          <button onClick={onCancel} className="px-4 py-2 text-xs border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition">
+          <button onClick={onCancel} className="px-4 py-2 text-xs border border-slate-200 rounded-md text-slate-500 hover:bg-slate-50 transition">
             Cancel
           </button>
           <button onClick={onConfirm} disabled={isDeleting}
-            className="px-4 py-2 text-xs bg-red-600 hover:bg-red-700 text-white rounded-lg transition disabled:opacity-60 flex items-center gap-1.5"
+            className="px-4 py-2 text-xs bg-red-600 hover:bg-red-700 text-white rounded-md transition disabled:opacity-60 flex items-center gap-1.5"
           >
             {isDeleting && (
               <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -831,7 +831,7 @@ export default function TeacherDataTable() {
 
       {/* Error banner */}
       {fetchError && (
-        <div className="flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+        <div className="flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">
           <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
           </svg>
@@ -841,23 +841,23 @@ export default function TeacherDataTable() {
       )}
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+      <div className="bg-white rounded-md shadow-sm border border-slate-100 p-4">
         <div className="flex flex-wrap gap-3 items-center justify-between">
           <div className="relative flex-1 min-w-[200px]">
             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
             <input type="text" placeholder="Search by name, email, phone..." value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+              className="w-full pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-md bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
             />
           </div>
           <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)}
-            className="px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-indigo-500"
+            className="px-3 py-2 text-sm border border-slate-300 rounded-md bg-white outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option value="">All Subjects</option>
             {uniqueSubjects.map((sub) => <option key={sub} value={sub}>{sub}</option>)}
           </select>
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-indigo-500"
+            className="px-3 py-2 text-sm border border-slate-300 rounded-md bg-white outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option value="">All Status</option>
             <option value="Active">Active</option>
@@ -866,16 +866,16 @@ export default function TeacherDataTable() {
           </select>
           <div className="flex flex-wrap gap-2 items-center">
             <input type="file" accept=".csv" ref={csvFileInputRef} className="hidden" onChange={handleUploadCSV} />
-            <button type="button" onClick={() => csvFileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold transition">Upload CSV</button>
-            <button type="button" onClick={handleBackupData} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition">Backup Data</button>
-            <button onClick={exportExcel} title="Export Excel" className="p-2 bg-slate-100 rounded-lg hover:bg-slate-200 transition"><FaFileExcel className="text-green-600" /></button>
-            <button onClick={exportPDF} title="Export PDF" className="p-2 bg-slate-100 rounded-lg hover:bg-slate-200 transition"><FaFilePdf className="text-red-600" /></button>
+            <button type="button" onClick={() => csvFileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold transition">Upload CSV</button>
+            <button type="button" onClick={handleBackupData} className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition">Backup Data</button>
+            <button onClick={exportExcel} title="Export Excel" className="p-2 bg-slate-100 rounded-md hover:bg-slate-200 transition"><FaFileExcel className="text-green-600" /></button>
+            <button onClick={exportPDF} title="Export PDF" className="p-2 bg-slate-100 rounded-md hover:bg-slate-200 transition"><FaFilePdf className="text-red-600" /></button>
           </div>
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+      <div className="bg-white rounded-md shadow-sm border border-slate-100 overflow-hidden">
         <DataTable
           columns={columns}
           data={filteredTeachers}

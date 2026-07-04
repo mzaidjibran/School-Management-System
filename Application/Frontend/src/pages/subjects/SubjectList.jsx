@@ -67,10 +67,10 @@ const ViewModal = ({ subject, onClose, onEdit }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+      <div className="bg-white rounded-md shadow-2xl w-full max-w-md">
         <div className="flex justify-between items-center px-6 py-4 border-b">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-indigo-100 rounded-md flex items-center justify-center">
               <FaBook className="text-indigo-600 text-sm" />
             </div>
             <h3 className="text-base font-bold text-slate-800">Subject Details</h3>
@@ -109,9 +109,9 @@ const ViewModal = ({ subject, onClose, onEdit }) => {
           )}
         </div>
         <div className="border-t px-6 py-4 flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 text-sm border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-colors">Close</button>
+          <button onClick={onClose} className="px-4 py-2 text-sm border border-slate-200 text-slate-600 rounded-md hover:bg-slate-50 transition-colors">Close</button>
           <button onClick={() => { onClose(); onEdit(subject); }}
-            className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-1.5">
+            className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors flex items-center gap-1.5">
             <FaEdit className="text-xs" /> Edit
           </button>
         </div>
@@ -195,14 +195,14 @@ const EditModal = ({ subject, onClose, onSave, classes, teachers }) => {
   };
 
   const inputCls = (field) =>
-    `w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 ${errors[field] ? "border-rose-400" : "border-slate-200"}`;
+    `w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300 ${errors[field] ? "border-rose-400" : "border-slate-200"}`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col">
+      <div className="bg-white rounded-md shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col">
         <div className="flex justify-between items-center px-6 py-4 border-b shrink-0">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-amber-100 rounded-md flex items-center justify-center">
               <FaEdit className="text-amber-600 text-sm" />
             </div>
             <h3 className="text-base font-bold text-slate-800">Edit Subject</h3>
@@ -211,7 +211,7 @@ const EditModal = ({ subject, onClose, onSave, classes, teachers }) => {
         </div>
 
         <div className="p-6 overflow-y-auto">
-          {apiError && <p className="text-rose-500 text-xs bg-rose-50 rounded-lg px-3 py-2 mb-4">{apiError}</p>}
+          {apiError && <p className="text-rose-500 text-xs bg-rose-50 rounded-md px-3 py-2 mb-4">{apiError}</p>}
           <div className="grid grid-cols-2 gap-4">
             {/* Name */}
             <div>
@@ -271,17 +271,17 @@ const EditModal = ({ subject, onClose, onSave, classes, teachers }) => {
             <div className="col-span-2">
               <label className="block text-xs font-medium text-slate-600 mb-1">Description</label>
               <textarea name="description" value={form.description} onChange={handleChange} rows={3}
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none" />
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none" />
             </div>
           </div>
         </div>
 
         <div className="border-t px-6 py-4 flex justify-end gap-2 shrink-0">
-          <button onClick={onClose} className="px-4 py-2 text-sm border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-1.5">
+          <button onClick={onClose} className="px-4 py-2 text-sm border border-slate-200 text-slate-600 rounded-md hover:bg-slate-50 transition-colors flex items-center gap-1.5">
             <FaTimes className="text-xs" /> Cancel
           </button>
           <button onClick={handleSubmit} disabled={saving}
-            className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-1.5 disabled:opacity-60">
+            className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors flex items-center gap-1.5 disabled:opacity-60">
             <FaSave className="text-xs" /> {saving ? "Saving…" : "Save Changes"}
           </button>
         </div>
@@ -574,7 +574,7 @@ export default function Subjects() {
     doc.save("subjects.pdf");
   };
 
-  const inputCls = "h-8 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full";
+  const inputCls = "h-8 text-xs border border-slate-200 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full";
 
   const statCards = [
     { label: "Total Subjects", value: totalSubjects, icon: <FaLayerGroup className="text-indigo-600" />, bg: "bg-indigo-50", text: "text-indigo-700" },
@@ -601,12 +601,12 @@ export default function Subjects() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <input type="file" accept=".csv" ref={csvFileInputRef} className="hidden" onChange={handleUploadCSV} />
-            <button type="button" onClick={() => csvFileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold transition">Upload CSV</button>
-            <button type="button" onClick={handleBackupData} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition">Backup Data</button>
-            <button onClick={exportExcel} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 transition-colors">
+            <button type="button" onClick={() => csvFileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold transition">Upload CSV</button>
+            <button type="button" onClick={handleBackupData} className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition">Backup Data</button>
+            <button onClick={exportExcel} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 transition-colors">
               <FaFileExcel className="text-green-600" /> Excel
             </button>
-            <button onClick={exportPDF} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors">
+            <button onClick={exportPDF} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors">
               <FaFilePdf className="text-rose-500" /> PDF
             </button>
           </div>
@@ -615,18 +615,18 @@ export default function Subjects() {
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {statCards.map((c) => (
-            <div key={c.label} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex justify-between items-center">
+            <div key={c.label} className="bg-white rounded-md p-4 shadow-sm border border-slate-100 flex justify-between items-center">
               <div>
                 <p className="text-xs text-slate-500">{c.label}</p>
                 <p className={`text-xl font-bold mt-0.5 ${c.text}`}>{c.value}</p>
               </div>
-              <div className={`w-10 h-10 ${c.bg} rounded-xl flex items-center justify-center text-lg`}>{c.icon}</div>
+              <div className={`w-10 h-10 ${c.bg} rounded-md flex items-center justify-center text-lg`}>{c.icon}</div>
             </div>
           ))}
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 px-4 py-3 mb-5">
+        <div className="bg-white rounded-md shadow-sm border border-slate-100 px-4 py-3 mb-5">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 items-center">
             <div className="relative">
               <FaSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs" />
@@ -647,10 +647,10 @@ export default function Subjects() {
           </div>
         </div>
 
-        {error && <p className="text-rose-500 text-sm bg-rose-50 rounded-xl px-4 py-3 mb-4">{error}</p>}
+        {error && <p className="text-rose-500 text-sm bg-rose-50 rounded-md px-4 py-3 mb-4">{error}</p>}
 
         {/* Table */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="bg-white rounded-md shadow-sm border border-slate-100 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 border-b border-slate-200">
@@ -681,9 +681,9 @@ export default function Subjects() {
                         <td className="py-2.5 px-4"><StatusBadge status={s.status} /></td>
                         <td className="py-2.5 px-4">
                           <div className="flex items-center gap-1">
-                            <button onClick={() => setViewSubject(s)} title="View" className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"><FaEye className="text-sm" /></button>
-                            <button onClick={() => setEditSubject(s)} title="Edit" className="p-1.5 text-amber-500 hover:bg-amber-50 rounded-lg transition-colors"><FaEdit className="text-sm" /></button>
-                            <button onClick={() => handleDelete(s)} title="Delete" className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"><FaTrash className="text-sm" /></button>
+                            <button onClick={() => setViewSubject(s)} title="View" className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"><FaEye className="text-sm" /></button>
+                            <button onClick={() => setEditSubject(s)} title="Edit" className="p-1.5 text-amber-500 hover:bg-amber-50 rounded-md transition-colors"><FaEdit className="text-sm" /></button>
+                            <button onClick={() => handleDelete(s)} title="Delete" className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-md transition-colors"><FaTrash className="text-sm" /></button>
                           </div>
                         </td>
                       </tr>
@@ -702,10 +702,10 @@ export default function Subjects() {
               </p>
               <div className="flex items-center gap-1.5">
                 <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}
-                  className="px-3 py-1 text-xs border border-slate-200 rounded-lg disabled:opacity-40 hover:bg-slate-50 transition-colors">Prev</button>
-                <span className="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 font-semibold rounded-lg">{currentPage}</span>
+                  className="px-3 py-1 text-xs border border-slate-200 rounded-md disabled:opacity-40 hover:bg-slate-50 transition-colors">Prev</button>
+                <span className="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 font-semibold rounded-md">{currentPage}</span>
                 <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => p + 1)}
-                  className="px-3 py-1 text-xs border border-slate-200 rounded-lg disabled:opacity-40 hover:bg-slate-50 transition-colors">Next</button>
+                  className="px-3 py-1 text-xs border border-slate-200 rounded-md disabled:opacity-40 hover:bg-slate-50 transition-colors">Next</button>
               </div>
             </div>
           )}

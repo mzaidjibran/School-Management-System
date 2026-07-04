@@ -38,7 +38,7 @@ const FloatingInput = ({
       onChange={onChange}
       disabled={disabled}
       placeholder=" "
-      className={`peer w-full px-4 pt-5 pb-2 border rounded-xl bg-white text-slate-800 outline-none transition-all text-sm
+      className={`peer w-full px-4 pt-5 pb-2 border rounded-md bg-white text-slate-800 outline-none transition-all text-sm
         ${error ? "border-rose-400 focus:ring-rose-100" : "border-slate-200 focus:border-indigo-500 focus:ring-indigo-100"}
         focus:ring-2 disabled:bg-slate-50 disabled:cursor-not-allowed`}
     />
@@ -73,7 +73,7 @@ const FloatingSelect = ({
   if (disabled) {
     return (
       <div className="relative">
-        <div className="w-full px-4 pt-5 pb-2 border border-slate-200 rounded-xl bg-slate-50 text-sm text-slate-700 min-h-[52px]">
+        <div className="w-full px-4 pt-5 pb-2 border border-slate-200 rounded-md bg-slate-50 text-sm text-slate-700 min-h-[52px]">
           {displayValue !== undefined ? displayValue || "—" : value || "—"}
         </div>
         <label className="absolute left-4 top-1.5 text-[10px] text-indigo-600 pointer-events-none">
@@ -88,7 +88,7 @@ const FloatingSelect = ({
         name={name}
         value={value}
         onChange={onChange}
-        className={`peer w-full px-4 pt-5 pb-2 border rounded-xl bg-white text-slate-800 outline-none transition-all appearance-none text-sm
+        className={`peer w-full px-4 pt-5 pb-2 border rounded-md bg-white text-slate-800 outline-none transition-all appearance-none text-sm
           ${error ? "border-rose-400 focus:ring-rose-100" : "border-slate-200 focus:border-indigo-500 focus:ring-indigo-100"}
           focus:ring-2`}
       >
@@ -132,9 +132,9 @@ const FloatingSelect = ({
 // ---------- Skeleton ----------
 const TableSkeleton = () => (
   <div className="animate-pulse p-4 space-y-2">
-    <div className="h-10 bg-slate-200 rounded-lg"></div>
+    <div className="h-10 bg-slate-200 rounded-md"></div>
     {[...Array(5)].map((_, i) => (
-      <div key={i} className="h-12 bg-slate-100 rounded-lg"></div>
+      <div key={i} className="h-12 bg-slate-100 rounded-md"></div>
     ))}
   </div>
 );
@@ -310,7 +310,7 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave, teachers }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="bg-white rounded-md shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <h2 className="text-sm font-semibold text-slate-700">
@@ -318,7 +318,7 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave, teachers }) => {
           </h2>
           <button
             onClick={onClose}
-            className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+            className="w-7 h-7 flex items-center justify-center rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
           >
             <svg
               className="w-4 h-4"
@@ -412,7 +412,7 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave, teachers }) => {
                   Description
                 </label>
                 {isViewOnly ? (
-                  <div className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 text-sm text-slate-700 min-h-[72px]">
+                  <div className="w-full px-4 py-3 border border-slate-200 rounded-md bg-slate-50 text-sm text-slate-700 min-h-[72px]">
                     {formData.description || "—"}
                   </div>
                 ) : (
@@ -422,7 +422,7 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave, teachers }) => {
                     onChange={handleChange}
                     rows={3}
                     placeholder="Additional information..."
-                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm outline-none resize-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-4 py-3 border border-slate-200 rounded-md text-sm outline-none resize-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 )}
               </div>
@@ -440,7 +440,7 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave, teachers }) => {
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-xs border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition"
+                className="px-4 py-2 text-xs border border-slate-200 rounded-md text-slate-500 hover:bg-slate-50 transition"
               >
                 Cancel
               </button>
@@ -448,7 +448,7 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave, teachers }) => {
                 type="submit"
                 form="class-form"
                 disabled={isSaving}
-                className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition disabled:opacity-60 flex items-center gap-1.5"
+                className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition disabled:opacity-60 flex items-center gap-1.5"
               >
                 {isSaving && (
                   <svg
@@ -478,7 +478,7 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave, teachers }) => {
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition"
+              className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition"
             >
               Close
             </button>
@@ -845,7 +845,7 @@ const handleSave = (updatedClass) => {
           ].map((s) => (
             <div
               key={s.label}
-              className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 hover:shadow-md transition"
+              className="bg-white rounded-md shadow-sm border border-slate-100 p-5 hover:shadow-md transition"
             >
               <div className="flex justify-between items-start">
                 <div>
@@ -857,7 +857,7 @@ const handleSave = (updatedClass) => {
                   </p>
                 </div>
                 <div
-                  className={`w-10 h-10 ${s.bg} rounded-xl flex items-center justify-center`}
+                  className={`w-10 h-10 ${s.bg} rounded-md flex items-center justify-center`}
                 >
                   <svg
                     className={`w-5 h-5 ${s.ic}`}
@@ -879,7 +879,7 @@ const handleSave = (updatedClass) => {
         </div>
 
         {/* Search + Filters + Exports — all in one box */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-6">
+        <div className="bg-white rounded-md shadow-sm border border-slate-100 p-4 mb-6">
           <div className="flex flex-wrap gap-3 items-center">
             {/* Search */}
             <div className="relative flex-1 min-w-[220px]">
@@ -889,14 +889,14 @@ const handleSave = (updatedClass) => {
                 placeholder="Search by class name or teacher..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+                className="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-md bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
               />
             </div>
             {/* Shift filter */}
             <select
               value={shiftFilter}
               onChange={(e) => setShiftFilter(e.target.value)}
-              className="px-3 py-2 text-sm border border-slate-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-500"
+              className="px-3 py-2 text-sm border border-slate-200 rounded-md bg-white outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="">All Shifts</option>
               <option value="Morning">Morning</option>
@@ -906,7 +906,7 @@ const handleSave = (updatedClass) => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 text-sm border border-slate-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-500"
+              className="px-3 py-2 text-sm border border-slate-200 rounded-md bg-white outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="">All Status</option>
               <option value="Active">Active</option>
@@ -915,19 +915,19 @@ const handleSave = (updatedClass) => {
             {/* Exports — colorful */}
             <div className="flex flex-wrap gap-2 items-center ml-auto">
               <input type="file" accept=".csv" ref={csvFileInputRef} className="hidden" onChange={handleUploadCSV} />
-              <button type="button" onClick={() => csvFileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold transition">Upload CSV</button>
-              <button type="button" onClick={handleBackupData} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition">Backup Data</button>
+              <button type="button" onClick={() => csvFileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold transition">Upload CSV</button>
+              <button type="button" onClick={handleBackupData} className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition">Backup Data</button>
               <button
                 onClick={exportExcel}
                 title="Export Excel"
-                className="p-2 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition"
+                className="p-2 bg-emerald-50 hover:bg-emerald-100 rounded-md transition"
               >
                 <FaFileExcel className="text-emerald-600 w-4 h-4" />
               </button>
               <button
                 onClick={exportPDF}
                 title="Export PDF"
-                className="p-2 bg-rose-50 hover:bg-rose-100 rounded-xl transition"
+                className="p-2 bg-rose-50 hover:bg-rose-100 rounded-md transition"
               >
                 <FaFilePdf className="text-rose-600 w-4 h-4" />
               </button>
@@ -936,7 +936,7 @@ const handleSave = (updatedClass) => {
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="bg-white rounded-md shadow-sm border border-slate-100 overflow-hidden">
           <div className="overflow-x-auto">
             {loading ? (
               <TableSkeleton />
@@ -991,7 +991,7 @@ const handleSave = (updatedClass) => {
                         {cls.room || "—"}
                       </td>
                       <td className="py-3.5 px-5">
-                        <span className="px-2.5 py-1 bg-slate-100 rounded-lg text-xs font-medium text-slate-600">
+                        <span className="px-2.5 py-1 bg-slate-100 rounded-md text-xs font-medium text-slate-600">
                           {cls.shift}
                         </span>
                       </td>
@@ -1002,21 +1002,21 @@ const handleSave = (updatedClass) => {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => openModal(cls, "view")}
-                            className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
+                            className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-md transition"
                             title="View"
                           >
                             <FaEye />
                           </button>
                           <button
                             onClick={() => openModal(cls, "edit")}
-                            className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition"
+                            className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-md transition"
                             title="Edit"
                           >
                             <FaEdit />
                           </button>
                           <button
                             onClick={() => handleDelete(cls)}
-                            className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                            className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-md transition"
                             title="Delete"
                           >
                             <FaTrash />

@@ -22,7 +22,7 @@ const EMPTY_FORM = {
 
 // ── Reusable field components (defined OUTSIDE to avoid focus bug) ─
 const inputBase = (hasError) =>
-  `w-full px-3 py-2.5 text-sm border rounded-lg bg-white outline-none transition-all ${
+  `w-full px-3 py-2.5 text-sm border rounded-md bg-white outline-none transition-all ${
     hasError
       ? "border-rose-400 focus:ring-1 focus:ring-rose-400"
       : "border-slate-200 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
@@ -197,7 +197,7 @@ export default function CreateNotice() {
 
         {/* Header */}
         <div className="flex items-center gap-3 mb-5">
-          <div className="p-2.5 bg-indigo-100 rounded-xl">
+          <div className="p-2.5 bg-indigo-100 rounded-md">
             <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"
@@ -215,7 +215,7 @@ export default function CreateNotice() {
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-md border border-slate-100 shadow-sm overflow-hidden">
           <form className="p-5" onSubmit={(e) => handleSubmit(e, false)}>
 
             {/* Notice Details */}
@@ -243,7 +243,7 @@ export default function CreateNotice() {
                       key={p}
                       type="button"
                       onClick={() => setForm((prev) => ({ ...prev, priority: p }))}
-                      className={`flex-1 py-2 text-xs font-medium rounded-lg border transition ${priorityColor[p]}`}
+                      className={`flex-1 py-2 text-xs font-medium rounded-md border transition ${priorityColor[p]}`}
                     >
                       {p.charAt(0).toUpperCase() + p.slice(1)}
                     </button>
@@ -294,7 +294,7 @@ export default function CreateNotice() {
                   key={s}
                   type="button"
                   onClick={() => setForm((prev) => ({ ...prev, status: s }))}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition ${
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md border transition ${
                     form.status === s
                       ? "bg-indigo-600 text-white border-indigo-600"
                       : "border-slate-200 text-slate-500 hover:bg-slate-50"
@@ -310,7 +310,7 @@ export default function CreateNotice() {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition"
+                className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 disabled:opacity-50 transition"
               >
                 <FaSave className="w-3 h-3" />
                 {loading ? "Saving..." : isEdit ? "Update Notice" : "Publish Notice"}
@@ -320,7 +320,7 @@ export default function CreateNotice() {
                   type="button"
                   onClick={(e) => handleSubmit(e, true)}
                   disabled={loading}
-                  className="flex items-center gap-1.5 px-4 py-2 border border-indigo-300 text-indigo-600 text-sm rounded-lg hover:bg-indigo-50 transition"
+                  className="flex items-center gap-1.5 px-4 py-2 border border-indigo-300 text-indigo-600 text-sm rounded-md hover:bg-indigo-50 transition"
                 >
                   <FaPlus className="w-3 h-3" /> Save as Draft
                 </button>
@@ -328,7 +328,7 @@ export default function CreateNotice() {
               <button
                 type="button"
                 onClick={resetForm}
-                className="flex items-center gap-1.5 px-4 py-2 border border-slate-200 text-slate-600 text-sm rounded-lg hover:bg-slate-50 transition"
+                className="flex items-center gap-1.5 px-4 py-2 border border-slate-200 text-slate-600 text-sm rounded-md hover:bg-slate-50 transition"
               >
                 <FaUndo className="w-3 h-3" /> Reset
               </button>

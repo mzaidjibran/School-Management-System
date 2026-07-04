@@ -39,7 +39,7 @@ const StatusBadge = ({ status }) => {
 
 // ---------- Stats Card ----------
 const StatsCard = ({ label, value, bgColor, iconColor, icon }) => (
-  <div className="bg-white rounded-md shadow-sm border border-slate-100">
+  <div className="bg-white rounded shadow-sm border border-slate-100">
     <div className="p-4 flex justify-between items-center">
       <div>
         <p className="text-sm text-slate-500">{label}</p>
@@ -64,7 +64,7 @@ const Input = ({ label, type = "text", name, value, onChange, disabled }) => {
         style={isDate && !value ? { color: "transparent" } : {}}
         onFocus={(e) => { if (isDate) e.target.style.color = "inherit"; }}
         onBlur={(e) => { if (isDate && !value) e.target.style.color = "transparent"; }}
-        className="peer w-full px-3 pt-5 pb-1.5 border border-slate-200 rounded-lg bg-white text-slate-800 outline-none transition-all text-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed"
+        className="peer w-full px-3 pt-5 pb-1.5 border border-slate-200 rounded-md bg-white text-slate-800 outline-none transition-all text-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed"
       />
       <label className={`absolute left-3 pointer-events-none transition-all duration-150
         ${value ? "top-1 text-[10px] text-indigo-500" : "top-3.5 text-sm text-slate-400"}
@@ -78,14 +78,14 @@ const Input = ({ label, type = "text", name, value, onChange, disabled }) => {
 const SelectField = ({ label, name, options = [], value, onChange, disabled }) => {
   if (disabled) return (
     <div className="relative">
-      <div className="w-full px-3 pt-5 pb-1.5 border border-slate-200 rounded-lg bg-slate-50 text-sm text-slate-700 min-h-[44px]">{value || "—"}</div>
+      <div className="w-full px-3 pt-5 pb-1.5 border border-slate-200 rounded-md bg-slate-50 text-sm text-slate-700 min-h-[44px]">{value || "—"}</div>
       <label className="absolute left-3 top-1 text-[10px] text-indigo-500 pointer-events-none">{label}</label>
     </div>
   );
   return (
     <div className="relative">
       <select name={name} value={value} onChange={onChange}
-        className="peer w-full px-3 pt-5 pb-1.5 border border-slate-200 rounded-lg bg-white text-slate-800 outline-none transition-all appearance-none text-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100">
+        className="peer w-full px-3 pt-5 pb-1.5 border border-slate-200 rounded-md bg-white text-slate-800 outline-none transition-all appearance-none text-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100">
         <option value=""></option>
         {options.map((o) => <option key={o}>{o}</option>)}
       </select>
@@ -160,10 +160,10 @@ const FeeRecordModal = ({ record, mode, onClose, onSave }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-lg shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="bg-white rounded-md shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <h2 className="text-sm font-semibold text-slate-700">{isView ? "Fee Record Details" : "Edit Fee Record"}</h2>
-          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 transition">
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 transition">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -175,14 +175,14 @@ const FeeRecordModal = ({ record, mode, onClose, onSave }) => {
             <div className="space-y-5">
               <div>
                 <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3">Student</p>
-                <div className="bg-slate-50 rounded-md p-4">
+                <div className="bg-slate-50 rounded p-4">
                   <InfoRow label="Name" value={studentName} />
                   <InfoRow label="Roll No" value={rollNo} />
                 </div>
               </div>
               <div>
                 <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3">Fee Details</p>
-                <div className="bg-slate-50 rounded-md p-4">
+                <div className="bg-slate-50 rounded p-4">
                   <InfoRow label="Fee Type" value={formData.feeType} />
                   <InfoRow label="Month/Year" value={`${formData.month ? MONTHS[formData.month - 1] : "—"} / ${formData.year}`} />
                   <InfoRow label="Due Date" value={formData.dueDate?.split("T")[0] || "—"} />
@@ -202,7 +202,7 @@ const FeeRecordModal = ({ record, mode, onClose, onSave }) => {
             </div>
           ) : (
             <form onSubmit={handleSubmit} id="fee-edit-form" className="space-y-4">
-              {error && <p className="text-rose-500 text-xs bg-rose-50 rounded-lg px-3 py-2">{error}</p>}
+              {error && <p className="text-rose-500 text-xs bg-rose-50 rounded-md px-3 py-2">{error}</p>}
               <div className="grid grid-cols-2 gap-3">
                 <Input label="Student Name" value={studentName} disabled />
                 <Input label="Roll No" value={rollNo} disabled />
@@ -215,7 +215,7 @@ const FeeRecordModal = ({ record, mode, onClose, onSave }) => {
                 <Input label="Discount (PKR)" type="number" name="discount" value={formData.discount || 0} onChange={handleChange} />
                 <Input label="Fine (PKR)" type="number" name="fine" value={formData.fine || 0} onChange={handleChange} />
               </div>
-              <div className="bg-slate-50 rounded-md px-4 py-3 flex justify-between text-sm">
+              <div className="bg-slate-50 rounded px-4 py-3 flex justify-between text-sm">
                 <span className="text-slate-500">Remaining Amount</span>
                 <span className="font-semibold text-rose-600">PKR {(formData.amount + (Number(formData.fine) || 0) - (Number(formData.discount) || 0) - formData.paidAmount).toLocaleString()}</span>
               </div>
@@ -225,12 +225,12 @@ const FeeRecordModal = ({ record, mode, onClose, onSave }) => {
 
         <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-2.5">
           {isView ? (
-            <button onClick={onClose} className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition">Close</button>
+            <button onClick={onClose} className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition">Close</button>
           ) : (
             <>
-              <button type="button" onClick={onClose} className="px-4 py-2 text-xs border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition">Cancel</button>
+              <button type="button" onClick={onClose} className="px-4 py-2 text-xs border border-slate-200 rounded-md text-slate-500 hover:bg-slate-50 transition">Cancel</button>
               <button type="submit" form="fee-edit-form" disabled={isSaving}
-                className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition disabled:opacity-60 flex items-center gap-1.5">
+                className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition disabled:opacity-60 flex items-center gap-1.5">
                 {isSaving && <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" /></svg>}
                 {isSaving ? "Saving..." : "Update Record"}
               </button>
@@ -260,10 +260,10 @@ const FeeSlipModal = ({ record, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-lg shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="bg-white rounded-md shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <h3 className="text-sm font-semibold text-slate-700">Fee Slip</h3>
-          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 transition">
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 transition">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -289,7 +289,7 @@ const FeeSlipModal = ({ record, onClose }) => {
               <div key={k}><span className="text-slate-400">{k}: </span><strong className="text-slate-700">{v}</strong></div>
             ))}
           </div>
-          <div className="border border-slate-100 rounded-md overflow-hidden mb-4">
+          <div className="border border-slate-100 rounded overflow-hidden mb-4">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 border-b border-slate-100">
                 <tr>
@@ -324,8 +324,8 @@ const FeeSlipModal = ({ record, onClose }) => {
           </div>
         </div>
         <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-2.5">
-          <button onClick={onClose} className="px-4 py-2 text-xs border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition">Close</button>
-          <button onClick={handlePrint} className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition flex items-center gap-1.5">
+          <button onClick={onClose} className="px-4 py-2 text-xs border border-slate-200 rounded-md text-slate-500 hover:bg-slate-50 transition">Close</button>
+          <button onClick={handlePrint} className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition flex items-center gap-1.5">
             <FaPrint className="w-3 h-3" /> Print
           </button>
         </div>
@@ -405,10 +405,10 @@ const CollectFeeModal = ({ students, classes, onClose, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-lg shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="bg-white rounded-md shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <h2 className="text-sm font-semibold text-slate-700">Collect Fee</h2>
-          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 transition">
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 transition">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -424,10 +424,10 @@ const CollectFeeModal = ({ students, classes, onClose, onSuccess }) => {
               <input type="text" value={studentSearch} placeholder="Type student name or roll number..."
                 onChange={(e) => { setStudentSearch(e.target.value); setSelectedStudent(null); setShowDropdown(true); }}
                 onFocus={() => { if (studentSearch.length >= 1) setShowDropdown(true); }}
-                className="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-lg outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
+                className="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-md outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
             </div>
             {showDropdown && filteredStudents.length > 0 && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+              <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded shadow-lg max-h-48 overflow-y-auto">
                 {filteredStudents.map(s => (
                   <button type="button" key={s._id} onClick={() => handleSelectStudent(s)}
                     className="w-full text-left px-4 py-2.5 hover:bg-indigo-50 transition flex items-center justify-between border-b border-slate-50 last:border-0">
@@ -435,13 +435,13 @@ const CollectFeeModal = ({ students, classes, onClose, onSuccess }) => {
                       <span className="text-sm font-medium text-slate-800">{s.firstName} {s.lastName}</span>
                       <span className="text-xs text-slate-400 ml-2">{s.currentClass?.name || ""}</span>
                     </div>
-                    <code className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs">{s.rollNumber}</code>
+                    <code className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md text-xs">{s.rollNumber}</code>
                   </button>
                 ))}
               </div>
             )}
             {showDropdown && studentSearch.length >= 1 && filteredStudents.length === 0 && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-md shadow-lg p-4 text-center text-sm text-slate-400">
+              <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded shadow-lg p-4 text-center text-sm text-slate-400">
                 No students found
               </div>
             )}
@@ -449,7 +449,7 @@ const CollectFeeModal = ({ students, classes, onClose, onSuccess }) => {
 
           {/* Selected student info */}
           {selectedStudent && (
-            <div className="bg-indigo-50 rounded-md p-3 flex items-center gap-3">
+            <div className="bg-indigo-50 rounded p-3 flex items-center gap-3">
               <div className="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
                 {selectedStudent.firstName?.[0]}{selectedStudent.lastName?.[0]}
               </div>
@@ -465,7 +465,7 @@ const CollectFeeModal = ({ students, classes, onClose, onSuccess }) => {
             <div>
               <label className="block text-xs font-semibold text-slate-500 mb-1">Fee Type</label>
               <select name="feeType" value={feeData.feeType} onChange={handleChange}
-                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100">
+                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-md bg-white outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100">
                 {["tuition", "admission", "exam", "library", "transport", "other"].map(t => (
                   <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
                 ))}
@@ -474,41 +474,41 @@ const CollectFeeModal = ({ students, classes, onClose, onSuccess }) => {
             <div>
               <label className="block text-xs font-semibold text-slate-500 mb-1">Month</label>
               <select name="month" value={feeData.month} onChange={handleChange}
-                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100">
+                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-md bg-white outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100">
                 {MONTHS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-500 mb-1">Year</label>
               <input type="number" name="year" value={feeData.year} onChange={handleChange}
-                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
+                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-md outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-500 mb-1">Due Date</label>
               <input type="date" name="dueDate" value={feeData.dueDate} onChange={handleChange}
-                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
+                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-md outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-500 mb-1">Total Amount (PKR) *</label>
               <input type="number" name="amount" value={feeData.amount} onChange={handleChange} required min="1"
-                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
+                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-md outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-500 mb-1">Paid Amount (PKR)</label>
               <input type="number" name="paidAmount" value={feeData.paidAmount} onChange={handleChange} min="0"
-                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
+                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-md outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
             </div>
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-500 mb-1">Remarks (Optional)</label>
             <textarea name="remarks" value={feeData.remarks} onChange={handleChange} rows={2}
-              className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 resize-none" />
+              className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-md outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 resize-none" />
           </div>
 
           <div className="flex justify-end gap-2.5 pt-2">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-xs border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition">Cancel</button>
+            <button type="button" onClick={onClose} className="px-4 py-2 text-xs border border-slate-200 rounded-md text-slate-500 hover:bg-slate-50 transition">Cancel</button>
             <button type="submit" disabled={saving || !selectedStudent}
-              className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5">
+              className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5">
               {saving ? "Saving..." : "Collect Fee"}
             </button>
           </div>
@@ -763,7 +763,7 @@ export default function FeeRecords() {
           <h1 className="text-2xl font-bold text-slate-800">Fee Records</h1>
           <p className="text-sm text-slate-500">View complete fee history and status</p>
         </div>
-        <button onClick={() => setShowCollectModal(true)} className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-md shadow-sm transition flex items-center gap-2">
+        <button onClick={() => setShowCollectModal(true)} className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded shadow-sm transition flex items-center gap-2">
           <FaMoneyBillWave className="w-4 h-4" /> Collect Fee
         </button>
       </div>
@@ -778,38 +778,38 @@ export default function FeeRecords() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-md shadow-sm border border-slate-100 p-4">
+      <div className="bg-white rounded shadow-sm border border-slate-100 p-4">
         <div className="flex flex-wrap gap-3 items-center">
           <div className="relative min-w-[160px] flex-1">
             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
             <input type="text" placeholder="Search student..." value={search} onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+              className="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-md outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
           </div>
           <input type="text" placeholder="Roll number..." value={rollSearch} onChange={(e) => setRollSearch(e.target.value)}
-            className="px-3 py-2 text-sm border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 min-w-[130px]" />
+            className="px-3 py-2 text-sm border border-slate-300 rounded-md outline-none focus:ring-2 focus:ring-indigo-500 min-w-[130px]" />
           <select value={monthFilter} onChange={(e) => setMonthFilter(e.target.value)}
-            className="px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-indigo-500">
+            className="px-3 py-2 text-sm border border-slate-300 rounded-md bg-white outline-none focus:ring-2 focus:ring-indigo-500">
             <option value="">All Months</option>
             {MONTHS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
           </select>
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-indigo-500">
+            className="px-3 py-2 text-sm border border-slate-300 rounded-md bg-white outline-none focus:ring-2 focus:ring-indigo-500">
             <option value="">All Status</option>
             {["paid", "partial", "pending", "overdue"].map((s) => <option key={s} value={s}>{statusLabel(s)}</option>)}
           </select>
           <div className="flex flex-wrap gap-2 items-center ml-auto">
             <input type="file" accept=".csv" ref={csvFileInputRef} className="hidden" onChange={handleUploadCSV} />
-            <button type="button" onClick={() => csvFileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold transition">Upload CSV</button>
-            <button type="button" onClick={handleBackupData} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition">Backup Data</button>
-            <button onClick={exportExcel} title="Excel" className="p-2 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition"><FaFileExcel className="text-emerald-600 w-4 h-4" /></button>
-            <button onClick={exportPDF} title="PDF" className="p-2 bg-rose-50 hover:bg-rose-100 rounded-lg transition"><FaFilePdf className="text-rose-600 w-4 h-4" /></button>
+            <button type="button" onClick={() => csvFileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold transition">Upload CSV</button>
+            <button type="button" onClick={handleBackupData} className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition">Backup Data</button>
+            <button onClick={exportExcel} title="Excel" className="p-2 bg-emerald-50 hover:bg-emerald-100 rounded-md transition"><FaFileExcel className="text-emerald-600 w-4 h-4" /></button>
+            <button onClick={exportPDF} title="PDF" className="p-2 bg-rose-50 hover:bg-rose-100 rounded-md transition"><FaFilePdf className="text-rose-600 w-4 h-4" /></button>
           </div>
         </div>
       </div>
 
       {/* Table */}
       {/* Table / Mobile Cards */}
-      <div className="bg-white rounded-md shadow-sm border border-slate-100 overflow-hidden">
+      <div className="bg-white rounded shadow-sm border border-slate-100 overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
           <span className="font-semibold text-slate-800 text-sm">Fee Records</span>
           <span className="bg-indigo-50 text-indigo-600 text-xs font-semibold px-3 py-1 rounded-full">{filtered.length} records</span>
@@ -839,7 +839,7 @@ export default function FeeRecords() {
                     return (
                       <tr key={r._id} className="border-b border-slate-100 hover:bg-slate-50 transition">
                         <td className="px-4 py-3.5">
-                          <code className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs">{r.student?.rollNumber || "—"}</code>
+                          <code className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md text-xs">{r.student?.rollNumber || "—"}</code>
                         </td>
                         <td className="px-4 py-3.5 font-medium text-slate-800">{name}</td>
                         <td className="px-4 py-3.5 capitalize text-slate-600">{r.feeType}</td>
@@ -851,9 +851,9 @@ export default function FeeRecords() {
                         <td className="px-4 py-3.5"><StatusBadge status={r.status} /></td>
                         <td className="px-4 py-3.5">
                           <div className="flex items-center gap-1.5">
-                            <button onClick={() => setViewRecord(r)} className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="View"><FaEye className="w-3.5 h-3.5" /></button>
-                            <button onClick={() => setSelectedRecord(r)} className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-lg transition" title="Print Slip"><FaPrint className="w-3.5 h-3.5" /></button>
-                            <button onClick={() => setEditRecord(r)} className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition" title="Edit"><FaEdit className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => setViewRecord(r)} className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-md transition" title="View"><FaEye className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => setSelectedRecord(r)} className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-md transition" title="Print Slip"><FaPrint className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => setEditRecord(r)} className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-md transition" title="Edit"><FaEdit className="w-3.5 h-3.5" /></button>
                           </div>
                         </td>
                       </tr>
@@ -870,7 +870,7 @@ export default function FeeRecords() {
                 const remaining = r.amount - r.paidAmount;
                 const avatarColor = idx % 2 === 0 ? "bg-indigo-100 text-indigo-700" : "bg-purple-100 text-purple-700";
                 return (
-                  <div key={r._id} className="bg-white p-4 rounded-lg border border-slate-100 shadow-sm flex flex-col gap-3 transition duration-200 hover:shadow-md hover:border-indigo-100">
+                  <div key={r._id} className="bg-white p-4 rounded-md border border-slate-100 shadow-sm flex flex-col gap-3 transition duration-200 hover:shadow-md hover:border-indigo-100">
                     <div className="flex justify-between items-start">
                       <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-full ${avatarColor} font-bold text-xs flex items-center justify-center`}>
@@ -878,7 +878,7 @@ export default function FeeRecords() {
                         </div>
                         <div>
                           <p className="font-semibold text-slate-800 text-sm">{name}</p>
-                          <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono font-bold border border-slate-200/40">
+                          <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md font-mono font-bold border border-slate-200/40">
                             Roll: {r.student?.rollNumber || "—"}
                           </span>
                         </div>
@@ -886,7 +886,7 @@ export default function FeeRecords() {
                       <StatusBadge status={r.status} />
                     </div>
                     
-                    <div className="grid grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded-md border border-slate-100/80 text-center text-xs mt-1">
+                    <div className="grid grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded border border-slate-100/80 text-center text-xs mt-1">
                       <div>
                         <p className="text-[9px] text-slate-400 font-bold uppercase">Total</p>
                         <p className="font-semibold text-slate-700 mt-0.5">PKR {r.amount?.toLocaleString()}</p>
@@ -907,9 +907,9 @@ export default function FeeRecords() {
                         <span>Due: <strong className="text-slate-700">{r.dueDate?.split("T")[0] || "—"}</strong></span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <button onClick={() => setViewRecord(r)} className="p-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-md transition" title="View"><FaEye className="w-3.5 h-3.5" /></button>
-                        <button onClick={() => setSelectedRecord(r)} className="p-2 text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-md transition" title="Print Slip"><FaPrint className="w-3.5 h-3.5" /></button>
-                        <button onClick={() => setEditRecord(r)} className="p-2 text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-md transition" title="Edit"><FaEdit className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => setViewRecord(r)} className="p-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded transition" title="View"><FaEye className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => setSelectedRecord(r)} className="p-2 text-slate-600 bg-slate-50 hover:bg-slate-100 rounded transition" title="Print Slip"><FaPrint className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => setEditRecord(r)} className="p-2 text-amber-600 bg-amber-50 hover:bg-amber-100 rounded transition" title="Edit"><FaEdit className="w-3.5 h-3.5" /></button>
                       </div>
                     </div>
                   </div>

@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 const FloatingInput = ({ label, name, type = "text", value, onChange, required, error }) => (
   <div className="relative">
     <input type={type} name={name} value={value} onChange={onChange}
-      className={`peer w-full px-3 py-2.5 text-sm border rounded-lg bg-white text-slate-800 outline-none transition-all
+      className={`peer w-full px-3 py-2.5 text-sm border rounded-md bg-white text-slate-800 outline-none transition-all
         ${error ? "border-rose-400 focus:ring-1 focus:ring-rose-400" : "border-slate-200 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"}`}
       placeholder=" " />
     <label className={`absolute left-3 bg-white px-1 text-slate-400 transition-all duration-200 pointer-events-none
@@ -23,7 +23,7 @@ const FloatingInput = ({ label, name, type = "text", value, onChange, required, 
 const FloatingSelect = ({ label, name, options = [], value, onChange, required, error }) => (
   <div className="relative">
     <select name={name} value={value} onChange={onChange}
-      className={`peer w-full px-3 py-2.5 text-sm border rounded-lg bg-white text-slate-800 outline-none transition-all appearance-none
+      className={`peer w-full px-3 py-2.5 text-sm border rounded-md bg-white text-slate-800 outline-none transition-all appearance-none
         ${error ? "border-rose-400 focus:ring-1 focus:ring-rose-400" : "border-slate-200 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"}`}>
       <option value=""></option>
       {options.map((opt) => {
@@ -146,13 +146,13 @@ export default function AddExam() {
           <span className="text-indigo-600">Add Exam</span>
         </nav>
         <div className="flex items-center gap-3 mb-5">
-          <div className="p-2.5 bg-indigo-100 rounded-xl"><FaBook className="w-5 h-5 text-indigo-600" /></div>
+          <div className="p-2.5 bg-indigo-100 rounded-md"><FaBook className="w-5 h-5 text-indigo-600" /></div>
           <div>
             <h1 className="text-lg font-bold text-slate-800">Add New Exam</h1>
             <p className="text-xs text-slate-500">Create exam schedule and configure details</p>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-md border border-slate-100 shadow-sm overflow-hidden">
           <form onSubmit={(e) => handleSubmit(e, false)} className="p-5">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Basic Information</p>
             <div className="grid md:grid-cols-2 gap-4 mb-5">
@@ -177,18 +177,18 @@ export default function AddExam() {
             <div className="mb-5">
               <label className="block text-xs font-medium text-slate-500 mb-1.5">Instructions</label>
               <textarea name="instructions" value={form.instructions} onChange={handleChange} rows="3"
-                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400 outline-none resize-none"
+                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-md focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400 outline-none resize-none"
                 placeholder="Any special instructions for students" />
             </div>
-            {apiError && <div className="mb-4 px-3 py-2 bg-rose-50 border border-rose-200 rounded-lg text-rose-600 text-xs">{apiError}</div>}
+            {apiError && <div className="mb-4 px-3 py-2 bg-rose-50 border border-rose-200 rounded-md text-rose-600 text-xs">{apiError}</div>}
             <div className="flex flex-wrap gap-2 pt-4 border-t border-slate-100">
-              <button type="submit" disabled={loading} className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition">
+              <button type="submit" disabled={loading} className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 disabled:opacity-50 transition">
                 <FaSave className="w-3 h-3" /> {loading && !saveAnother ? "Saving..." : "Save Exam"}
               </button>
-              <button type="button" onClick={(e) => handleSubmit(e, true)} disabled={loading} className="flex items-center gap-1.5 px-4 py-2 border border-indigo-300 text-indigo-600 text-sm rounded-lg hover:bg-indigo-50 transition">
+              <button type="button" onClick={(e) => handleSubmit(e, true)} disabled={loading} className="flex items-center gap-1.5 px-4 py-2 border border-indigo-300 text-indigo-600 text-sm rounded-md hover:bg-indigo-50 transition">
                 <FaPlus className="w-3 h-3" /> Save & Add Another
               </button>
-              <button type="button" onClick={resetForm} className="flex items-center gap-1.5 px-4 py-2 border border-slate-200 text-slate-600 text-sm rounded-lg hover:bg-slate-50 transition">
+              <button type="button" onClick={resetForm} className="flex items-center gap-1.5 px-4 py-2 border border-slate-200 text-slate-600 text-sm rounded-md hover:bg-slate-50 transition">
                 <FaUndo className="w-3 h-3" /> Reset
               </button>
               <button type="button" onClick={() => navigate("/exams")} className="flex items-center gap-1.5 px-3 py-2 text-slate-400 hover:text-slate-600 text-sm transition">
@@ -198,7 +198,7 @@ export default function AddExam() {
           </form>
         </div>
         {success && (
-          <div className="fixed bottom-5 right-5 bg-emerald-500 text-white text-sm px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2 z-50">
+          <div className="fixed bottom-5 right-5 bg-emerald-500 text-white text-sm px-4 py-2.5 rounded-md shadow-lg flex items-center gap-2 z-50">
             <FaSave className="w-3.5 h-3.5" />
             {saveAnother ? "Saved! Add another exam." : "Exam created successfully!"}
           </div>

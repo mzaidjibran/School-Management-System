@@ -66,10 +66,10 @@ const NoticeModal = ({ notice, onClose, onPrint }) => {
   if (!notice) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col">
+      <div className="bg-white rounded-md shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col">
         <div className="flex justify-between items-start px-6 py-4 border-b shrink-0">
           <div className="flex items-start gap-3 pr-4">
-            <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+            <div className="w-8 h-8 bg-indigo-100 rounded-md flex items-center justify-center shrink-0 mt-0.5">
               <FaBullhorn className="text-indigo-600 text-sm" />
             </div>
             <div>
@@ -114,13 +114,13 @@ const NoticeModal = ({ notice, onClose, onPrint }) => {
         <div className="border-t px-6 py-3 flex justify-end gap-2 shrink-0">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-colors"
+            className="px-4 py-2 text-sm border border-slate-200 text-slate-600 rounded-md hover:bg-slate-50 transition-colors"
           >
             Close
           </button>
           <button
             onClick={() => { onPrint(notice); onClose(); }}
-            className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-1.5"
+            className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors flex items-center gap-1.5"
           >
             <FaPrint className="text-xs" /> Print
           </button>
@@ -245,7 +245,7 @@ export default function NoticeBoard() {
   };
 
   const inputCls =
-    "h-8 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full";
+    "h-8 text-xs border border-slate-200 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full";
 
   const priorityBorder = {
     normal:    "border-l-blue-400",
@@ -301,13 +301,13 @@ export default function NoticeBoard() {
           <div className="flex items-center gap-2">
             <button
               onClick={exportPDF}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors"
             >
               <FaFilePdf className="text-rose-500" /> Export PDF
             </button>
             <button
               onClick={() => navigate("/notices/create")}
-              className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
             >
               <FaPlus className="text-xs" /> Create Notice
             </button>
@@ -319,13 +319,13 @@ export default function NoticeBoard() {
           {statCards.map((c) => (
             <div
               key={c.label}
-              className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex justify-between items-center"
+              className="bg-white rounded-md shadow-sm border border-slate-100 p-4 flex justify-between items-center"
             >
               <div>
                 <p className="text-xs text-slate-500">{c.label}</p>
                 <p className={`text-xl font-bold mt-0.5 ${c.text}`}>{c.value}</p>
               </div>
-              <div className={`w-10 h-10 ${c.bg} rounded-xl flex items-center justify-center text-lg`}>
+              <div className={`w-10 h-10 ${c.bg} rounded-md flex items-center justify-center text-lg`}>
                 {c.icon}
               </div>
             </div>
@@ -333,7 +333,7 @@ export default function NoticeBoard() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 px-4 py-3 mb-5">
+        <div className="bg-white rounded-md shadow-sm border border-slate-100 px-4 py-3 mb-5">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 items-center">
             <div className="relative">
               <FaSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs" />
@@ -368,7 +368,7 @@ export default function NoticeBoard() {
             </select>
             <button
               onClick={() => { setSearch(""); setPriorityFilter(""); setStatusFilter(""); }}
-              className="h-8 px-3 text-xs border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition-colors"
+              className="h-8 px-3 text-xs border border-slate-200 rounded-md text-slate-500 hover:bg-slate-50 transition-colors"
             >
               Clear Filters
             </button>
@@ -379,11 +379,11 @@ export default function NoticeBoard() {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array(6).fill(0).map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl h-44 animate-pulse border border-slate-100" />
+              <div key={i} className="bg-white rounded-md h-44 animate-pulse border border-slate-100" />
             ))}
           </div>
         ) : paginatedNotices.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-100 py-16 text-center">
+          <div className="bg-white rounded-md border border-slate-100 py-16 text-center">
             <FaBullhorn className="text-slate-300 text-4xl mx-auto mb-3" />
             <p className="text-slate-400 text-sm">No notices found</p>
           </div>
@@ -392,7 +392,7 @@ export default function NoticeBoard() {
             {paginatedNotices.map((notice) => (
               <div
                 key={notice._id}
-                className={`bg-white rounded-2xl shadow-sm border border-slate-100 border-l-4 ${
+                className={`bg-white rounded-md shadow-sm border border-slate-100 border-l-4 ${
                   priorityBorder[notice.priority] || "border-l-slate-300"
                 } p-4 hover:shadow-md transition-shadow flex flex-col`}
               >
@@ -423,28 +423,28 @@ export default function NoticeBoard() {
                   <button
                     onClick={() => setSelectedNotice(notice)}
                     title="View"
-                    className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                    className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
                   >
                     <FaEye className="text-sm" />
                   </button>
                   <button
                     onClick={() => navigate(`/notices/edit/${notice._id}`)}
                     title="Edit"
-                    className="p-1.5 text-amber-500 hover:bg-amber-50 rounded-lg transition-colors"
+                    className="p-1.5 text-amber-500 hover:bg-amber-50 rounded-md transition-colors"
                   >
                     <FaEdit className="text-sm" />
                   </button>
                   <button
                     onClick={() => handleDelete(notice)}
                     title="Delete"
-                    className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                    className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-md transition-colors"
                   >
                     <FaTrash className="text-sm" />
                   </button>
                   <button
                     onClick={() => handlePrint(notice)}
                     title="Print"
-                    className="p-1.5 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
+                    className="p-1.5 text-slate-500 hover:bg-slate-100 rounded-md transition-colors"
                   >
                     <FaPrint className="text-sm" />
                   </button>
@@ -460,7 +460,7 @@ export default function NoticeBoard() {
             <button
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((p) => p - 1)}
-              className="px-3 py-1 text-xs border border-slate-200 rounded-lg disabled:opacity-40 hover:bg-slate-50 transition-colors"
+              className="px-3 py-1 text-xs border border-slate-200 rounded-md disabled:opacity-40 hover:bg-slate-50 transition-colors"
             >
               Prev
             </button>
@@ -468,7 +468,7 @@ export default function NoticeBoard() {
               <button
                 key={p}
                 onClick={() => setCurrentPage(p)}
-                className={`w-7 h-7 text-xs rounded-lg transition-colors ${
+                className={`w-7 h-7 text-xs rounded-md transition-colors ${
                   p === currentPage
                     ? "bg-indigo-600 text-white"
                     : "border border-slate-200 hover:bg-slate-50"
@@ -480,7 +480,7 @@ export default function NoticeBoard() {
             <button
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((p) => p + 1)}
-              className="px-3 py-1 text-xs border border-slate-200 rounded-lg disabled:opacity-40 hover:bg-slate-50 transition-colors"
+              className="px-3 py-1 text-xs border border-slate-200 rounded-md disabled:opacity-40 hover:bg-slate-50 transition-colors"
             >
               Next
             </button>

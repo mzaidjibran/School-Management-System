@@ -24,7 +24,7 @@ const Input = ({ label, type = "text", name, value, onChange, required = false, 
         style={isDate && !hasValue ? { color: "transparent" } : {}}
         onFocus={(e) => { if (isDate) e.target.style.color = "inherit"; }}
         onBlur={(e) => { if (isDate && !value) e.target.style.color = "transparent"; }}
-        className={`peer w-full px-3 pt-5 pb-1.5 border rounded-lg bg-white text-slate-800 outline-none transition-all text-sm
+        className={`peer w-full px-3 pt-5 pb-1.5 border rounded-md bg-white text-slate-800 outline-none transition-all text-sm
           ${error ? "border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-indigo-400 focus:ring-indigo-100"}
           focus:ring-2 disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed`}
       />
@@ -45,7 +45,7 @@ const Select = ({ label, name, options = [], value, onChange, required = false, 
     const displayVal = selectedOpt ? (typeof selectedOpt === "object" ? selectedOpt.label : selectedOpt) : (value || "—");
     return (
       <div className={`relative ${className}`}>
-        <div className="w-full px-3 pt-5 pb-1.5 border border-slate-200 rounded-lg bg-slate-50 text-sm text-slate-700 min-h-[44px]">
+        <div className="w-full px-3 pt-5 pb-1.5 border border-slate-200 rounded-md bg-slate-50 text-sm text-slate-700 min-h-[44px]">
           {displayVal}
         </div>
         <label className="absolute left-3 top-1 text-[10px] text-indigo-500 pointer-events-none">{label}</label>
@@ -55,7 +55,7 @@ const Select = ({ label, name, options = [], value, onChange, required = false, 
   return (
     <div className={`relative ${className}`}>
       <select name={name} id={name} value={value} onChange={onChange}
-        className={`peer w-full px-3 pt-5 pb-1.5 border rounded-lg bg-white text-slate-800 outline-none transition-all appearance-none text-sm
+        className={`peer w-full px-3 pt-5 pb-1.5 border rounded-md bg-white text-slate-800 outline-none transition-all appearance-none text-sm
           ${error ? "border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-indigo-400 focus:ring-indigo-100"}
           focus:ring-2`}>
         <option value=""></option>
@@ -80,7 +80,7 @@ const Select = ({ label, name, options = [], value, onChange, required = false, 
 
 // ---------- Stats Card ----------
 const StatsCard = ({ label, value, bgColor, iconColor, icon }) => (
-  <div className="bg-white rounded-xl shadow-sm border border-slate-100">
+  <div className="bg-white rounded-md shadow-sm border border-slate-100">
     <div className="p-4 flex justify-between items-center">
       <div>
         <p className="text-sm text-slate-500">{label}</p>
@@ -274,13 +274,13 @@ const StudentFormModal = ({ isOpen, onClose, student, mode, onSave }) => {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="bg-white rounded-md shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <h2 className="text-sm font-semibold text-slate-700">
             {mode === "edit" ? "Edit Student" : "Student Profile"}
           </h2>
-          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -315,7 +315,7 @@ const StudentFormModal = ({ isOpen, onClose, student, mode, onSave }) => {
               </div>
               {!isViewOnly && (
                 <div>
-                  <label className="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">
+                  <label className="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-md text-xs font-medium transition">
                     Upload Photo
                     <input type="file" accept="image/jpeg,image/png" onChange={handleImageUpload} className="hidden" ref={fileInputRef} />
                   </label>
@@ -393,7 +393,7 @@ const StudentFormModal = ({ isOpen, onClose, student, mode, onSave }) => {
               <div className="space-y-3">
                 {isViewOnly ? (
                   <div className="relative">
-                    <div className="w-full px-3 pt-5 pb-1.5 border border-slate-200 rounded-lg bg-slate-50 text-sm text-slate-700 min-h-[60px]">
+                    <div className="w-full px-3 pt-5 pb-1.5 border border-slate-200 rounded-md bg-slate-50 text-sm text-slate-700 min-h-[60px]">
                       {formData.medicalInfo || "—"}
                     </div>
                     <label className="absolute left-3 top-1 text-[10px] text-indigo-500 pointer-events-none">Medical Info / Allergies</label>
@@ -401,7 +401,7 @@ const StudentFormModal = ({ isOpen, onClose, student, mode, onSave }) => {
                 ) : (
                   <textarea name="medicalInfo" value={formData.medicalInfo} onChange={handleChange} rows={2}
                     placeholder="Medical Information / Allergies..."
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-800 bg-white outline-none resize-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-md text-sm text-slate-800 bg-white outline-none resize-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Input label="Emergency Contact Name" name="emergencyName" value={formData.emergencyName} onChange={handleChange} disabled={isViewOnly} />
@@ -416,11 +416,11 @@ const StudentFormModal = ({ isOpen, onClose, student, mode, onSave }) => {
         <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-2.5">
           {!isViewOnly ? (
             <>
-              <button type="button" onClick={onClose} className="px-4 py-2 text-xs border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition">
+              <button type="button" onClick={onClose} className="px-4 py-2 text-xs border border-slate-200 rounded-md text-slate-500 hover:bg-slate-50 transition">
                 Cancel
               </button>
               <button type="submit" form="student-form" disabled={isSaving}
-                className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition disabled:opacity-60 flex items-center gap-1.5">
+                className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition disabled:opacity-60 flex items-center gap-1.5">
                 {isSaving && (
                   <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -431,7 +431,7 @@ const StudentFormModal = ({ isOpen, onClose, student, mode, onSave }) => {
               </button>
             </>
           ) : (
-            <button type="button" onClick={onClose} className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition">
+            <button type="button" onClick={onClose} className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition">
               Close
             </button>
           )}
@@ -849,39 +849,39 @@ export default function StudentList() {
 
       {/* API Error */}
       {apiError && (
-        <div className="px-4 py-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl">
+        <div className="px-4 py-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-md">
           {apiError}
         </div>
       )}
 
       {/* Search + Filter + Export */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+      <div className="bg-white rounded-md shadow-sm border border-slate-100 p-4">
         <div className="flex flex-wrap gap-3 items-center justify-between">
           <div className="relative flex-1 min-w-[200px]">
             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
             <input
               type="text" placeholder="Search by name, email, roll no..."
               value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+              className="w-full pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-md bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
             />
           </div>
           <select value={classFilter} onChange={(e) => setClassFilter(e.target.value)}
-            className="px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-indigo-500">
+            className="px-3 py-2 text-sm border border-slate-300 rounded-md bg-white outline-none focus:ring-2 focus:ring-indigo-500">
             <option value="">All Classes</option>
             {uniqueClasses.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
           <div className="flex flex-wrap gap-2 items-center">
             <input type="file" accept=".csv" ref={csvFileInputRef} className="hidden" onChange={handleUploadCSV} />
-            <button type="button" onClick={() => csvFileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold transition">Upload CSV</button>
-            <button type="button" onClick={handleBackupData} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition">Backup Data</button>
-            <button onClick={exportExcel} title="Export Excel" className="p-2 bg-slate-100 rounded-lg hover:bg-slate-200 transition"><FaFileExcel className="text-green-600" /></button>
-            <button onClick={exportPDF} title="Export PDF" className="p-2 bg-slate-100 rounded-lg hover:bg-slate-200 transition"><FaFilePdf className="text-red-600" /></button>
+            <button type="button" onClick={() => csvFileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold transition">Upload CSV</button>
+            <button type="button" onClick={handleBackupData} className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition">Backup Data</button>
+            <button onClick={exportExcel} title="Export Excel" className="p-2 bg-slate-100 rounded-md hover:bg-slate-200 transition"><FaFileExcel className="text-green-600" /></button>
+            <button onClick={exportPDF} title="Export PDF" className="p-2 bg-slate-100 rounded-md hover:bg-slate-200 transition"><FaFilePdf className="text-red-600" /></button>
           </div>
         </div>
       </div>
 
       {/* Table - Desktop View */}
-      <div className="hidden md:block bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+      <div className="hidden md:block bg-white rounded-md shadow-sm border border-slate-100 overflow-hidden">
         <DataTable
           columns={columns}
           data={filteredStudents}
@@ -903,9 +903,9 @@ export default function StudentList() {
       {/* Mobile Card List View */}
       <div className="block md:hidden space-y-2.5">
         {loading ? (
-          <div className="p-10 text-center text-slate-500 bg-white rounded-xl border border-slate-100 text-sm">Loading students...</div>
+          <div className="p-10 text-center text-slate-500 bg-white rounded-md border border-slate-100 text-sm">Loading students...</div>
         ) : filteredStudents.length === 0 ? (
-          <div className="p-10 text-center text-slate-500 bg-white rounded-xl border border-slate-100 text-sm">No students found</div>
+          <div className="p-10 text-center text-slate-500 bg-white rounded-md border border-slate-100 text-sm">No students found</div>
         ) : (
           filteredStudents.map((student) => (
             <div key={student.id} className="bg-white p-3 border border-slate-100 shadow-sm flex flex-col gap-2">

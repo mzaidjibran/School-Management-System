@@ -32,7 +32,7 @@ const StatusBadge = ({ status }) => {
 
 const TableSkeleton = () => (
   <div className="animate-pulse p-4 space-y-2">
-    {[...Array(5)].map((_, i) => <div key={i} className="h-10 bg-slate-100 rounded-lg" />)}
+    {[...Array(5)].map((_, i) => <div key={i} className="h-10 bg-slate-100 rounded-md" />)}
   </div>
 );
 
@@ -83,19 +83,19 @@ const EditModal = ({ exam, classes, onClose, onSave }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+      <div className="bg-white rounded-md shadow-2xl w-full max-w-md">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
           <h2 className="text-sm font-semibold text-slate-700">Edit Exam</h2>
-          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100">✕</button>
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-md text-slate-400 hover:bg-slate-100">✕</button>
         </div>
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-slate-500 mb-1">Exam Name</label>
-            <input name="name" value={form.name} onChange={handleChange} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-indigo-400" />
+            <input name="name" value={form.name} onChange={handleChange} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md outline-none focus:ring-1 focus:ring-indigo-400" />
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-500 mb-1">Status</label>
-            <select name="status" value={form.status} onChange={handleChange} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-indigo-400 bg-white">
+            <select name="status" value={form.status} onChange={handleChange} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md outline-none focus:ring-1 focus:ring-indigo-400 bg-white">
               <option value="scheduled">Scheduled</option>
               <option value="ongoing">Ongoing</option>
               <option value="completed">Completed</option>
@@ -104,22 +104,22 @@ const EditModal = ({ exam, classes, onClose, onSave }) => {
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-500 mb-1">Venue</label>
-            <input name="venue" value={form.venue} onChange={handleChange} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-indigo-400" />
+            <input name="venue" value={form.venue} onChange={handleChange} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md outline-none focus:ring-1 focus:ring-indigo-400" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-slate-500 mb-1">Total Marks</label>
-              <input type="number" name="totalMarks" value={form.totalMarks} onChange={handleChange} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-indigo-400" />
+              <input type="number" name="totalMarks" value={form.totalMarks} onChange={handleChange} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md outline-none focus:ring-1 focus:ring-indigo-400" />
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-500 mb-1">Passing Marks</label>
-              <input type="number" name="passingMarks" value={form.passingMarks} onChange={handleChange} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-indigo-400" />
+              <input type="number" name="passingMarks" value={form.passingMarks} onChange={handleChange} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md outline-none focus:ring-1 focus:ring-indigo-400" />
             </div>
           </div>
           {err && <p className="text-rose-500 text-xs">{err}</p>}
           <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-xs border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50">Cancel</button>
-            <button type="submit" disabled={saving} className="px-4 py-2 text-xs bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-xs border border-slate-200 rounded-md text-slate-500 hover:bg-slate-50">Cancel</button>
+            <button type="submit" disabled={saving} className="px-4 py-2 text-xs bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50">
               {saving ? "Saving..." : "Update Exam"}
             </button>
           </div>
@@ -251,9 +251,9 @@ export default function ExamList() {
             <p className="text-xs text-slate-500 mt-0.5">Manage all school exams, schedules, and results</p>
           </div>
           <div className="flex gap-1.5">
-            <button onClick={exportCSV}   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-medium transition"><FaFileCsv className="text-emerald-600" /> CSV</button>
-            <button onClick={exportExcel} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-50 border border-green-200 text-green-700 hover:bg-green-100 text-xs font-medium transition"><FaFileExcel className="text-green-600" /> Excel</button>
-            <button onClick={exportPDF}   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 text-xs font-medium transition"><FaFilePdf className="text-rose-600" /> PDF</button>
+            <button onClick={exportCSV}   className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-medium transition"><FaFileCsv className="text-emerald-600" /> CSV</button>
+            <button onClick={exportExcel} className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-green-50 border border-green-200 text-green-700 hover:bg-green-100 text-xs font-medium transition"><FaFileExcel className="text-green-600" /> Excel</button>
+            <button onClick={exportPDF}   className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 text-xs font-medium transition"><FaFilePdf className="text-rose-600" /> PDF</button>
           </div>
         </div>
 
@@ -265,8 +265,8 @@ export default function ExamList() {
             { label:"Ongoing",     value:stats.ongoing, icon:<FaCalendarCheck />, color:"text-amber-600", bg:"bg-amber-50" },
             { label:"Completed",   value:stats.completed, icon:<FaCheckCircle />, color:"text-emerald-600", bg:"bg-emerald-50" },
           ].map((c) => (
-            <div key={c.label} className="bg-white rounded-xl border border-slate-100 shadow-sm px-4 py-3 flex items-center gap-3">
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${c.bg} ${c.color} text-sm`}>{c.icon}</div>
+            <div key={c.label} className="bg-white rounded-md border border-slate-100 shadow-sm px-4 py-3 flex items-center gap-3">
+              <div className={`w-8 h-8 rounded-md flex items-center justify-center ${c.bg} ${c.color} text-sm`}>{c.icon}</div>
               <div>
                 <p className="text-xs text-slate-500">{c.label}</p>
                 <p className={`text-lg font-bold ${c.color}`}>{c.value}</p>
@@ -276,22 +276,22 @@ export default function ExamList() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-xl border border-slate-100 shadow-sm px-4 py-3 mb-4">
+        <div className="bg-white rounded-md border border-slate-100 shadow-sm px-4 py-3 mb-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div className="relative">
               <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-xs" />
               <input type="text" placeholder="Search exam or subject..." value={search} onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-400" />
+                className="w-full pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-md outline-none focus:ring-2 focus:ring-indigo-400" />
             </div>
-            <select value={classFilter} onChange={(e) => setClassFilter(e.target.value)} className="text-sm px-3 py-1.5 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
+            <select value={classFilter} onChange={(e) => setClassFilter(e.target.value)} className="text-sm px-3 py-1.5 border border-slate-200 rounded-md outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
               <option value="">All Classes</option>
               {classOptions.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
             </select>
-            <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="text-sm px-3 py-1.5 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
+            <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="text-sm px-3 py-1.5 border border-slate-200 rounded-md outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
               <option value="">All Types</option>
               {Object.entries(EXAM_TYPE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="text-sm px-3 py-1.5 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="text-sm px-3 py-1.5 border border-slate-200 rounded-md outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
               <option value="">All Status</option>
               {Object.entries(STATUS_MAP).map(([v, s]) => <option key={v} value={v}>{s.label}</option>)}
             </select>
@@ -299,7 +299,7 @@ export default function ExamList() {
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-md border border-slate-100 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -325,8 +325,8 @@ export default function ExamList() {
                     <td className="py-2.5 px-4"><StatusBadge status={exam.status} /></td>
                     <td className="py-2.5 px-4">
                       <div className="flex items-center gap-1">
-                        <button onClick={() => setEditExam(exam)} className="p-1.5 text-amber-500 hover:bg-amber-50 rounded-lg transition"><FaEdit className="w-3 h-3" /></button>
-                        <button onClick={() => handleDelete(exam)} className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition"><FaTrash className="w-3 h-3" /></button>
+                        <button onClick={() => setEditExam(exam)} className="p-1.5 text-amber-500 hover:bg-amber-50 rounded-md transition"><FaEdit className="w-3 h-3" /></button>
+                        <button onClick={() => handleDelete(exam)} className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-md transition"><FaTrash className="w-3 h-3" /></button>
                       </div>
                     </td>
                   </tr>
@@ -338,9 +338,9 @@ export default function ExamList() {
             <div className="flex justify-between items-center px-4 py-3 border-t border-slate-100">
               <p className="text-xs text-slate-400">Showing {(currentPage-1)*itemsPerPage+1}–{Math.min(currentPage*itemsPerPage, filtered.length)} of {filtered.length}</p>
               <div className="flex items-center gap-1.5">
-                <button disabled={currentPage===1} onClick={() => setCurrentPage((p) => p-1)} className="px-2.5 py-1 text-xs border border-slate-200 rounded-lg disabled:opacity-40 hover:bg-slate-50">Prev</button>
-                <span className="px-2.5 py-1 text-xs bg-indigo-600 text-white rounded-lg">{currentPage}</span>
-                <button disabled={currentPage===totalPages} onClick={() => setCurrentPage((p) => p+1)} className="px-2.5 py-1 text-xs border border-slate-200 rounded-lg disabled:opacity-40 hover:bg-slate-50">Next</button>
+                <button disabled={currentPage===1} onClick={() => setCurrentPage((p) => p-1)} className="px-2.5 py-1 text-xs border border-slate-200 rounded-md disabled:opacity-40 hover:bg-slate-50">Prev</button>
+                <span className="px-2.5 py-1 text-xs bg-indigo-600 text-white rounded-md">{currentPage}</span>
+                <button disabled={currentPage===totalPages} onClick={() => setCurrentPage((p) => p+1)} className="px-2.5 py-1 text-xs border border-slate-200 rounded-md disabled:opacity-40 hover:bg-slate-50">Next</button>
               </div>
             </div>
           )}

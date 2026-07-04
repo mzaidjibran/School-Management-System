@@ -22,7 +22,7 @@ const FloatingInput = ({
       value={value}
       onChange={onChange}
       placeholder=" "
-      className={`peer w-full px-4 pt-5 pb-2 border rounded-xl bg-white text-slate-800 outline-none transition-all text-sm
+      className={`peer w-full px-4 pt-5 pb-2 border rounded-md bg-white text-slate-800 outline-none transition-all text-sm
         ${error ? "border-rose-400 focus:ring-rose-100" : "border-slate-200 focus:border-indigo-500 focus:ring-indigo-100"}
         focus:ring-2`}
     />
@@ -54,7 +54,7 @@ const FloatingSelect = ({
       name={name}
       value={value}
       onChange={onChange}
-      className={`peer w-full px-4 pt-5 pb-2 border rounded-xl bg-white text-slate-800 outline-none transition-all appearance-none text-sm
+      className={`peer w-full px-4 pt-5 pb-2 border rounded-md bg-white text-slate-800 outline-none transition-all appearance-none text-sm
         ${error ? "border-rose-400 focus:ring-rose-100" : "border-slate-200 focus:border-indigo-500 focus:ring-indigo-100"}
         focus:ring-2`}
     >
@@ -227,7 +227,7 @@ export default function AddClass() {
 
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-3 bg-indigo-100 rounded-2xl">
+          <div className="p-3 bg-indigo-100 rounded-md">
             <FaBook className="w-6 h-6 text-indigo-600" />
           </div>
           <div>
@@ -239,7 +239,7 @@ export default function AddClass() {
         </div>
 
         {/* Progress */}
-        <div className="mb-8 bg-white/60 backdrop-blur-sm rounded-2xl p-4 shadow-sm">
+        <div className="mb-8 bg-white/60 backdrop-blur-sm rounded-md p-4 shadow-sm">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium text-slate-600">
               Form completion
@@ -257,7 +257,7 @@ export default function AddClass() {
         </div>
 
         {/* Form */}
-        <div className="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+        <div className="bg-white rounded-md shadow-xl border border-slate-100 overflow-hidden">
           <form onSubmit={(e) => handleSubmit(e, false)} className="p-6 md:p-8">
             <div className="grid md:grid-cols-2 gap-6">
               <FloatingInput
@@ -328,7 +328,7 @@ export default function AddClass() {
                   onChange={handleChange}
                   rows={3}
                   placeholder="Additional information about this class..."
-                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition resize-none outline-none"
+                  className="w-full px-4 py-3 border border-slate-200 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition resize-none outline-none"
                 />
               </div>
             </div>
@@ -337,7 +337,7 @@ export default function AddClass() {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-2.5 text-sm bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition shadow-sm disabled:opacity-50 flex items-center gap-2"
+                className="px-6 py-2.5 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition shadow-sm disabled:opacity-50 flex items-center gap-2"
               >
                 {loading && !savingAnother && (
                   <svg
@@ -366,14 +366,14 @@ export default function AddClass() {
                 type="button"
                 onClick={(e) => handleSubmit(e, true)}
                 disabled={loading}
-                className="px-6 py-2.5 text-sm border border-indigo-600 text-indigo-600 rounded-xl hover:bg-indigo-50 transition disabled:opacity-50"
+                className="px-6 py-2.5 text-sm border border-indigo-600 text-indigo-600 rounded-md hover:bg-indigo-50 transition disabled:opacity-50"
               >
                 {loading && savingAnother ? "Saving..." : "Save & Add Another"}
               </button>
               <button
                 type="button"
                 onClick={resetForm}
-                className="px-6 py-2.5 text-sm border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition"
+                className="px-6 py-2.5 text-sm border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 transition"
               >
                 Reset
               </button>
@@ -389,14 +389,14 @@ export default function AddClass() {
         </div>
 
         {success && (
-          <div className="fixed bottom-6 right-6 bg-emerald-500 text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 z-50">
+          <div className="fixed bottom-6 right-6 bg-emerald-500 text-white px-5 py-3 rounded-md shadow-lg flex items-center gap-3 z-50">
             <FaCheckCircle className="w-5 h-5" />
             <span>Class saved successfully!</span>
           </div>
         )}
 
         {apiError && (
-          <div className="fixed bottom-6 right-6 bg-rose-500 text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 z-50">
+          <div className="fixed bottom-6 right-6 bg-rose-500 text-white px-5 py-3 rounded-md shadow-lg flex items-center gap-3 z-50">
             <FaExclamationCircle className="w-5 h-5" />
             <span>{apiError}</span>
           </div>
