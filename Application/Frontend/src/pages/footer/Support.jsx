@@ -33,11 +33,19 @@ export default function Support() {
       return;
     }
     setSubmitting(true);
+    
+    const subject = encodeURIComponent(`[ERP Support Ticket] ${form.ticketType.toUpperCase()}`);
+    const body = encodeURIComponent(
+      `Name: ${form.name}\nEmail: ${form.email}\nTicket Type: ${form.ticketType}\n\nIssue Description:\n${form.message}`
+    );
+    
+    window.location.href = `mailto:nullsatcksloutions@gmail.com?subject=${subject}&body=${body}`;
+    
     setTimeout(() => {
-      toast.success("Support ticket created! We will contact you soon.");
+      toast.success("Opening mail client to send support ticket...");
       setForm({ name: "", email: "", ticketType: "bug", message: "" });
       setSubmitting(false);
-    }, 1200);
+    }, 1000);
   };
 
   return (

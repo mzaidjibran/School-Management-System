@@ -21,7 +21,7 @@ export default function ContactUs() {
     );
     
     // Open mailto
-    window.location.href = `mailto:punjabpublicschool@gmail.com?subject=${mailtoSubject}&body=${mailtoBody}`;
+    window.location.href = `mailto:nullsatcksloutions@gmail.com?subject=${mailtoSubject}&body=${mailtoBody}`;
 
     setTimeout(() => {
       toast.success("Opening your mail application...");
@@ -32,7 +32,7 @@ export default function ContactUs() {
 
   const handleWhatsApp = () => {
     const text = encodeURIComponent(
-      "Hello Punjab Public High School administration! I am looking for assistance regarding the School ERP portal."
+      "Hello Null Stack Solutions team! I am looking for assistance regarding the school ERP system."
     );
     window.open(`https://wa.me/923076048509?text=${text}`, "_blank");
   };
@@ -46,7 +46,7 @@ export default function ContactUs() {
             <Mail size={26} />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">Contact Us</h1>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">Contact Developer Support</h1>
             <p className="text-xs text-slate-400 font-semibold mt-0.5">We would love to hear from you</p>
           </div>
         </div>
@@ -124,7 +124,7 @@ export default function ContactUs() {
           {/* Info Card */}
           <div className="bg-white rounded-md border border-slate-100/85 shadow-sm p-6 space-y-5">
             <h2 className="text-sm font-bold text-slate-800 pb-3 border-b border-slate-100 mb-2">
-              Contact Information
+              Developer Information
             </h2>
 
             <div className="space-y-4 text-xs text-slate-500">
@@ -132,7 +132,7 @@ export default function ContactUs() {
                 <MapPin size={16} className="text-indigo-600 shrink-0 mt-0.5" />
                 <div>
                   <strong className="block text-slate-700 font-bold">Address</strong>
-                  <span className="leading-relaxed">Main Campus, Punjab Public High School Road, Sahiwal, Pakistan</span>
+                  <span className="leading-relaxed">Nullstack Solutions, Gulberg, Lahore, Pakistan</span>
                 </div>
               </div>
 
@@ -148,14 +148,14 @@ export default function ContactUs() {
                 <Mail size={16} className="text-indigo-600 shrink-0 mt-0.5" />
                 <div>
                   <strong className="block text-slate-700 font-bold">Email Address</strong>
-                  <span>punjabpublicschool@gmail.com</span>
+                  <span>nullsatcksloutions@gmail.com</span>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
                 <Clock size={16} className="text-indigo-600 shrink-0 mt-0.5" />
                 <div>
-                  <strong className="block text-slate-700 font-bold">Office Hours</strong>
+                  <strong className="block text-slate-700 font-bold">Support Hours</strong>
                   <span>Mon - Sat: 08:00 AM - 02:00 PM</span>
                 </div>
               </div>
@@ -168,14 +168,14 @@ export default function ContactUs() {
               <MessageCircle size={18} className="text-emerald-600" /> WhatsApp Support
             </h3>
             <p className="text-xs text-emerald-700/80 leading-relaxed font-semibold">
-              Instant help is just a click away! Chat directly with our administrative team on WhatsApp.
+              Instant help is just a click away! Chat directly with our developer support team on WhatsApp.
             </p>
             <button
               onClick={handleWhatsApp}
               className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-750 text-white rounded text-xs font-bold shadow-md shadow-emerald-600/10 transition cursor-pointer flex items-center justify-center gap-1.5"
             >
               <MessageCircle size={14} />
-              Chat on WhatsApp (+923076048509)
+              Chat on WhatsApp
             </button>
           </div>
 
