@@ -94,7 +94,7 @@ const NoticeModal = ({ notice, onClose, onPrint }) => {
               ["Status",   <StatusBadge status={notice.status} />],
               ["Publish Date", formatDate(notice.publishDate)],
               ["Expiry Date",  formatDate(notice.expiryDate)],
-              ["Author", notice.createdBy?.name || "—"],
+              ["Author", notice.createdBy?.Name || notice.createdBy?.name || "—"],
               ["Views",  notice.views ?? 0],
             ].map(([label, val]) => (
               <div key={label}>
@@ -416,7 +416,7 @@ export default function NoticeBoard() {
 
                 <div className="flex items-center justify-between text-xs text-slate-400 mb-3">
                   <span className="flex items-center gap-1"><FaCalendarAlt className="text-slate-400 text-[11px]" /> {formatDate(notice.publishDate)}</span>
-                  <span className="flex items-center gap-1"><FaUser className="text-slate-400 text-[11px]" /> {notice.createdBy?.name || "—"}</span>
+                  <span className="flex items-center gap-1"><FaUser className="text-slate-400 text-[11px]" /> {notice.createdBy?.Name || notice.createdBy?.name || "—"}</span>
                 </div>
 
                 <div className="flex items-center gap-1 pt-2.5 border-t border-slate-100">

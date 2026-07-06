@@ -12,7 +12,7 @@ export const getAllNotices = async (req, res) => {
 
     const total = await Notice.countDocuments(filter);
     const notices = await Notice.find(filter)
-      .populate("createdBy", "name")
+      .populate("createdBy", "Name")
       .populate("targetClass", "name section")
       .skip((page - 1) * limit)
       .limit(Number(limit))
@@ -34,7 +34,7 @@ export const getNoticeById = async (req, res) => {
       query,
       { $inc: { views: 1 } },
       { new: true }
-    ).populate("createdBy", "name");
+    ).populate("createdBy", "Name");
     if (!notice) return res.status(404).json({ success: false, message: "Notice not found" });
     res.json({ success: true, notice });
   } catch (err) {
@@ -49,7 +49,8 @@ export const createNotice = async (req, res) => {
     if (req.headers["x-section"]) req.body.schoolSection = req.headers["x-section"];
     const notice = new Notice({ ...req.body});
     await notice.save();
-    res.status(201).json({ success: true, message: "Notice created", notice });
+    const populated = await Notice.findById(notice._id).populate("createdBy", "Name");
+    res.status(201).json({ success: true, message: "Notice created", notice: populated });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }
@@ -63,7 +64,7 @@ export const updateNotice = async (req, res) => {
 
     const notice = await Notice.findOneAndUpdate(query, req.body, {
       new: true, runValidators: true,
-    });
+    }).populate("createdBy", "Name");
     if (!notice) return res.status(404).json({ success: false, message: "Notice not found" });
     res.json({ success: true, message: "Notice updated", notice });
   } catch (err) {

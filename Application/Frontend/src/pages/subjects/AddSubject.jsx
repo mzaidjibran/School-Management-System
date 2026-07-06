@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaBook, FaSave, FaPlus, FaUndo, FaTimes } from "react-icons/fa";
 import { addSubject } from "../../api/Subject_Api.js";
+import { getAllClasses } from "../../Api/Class_Api.js";
+import { getAllTeachers } from "../../Api/Teacher_Api.js";
 import toast from "react-hot-toast";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
@@ -25,6 +27,64 @@ const inputCls = (field, errors = {}) =>
   `w-full px-3 py-2.5 text-sm border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 transition-all ${
     errors[field] ? "border-rose-400 focus:ring-rose-300" : "border-slate-200"
   }`;
+
+// ─── Class Multi-Select Dropdown ──────────────────────────────────────────────
+const ClassMultiDropdown = ({ classes, selected, onChange, error }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const toggle = (id) => {
+    const next = selected.includes(id) ? selected.filter((x) => x !== id) : [...selected, id];
+    onChange(next);
+  };
+
+  const label = selected.length === 0
+    ? "Select class(es)…"
+    : classes.filter((c) => selected.includes(c._id)).map((c) => c.name + (c.section ? ` - ${c.section}` : "")).join(", ");
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className={`w-full flex items-center justify-between px-3 py-2.5 text-sm border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 transition-all text-left ${error ? "border-rose-400" : "border-slate-200"}`}
+      >
+        <span className={`truncate ${selected.length === 0 ? "text-slate-400" : "text-slate-800"}`}>{label}</span>
+        <svg className={`w-4 h-4 text-slate-400 shrink-0 ml-2 transition-transform ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute z-50 mt-1 w-full bg-white border border-slate-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+          {classes.length === 0 ? (
+            <p className="text-xs text-slate-400 px-3 py-2">No classes found</p>
+          ) : (
+            classes.map((c) => {
+              const checked = selected.includes(c._id);
+              return (
+                <label key={c._id} className="flex items-center gap-2.5 px-3 py-2 hover:bg-indigo-50 cursor-pointer transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => toggle(c._id)}
+                    className="w-3.5 h-3.5 accent-indigo-600 rounded"
+                  />
+                  <span className="text-sm text-slate-700">{c.name}{c.section ? ` - ${c.section}` : ""}</span>
+                </label>
+              );
+            })
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 // ✅ Component ke BAHAR define kiya - focus issue fix
 const Field = ({ label, name, type = "text", required, value, onChange, errors = {} }) => (
@@ -101,14 +161,13 @@ export default function AddSubject() {
     const fetchDropdowns = async () => {
       setLoadingDropdowns(true);
       try {
+        // Use API helper functions — they send auth token + x-section + x-branch-id headers
         const [classRes, teacherRes] = await Promise.all([
-          fetch(`${API_BASE}/api/classes`, { headers: { "Content-Type": "application/json" } }),
-          fetch(`${API_BASE}/api/teachers`, { headers: { "Content-Type": "application/json" } }),
+          getAllClasses(),
+          getAllTeachers(),
         ]);
-        const classJson = await classRes.json();
-        const teacherJson = await teacherRes.json();
-        setClasses(classJson.data || classJson.classes || []);
-        setTeachers(teacherJson.data || teacherJson.teachers || []);
+        setClasses(classRes.data || []);
+        setTeachers(teacherRes.data || []);
       } catch (err) {
         toast.error("Classes/Teachers load karne mein error: " + err.message);
       } finally {
@@ -240,25 +299,21 @@ export default function AddSubject() {
                   errors={errors}
                 />
 
-                {/* Classes multi-select */}
+                {/* Classes dropdown */}
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1.5">
                     Class(es) <span className="text-rose-500">*</span>
-                    <span className="text-slate-400 font-normal ml-1">(Ctrl+click for multiple)</span>
+                    <span className="text-slate-400 font-normal ml-1">(select one or more)</span>
                   </label>
-                  <select
-                    multiple
-                    value={form.class}
-                    onChange={handleClassChange}
-                    className={`${inputCls("class", errors)} h-28`}
-                  >
-                    {classes.map((c) => (
-                      <option key={c._id} value={c._id}>
-                        {c.name}
-                        {c.section ? ` - ${c.section}` : ""}
-                      </option>
-                    ))}
-                  </select>
+                  <ClassMultiDropdown
+                    classes={classes}
+                    selected={form.class}
+                    onChange={(val) => {
+                      setForm((prev) => ({ ...prev, class: val }));
+                      if (errors.class) setErrors((prev) => ({ ...prev, class: "" }));
+                    }}
+                    error={!!errors.class}
+                  />
                   {errors.class && (
                     <p className="text-rose-500 text-xs mt-1">{errors.class}</p>
                   )}
@@ -279,7 +334,7 @@ export default function AddSubject() {
                       <option value="">Select Teacher…</option>
                       {teachers.map((t) => (
                         <option key={t._id} value={t._id}>
-                          {t.name}
+                          {t.name || `${t.firstName || ""} ${t.lastName || ""}`.trim()}
                         </option>
                       ))}
                     </select>
