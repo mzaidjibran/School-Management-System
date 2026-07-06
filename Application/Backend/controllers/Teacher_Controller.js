@@ -1,5 +1,7 @@
 import Teacher from "../models/Teacher_Model.js";
+import User_Model from "../models/User_Model.js";
 import path from "path";
+import bcrypt from "bcrypt";
 
 function normalizePayload(body, file) {
   const data = { ...body };
@@ -63,12 +65,28 @@ export const createTeacher = async (request, response) => {
     teacherData.schoolSection = teacherData.schoolSection || request.headers["x-section"];
 
     const teacher = await Teacher.create(teacherData);
+
+    // Create corresponding login User account
+    const existingUser = await User_Model.findOne({ email: teacherData.email.toLowerCase().trim() });
+    if (!existingUser) {
+      const hashedPassword = await bcrypt.hash("123456", 10);
+      await User_Model.create({
+        Name: teacherData.name,
+        email: teacherData.email.toLowerCase().trim(),
+        password: hashedPassword,
+        role: "teacher",
+        gender: teacherData.gender || "male",
+        createdBy: request.userId,
+        assignedPages: ["attendance"], // default page
+      });
+    }
+
     response
       .status(201)
       .json({
         success: true,
         error: false,
-        message: "Teacher created successfully",
+        message: "Teacher created successfully. Login account created with default password '123456'.",
         data: transformTeacherDoc(teacher),
       });
   } catch (error) {
@@ -80,9 +98,14 @@ export const createTeacher = async (request, response) => {
 
 export const getAllTeachers = async (request, response) => {
   try {
-    const query = { userId: request.userId };
+    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+    const query = { userId: ownerId };
     if (request.headers["x-branch-id"]) query.branch = request.headers["x-branch-id"];
-    if (request.headers["x-section"]) query.schoolSection = request.headers["x-section"];
+    if (request.user && request.user.role === "teacher") {
+      query.schoolSection = request.user.gender === "female" ? "girls" : "boys";
+    } else if (request.headers["x-section"]) {
+      query.schoolSection = request.headers["x-section"];
+    }
 
     const teachers = await Teacher.find(query);
     response
@@ -207,5 +230,84 @@ export const assignClass = async (request, response) => {
     response
       .status(400)
       .json({ success: false, error: true, message: error.message });
+  }
+};
+
+export const getTeacherPermissionsList = async (request, response) => {
+  try {
+    const query = { userId: request.userId };
+    if (request.headers["x-branch-id"]) query.branch = request.headers["x-branch-id"];
+    if (request.headers["x-section"]) query.schoolSection = request.headers["x-section"];
+
+    const teachers = await Teacher.find(query);
+
+    const list = await Promise.all(
+      teachers.map(async (t) => {
+        const u = await User_Model.findOne({ email: t.email.toLowerCase().trim() });
+        return {
+          _id: t._id,
+          name: t.name,
+          email: t.email,
+          assignedPages: u ? u.assignedPages : [],
+          hasAccount: !!u,
+        };
+      })
+    );
+
+    response.status(200).json({
+      success: true,
+      error: false,
+      data: list,
+    });
+  } catch (error) {
+    response.status(500).json({ success: false, error: true, message: error.message });
+  }
+};
+
+export const updateTeacherPermissions = async (request, response) => {
+  try {
+    const { email, name, assignedPages, password } = request.body;
+
+    if (!email) {
+      return response.status(400).json({ success: false, error: true, message: "Email is required!" });
+    }
+
+    let user = await User_Model.findOne({ email: email.toLowerCase().trim() });
+    const teacherDoc = await Teacher.findOne({ email: email.toLowerCase().trim() });
+    const teacherGender = teacherDoc ? teacherDoc.gender : "male";
+
+    if (!user) {
+      const hashedPassword = await bcrypt.hash(password || "123456", 10);
+      user = await User_Model.create({
+        Name: name || "Teacher User",
+        email: email.toLowerCase().trim(),
+        password: hashedPassword,
+        role: "teacher",
+        gender: teacherGender,
+        createdBy: request.userId,
+        assignedPages: assignedPages || [],
+      });
+    } else {
+      user.role = "teacher";
+      user.gender = teacherGender;
+      user.assignedPages = assignedPages || [];
+      if (password) {
+        user.password = await bcrypt.hash(password, 10);
+      }
+      await user.save();
+    }
+
+    response.status(200).json({
+      success: true,
+      error: false,
+      message: "Permissions updated successfully",
+      data: {
+        email: user.email,
+        assignedPages: user.assignedPages,
+        hasAccount: true,
+      },
+    });
+  } catch (error) {
+    response.status(500).json({ success: false, error: true, message: error.message });
   }
 };

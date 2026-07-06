@@ -3,12 +3,17 @@ import Subject from "../models/Subject_Model.js";
 export const getAllSubjects = async (req, res) => {
   try {
     const { classId, status, search } = req.query;
-    const filter = { createdBy: req.userId };
+    const ownerId = req.user && req.user.role === "teacher" ? req.user.createdBy : req.userId;
+    const filter = { createdBy: ownerId };
     if (classId) filter.class = classId;
     if (status) filter.status = status;
     if (search) filter.name = { $regex: search, $options: "i" };
     if (req.headers["x-branch-id"]) filter.branch = req.headers["x-branch-id"];
-    if (req.headers["x-section"]) filter.schoolSection = req.headers["x-section"];
+    if (req.user && req.user.role === "teacher") {
+      filter.schoolSection = req.user.gender === "female" ? "girls" : "boys";
+    } else if (req.headers["x-section"]) {
+      filter.schoolSection = req.headers["x-section"];
+    }
 
     const subjects = await Subject.find(filter)
       .populate("class", "name section")

@@ -130,7 +130,11 @@ export default function Login() {
     try {
       const result = await signIn(form.email, form.password);
       toast.success(`Welcome back, ${result.Name || ""}!`);
-      navigate("/");
+      if (result.role === "teacher" && result.assignedPages && result.assignedPages.length > 0) {
+        navigate(`/${result.assignedPages[0]}`);
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       toast.error(err.message || "Login failed");
     } finally {

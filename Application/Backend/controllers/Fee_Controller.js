@@ -45,7 +45,8 @@ export const getStudentFees = async (request, response) => {
     const { studentId } = request.params;
     const { status, year } = request.query;
 
-    const filter = { student: studentId, createdBy: request.userId };
+    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+    const filter = { student: studentId, createdBy: ownerId };
     if (status) filter.status = status;
     if (year) filter.year = Number(year);
     if (request.headers["x-branch-id"]) filter.branch = request.headers["x-branch-id"];
@@ -76,8 +77,9 @@ export const getStudentFees = async (request, response) => {
 // ─── Get Pending Fees ─────────────────────────────────────────────
 export const getPendingFees = async (request, response) => {
   try {
+    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
     const filter = {
-      createdBy: request.userId,
+      createdBy: ownerId,
       status: { $in: ["pending", "partial", "overdue"] },
     };
     if (request.headers["x-branch-id"]) filter.branch = request.headers["x-branch-id"];
@@ -108,7 +110,8 @@ export const getAllFees = async (request, response) => {
   try {
     const { status, month, year } = request.query;
 
-    const filter = { createdBy: request.userId };
+    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+    const filter = { createdBy: ownerId };
     if (status) filter.status = status;
     if (month) filter.month = Number(month);
     if (year) filter.year = Number(year);

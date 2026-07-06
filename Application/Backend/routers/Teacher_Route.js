@@ -6,6 +6,8 @@ import {
   updateTeacher,
   deleteTeacher,
   assignClass,
+  getTeacherPermissionsList,
+  updateTeacherPermissions,
 } from "../controllers/Teacher_Controller.js";
 import { protect, authorize } from "../middleware/Auth_Middleware.js";
 import { upload } from "../middleware/Upload_Middleware.js";
@@ -15,6 +17,9 @@ const router = express.Router();
 router.use(protect);
 
 // ─── Teacher CRUD ─────────────────────────────────────────────────
+router.get("/permissions/list", authorize("admin"), getTeacherPermissionsList);
+router.post("/permissions/update", authorize("admin"), updateTeacherPermissions);
+
 router.post("/",upload.single("profileImage"), createTeacher);
 router.get("/",getAllTeachers);
 router.get("/:id", getSingleTeacher);

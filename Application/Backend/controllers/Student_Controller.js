@@ -122,7 +122,8 @@ export const createStudent = async (request, response) => {
 // ─── Get All Students ─────────────────────────────────────────────
 export const getAllStudents = async (request, response) => {
   try {
-    const query = { createdBy: request.userId };
+    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+    const query = { createdBy: ownerId };
     const { rollNumber, name, search } = request.query;
 
     if (request.query.currentClass) {
@@ -161,10 +162,14 @@ export const getAllStudents = async (request, response) => {
         ];
       }
     }
-    if (request.query.section) {
-      query.schoolSection = request.query.section;
-    } else if (request.headers["x-section"]) {
-      query.schoolSection = request.headers["x-section"];
+    if (request.user && request.user.role === "teacher") {
+      query.schoolSection = request.user.gender === "female" ? "girls" : "boys";
+    } else {
+      if (request.query.section) {
+        query.schoolSection = request.query.section;
+      } else if (request.headers["x-section"]) {
+        query.schoolSection = request.headers["x-section"];
+      }
     }
     if (request.headers["x-branch-id"]) {
       query.branch = request.headers["x-branch-id"];

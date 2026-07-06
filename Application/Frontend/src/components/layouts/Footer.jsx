@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
@@ -24,10 +26,10 @@ export default function Footer() {
 
           {/* Center: Quick links */}
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs font-semibold text-slate-500">
-            <a href="#" className="hover:text-indigo-600 transition duration-150">Privacy Policy</a>
-            <a href="#" className="hover:text-indigo-600 transition duration-150">Terms of Service</a>
-            <a href="#" className="hover:text-indigo-600 transition duration-150">Support</a>
-            <a href="#" className="hover:text-indigo-600 transition duration-150">Contact Us</a>
+            <Link to="/privacy-policy" className="hover:text-indigo-600 transition duration-150">Privacy Policy</Link>
+            <Link to="/terms-of-service" className="hover:text-indigo-600 transition duration-150">Terms of Service</Link>
+            <Link to="/support" className="hover:text-indigo-600 transition duration-150">Support</Link>
+            <Link to="/contact-us" className="hover:text-indigo-600 transition duration-150">Contact Us</Link>
           </div>
 
           {/* Right: Copyright + Version + Dev credit */}

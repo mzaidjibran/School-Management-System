@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import User_Model from "../models/User_Model.js";
 
 // ─── Token Verify Karo ────────────────────────────────────────────
@@ -35,12 +36,17 @@ export const protect = async (request, response, next) => {
       });
     }
 
-    if (user.isActive === false) {
-      return response.status(403).json({
-        success: false,
-        error: true,
-        message: "Aapka account inactive hai. Admin se rabta karein",
-      });
+    if (user.role === "teacher" && !user.gender) {
+      try {
+        const TeacherModel = mongoose.model("Teacher");
+        const teacherDoc = await TeacherModel.findOne({ email: user.email.toLowerCase().trim() });
+        if (teacherDoc) {
+          user.gender = teacherDoc.gender || "male";
+          await User_Model.updateOne({ _id: user._id }, { gender: user.gender });
+        }
+      } catch (err) {
+        console.error("Failed to populate teacher gender:", err.message);
+      }
     }
 
     // request.userId set karo — controllers mein isi se access hota hai

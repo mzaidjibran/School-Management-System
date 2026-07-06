@@ -15,6 +15,7 @@ export const normalizeRole = (r) => {
   if (!r) return null;
   const lower = String(r).toLowerCase();
   if (lower === "admin" || lower === "administrator") return "admin";
+  if (lower === "teacher") return "teacher";
   if (lower === "employee") return "employee";
   return "employee";
 };

@@ -9,8 +9,17 @@ const userSchema = new mongoose.Schema(
     // ─── Role ─────────────────────────────────────────────────────
     role: {
       type: String,
-      enum: ["admin"],
+      enum: ["admin", "teacher"],
       default: "admin",
+    },
+    assignedPages: {
+      type: [String],
+      default: [],
+    },
+    gender: {
+      type: String,
+      enum: ["male", "female", "other"],
+      default: "male",
     },
 
     // ─── Profile ──────────────────────────────────────────────────

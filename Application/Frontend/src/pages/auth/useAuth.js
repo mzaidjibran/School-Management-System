@@ -81,5 +81,14 @@ export const useAuth = () => {
     userImage:  authState.userImage,
     isAdmin:    authState.userRole === "admin",
     isEmployee: authState.userRole === "employee",
+    isTeacher:  authState.userRole === "teacher",
+    assignedPages: (() => {
+      try {
+        const u = localStorage.getItem("user");
+        return u ? JSON.parse(u).assignedPages || [] : [];
+      } catch {
+        return [];
+      }
+    })(),
   };
 };

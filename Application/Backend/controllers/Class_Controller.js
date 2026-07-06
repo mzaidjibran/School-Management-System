@@ -34,18 +34,23 @@ export const createClass = async (request, response) => {
 export const getAllClasses = async (request, response) => {
   try {
     const { academicYear, isActive } = request.query;
-    const filter = { createdBy: request.userId };
+    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+    const filter = { createdBy: ownerId };
     if (academicYear) filter.academicYear = academicYear;
     if (isActive !== undefined) filter.isActive = isActive === "true";
     if (request.headers["x-branch-id"]) filter.branch = request.headers["x-branch-id"];
     
-    const sectionParam = request.query.schoolSection || request.query.section;
-    if (sectionParam) {
-      if (sectionParam !== "all") {
-        filter.schoolSection = sectionParam;
+    if (request.user && request.user.role === "teacher") {
+      filter.schoolSection = request.user.gender === "female" ? "girls" : "boys";
+    } else {
+      const sectionParam = request.query.schoolSection || request.query.section;
+      if (sectionParam) {
+        if (sectionParam !== "all") {
+          filter.schoolSection = sectionParam;
+        }
+      } else if (request.headers["x-section"]) {
+        filter.schoolSection = request.headers["x-section"];
       }
-    } else if (request.headers["x-section"]) {
-      filter.schoolSection = request.headers["x-section"];
     }
 
     const classes = await Class.find(filter)

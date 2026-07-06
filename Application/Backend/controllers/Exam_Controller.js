@@ -6,13 +6,18 @@ import mongoose from "mongoose";
 export const getAllExams = async (req, res) => {
   try {
     const { classId, status, examType, session, page = 1, limit = 20 } = req.query;
-    const filter = { createdBy: req.userId };
+    const ownerId = req.user && req.user.role === "teacher" ? req.user.createdBy : req.userId;
+    const filter = { createdBy: ownerId };
     if (classId)   filter.class    = classId;
     if (status)    filter.status   = status;
     if (examType)  filter.examType = examType;
     if (session)   filter.session  = session;
     if (req.headers["x-branch-id"]) filter.branch = req.headers["x-branch-id"];
-    if (req.headers["x-section"]) filter.schoolSection = req.headers["x-section"];
+    if (req.user && req.user.role === "teacher") {
+      filter.schoolSection = req.user.gender === "female" ? "girls" : "boys";
+    } else if (req.headers["x-section"]) {
+      filter.schoolSection = req.headers["x-section"];
+    }
 
     const total = await Exam.countDocuments(filter);
     const exams = await Exam.find(filter)

@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
+import toast from "react-hot-toast";
 import { useAuth } from "../../pages/auth/useAuth.js";
 import { logOut, updateMyProfile } from "../../Api/Auth_Api.js";
 import {
@@ -16,6 +17,7 @@ import {
   Clock,
   Megaphone,
   User,
+  Lock,
 } from "lucide-react";
 
 const navItems = [
@@ -40,9 +42,103 @@ export default function ProHeader() {
   const navigate = useNavigate();
 
   // Real auth data
-  const { userName, userEmail, userRole, userImage } = useAuth();
+  const { userName, userEmail, userRole, userImage, isAdmin, isTeacher, assignedPages } = useAuth();
+
+  const visibleNavItems = navItems.filter((item) => {
+    if (isAdmin) return true;
+    if (item.path === "/") return true;
+    const pageKey = item.path.replace("/", "");
+    return assignedPages.includes(pageKey);
+  });
 
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [permissionsModalOpen, setPermissionsModalOpen] = useState(false);
+  const [permissionsLoading, setPermissionsLoading] = useState(false);
+  const [teachersList, setTeachersList] = useState([]);
+  const [selectedTeacher, setSelectedTeacher] = useState(null);
+  const [modalAssignedPages, setModalAssignedPages] = useState([]);
+  const [savingPermissions, setSavingPermissions] = useState(false);
+  const [teacherPassword, setTeacherPassword] = useState("");
+
+  const fetchPermissionsList = async () => {
+    setPermissionsLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/teachers/permissions/list`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTeachersList(data.data || []);
+        if (data.data && data.data.length > 0) {
+          setSelectedTeacher(data.data[0]);
+          setModalAssignedPages(data.data[0].assignedPages || []);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setPermissionsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (permissionsModalOpen) {
+      fetchPermissionsList();
+    }
+  }, [permissionsModalOpen]);
+
+  const handleSelectTeacher = (teacher) => {
+    setSelectedTeacher(teacher);
+    setModalAssignedPages(teacher.assignedPages || []);
+    setTeacherPassword("");
+  };
+
+  const handleTogglePageKey = (key) => {
+    setModalAssignedPages((prev) =>
+      prev.includes(key) ? prev.filter((x) => x !== key) : [...prev, key]
+    );
+  };
+
+  const handleSavePermissions = async () => {
+    if (!selectedTeacher) return;
+    setSavingPermissions(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/teachers/permissions/update`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        body: JSON.stringify({
+          email: selectedTeacher.email,
+          name: selectedTeacher.name,
+          assignedPages: modalAssignedPages,
+          password: teacherPassword || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTeachersList((prev) =>
+          prev.map((t) =>
+            t.email === selectedTeacher.email ? { ...t, assignedPages: modalAssignedPages, hasAccount: true } : t
+          )
+        );
+        toast.success(teacherPassword ? "User account & permissions updated!" : "Permissions updated successfully!");
+        setTeacherPassword("");
+      } else {
+        toast.error(data.message || "Failed to update permissions");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || "An error occurred");
+    } finally {
+      setSavingPermissions(false);
+    }
+  };
+
   const [newName, setNewName] = useState(userName || "");
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewImage, setPreviewImage] = useState("");
@@ -153,7 +249,7 @@ export default function ProHeader() {
           {/* Desktop Nav */}
           <div className="hidden lg:flex flex-1 justify-center overflow-x-auto scrollbar-none">
             <nav className="flex items-center gap-1 xl:gap-2">
-              {navItems.map((item) => (
+              {visibleNavItems.map((item) => (
                 <NavLink
                   key={item.path}
                   to={item.path}
@@ -186,23 +282,25 @@ export default function ProHeader() {
           <div className="flex items-center gap-3 shrink-0">
 
             {/* Active Branch & Section Badge */}
-            <div 
-              onClick={() => window.dispatchEvent(new Event("open-branch-modal"))}
-              className="flex items-center gap-1 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-1.5 bg-indigo-50/60 hover:bg-indigo-50 border border-indigo-100/60 rounded-md cursor-pointer select-none transition-all group shrink-0"
-              title="Click to Switch Branch or Section"
-            >
-              <div className="hidden sm:flex flex-col text-right">
-                <span className="text-[11px] font-extrabold text-indigo-700 leading-tight truncate max-w-[120px]">
-                  {activeBranchName || "Select Branch"}
-                </span>
-                <span className="text-[9px] font-bold text-indigo-500 capitalize leading-none">
-                  {activeSection ? `${activeSection} Section` : "Select Section"}
-                </span>
+            {!isTeacher && (
+              <div 
+                onClick={() => window.dispatchEvent(new Event("open-branch-modal"))}
+                className="flex items-center gap-1 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-1.5 bg-indigo-50/60 hover:bg-indigo-50 border border-indigo-100/60 rounded-md cursor-pointer select-none transition-all group shrink-0"
+                title="Click to Switch Branch or Section"
+              >
+                <div className="hidden sm:flex flex-col text-right">
+                  <span className="text-[11px] font-extrabold text-indigo-700 leading-tight truncate max-w-[120px]">
+                    {activeBranchName || "Select Branch"}
+                  </span>
+                  <span className="text-[9px] font-bold text-indigo-500 capitalize leading-none">
+                    {activeSection ? `${activeSection} Section` : "Select Section"}
+                  </span>
+                </div>
+                <div className="w-7 h-7 rounded-md bg-indigo-600/10 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
+                  <School size={14} />
+                </div>
               </div>
-              <div className="w-7 h-7 rounded-md bg-indigo-600/10 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
-                <School size={14} />
-              </div>
-            </div>
+            )}
 
             {/* Notification Bell */}
             <div className="relative" ref={notifDropdownRef}>
@@ -270,6 +368,19 @@ export default function ProHeader() {
                       <User size={14} className="text-slate-400" /> Edit Profile
                     </button>
                   </div>
+                  {isAdmin && (
+                    <div className="p-1">
+                      <button
+                        onClick={() => {
+                          setPermissionsModalOpen(true);
+                          setUserDropdownOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-md transition flex items-center gap-1.5 cursor-pointer font-semibold text-indigo-600 bg-indigo-50/50 hover:bg-indigo-50"
+                      >
+                        <Lock size={14} className="text-indigo-500" /> Teacher Permissions
+                      </button>
+                    </div>
+                  )}
 
                   <hr className="my-1 border-slate-100" />
 
@@ -306,7 +417,7 @@ export default function ProHeader() {
       {mobileMenuOpen && (
         <div className="lg:hidden bg-white/95 backdrop-blur-sm border-t border-slate-100 shadow-inner">
           <nav className="px-4 py-3 flex flex-col gap-1 max-h-[70vh] overflow-y-auto">
-            {navItems.map((item) => (
+            {visibleNavItems.map((item) => (
               <NavLink
                 key={item.path}
                 to={item.path}
@@ -441,6 +552,153 @@ export default function ProHeader() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Teacher Permissions Modal */}
+      {permissionsModalOpen && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-lg bg-white rounded-md border border-slate-100 shadow-2xl p-6 overflow-hidden animate-scaleIn flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4 shrink-0">
+              <h2 className="text-lg font-black text-slate-800 flex items-center gap-2">
+                <Lock size={20} className="text-indigo-600" /> Teacher Page Permissions
+              </h2>
+              <button
+                onClick={() => setPermissionsModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-50 rounded-md transition"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {permissionsLoading ? (
+              <div className="py-12 text-center text-slate-400 text-sm flex-1 flex flex-col justify-center items-center gap-2">
+                <div className="animate-spin w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full" />
+                <span>Loading teachers list...</span>
+              </div>
+            ) : teachersList.length === 0 ? (
+              <div className="py-12 text-center text-slate-400 text-sm flex-1">
+                No teachers found in the database. Please add teachers first.
+              </div>
+            ) : (
+              <div className="mt-4 flex-1 overflow-y-auto space-y-5 pr-1">
+                {/* Select Teacher */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Select Teacher</label>
+                  <select
+                    value={selectedTeacher ? selectedTeacher._id : ""}
+                    onChange={(e) => {
+                      const t = teachersList.find((x) => x._id === e.target.value);
+                      if (t) handleSelectTeacher(t);
+                    }}
+                    className="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-md outline-none focus:border-indigo-500 focus:bg-white transition font-medium text-slate-700"
+                  >
+                    {teachersList.map((t) => (
+                      <option key={t._id} value={t._id}>
+                        {t.name} ({t.email})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {selectedTeacher && (
+                  <>
+                    {/* Account Status Badge */}
+                    <div className="flex items-center justify-between text-xs bg-slate-50 border border-slate-100 rounded-md p-3">
+                      <div>
+                        <p className="font-semibold text-slate-600">{selectedTeacher.name}</p>
+                        <p className="text-slate-400 mt-0.5">{selectedTeacher.email}</p>
+                      </div>
+                      <span className={`px-2.5 py-0.5 rounded-full font-semibold text-[10px] uppercase ${selectedTeacher.hasAccount ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
+                        {selectedTeacher.hasAccount ? "Account Active" : "No Login Yet (Will Auto-Create)"}
+                      </span>
+                    </div>
+
+                    {/* Password Fields */}
+                    <div className="space-y-1.5 p-3 border border-indigo-50/50 bg-indigo-50/10 rounded-md">
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                        {selectedTeacher.hasAccount ? "Reset / Change Password" : "Create User Password"}
+                      </label>
+                      <input
+                        type="text"
+                        value={teacherPassword}
+                        onChange={(e) => setTeacherPassword(e.target.value)}
+                        placeholder={selectedTeacher.hasAccount ? "Leave empty to keep current password" : "Enter password (default: 123456)"}
+                        className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded outline-none focus:border-indigo-400 transition"
+                      />
+                    </div>
+
+                    {/* Permissions list */}
+                    <div className="space-y-2">
+                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Assign Access Pages</label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {[
+                          { key: "students",   label: "Students Portal" },
+                          { key: "teachers",   label: "Teachers Portal" },
+                          { key: "classes",    label: "Classes Portal" },
+                          { key: "attendance", label: "Attendance Portal" },
+                          { key: "exams",      label: "Exams & Marks" },
+                          { key: "fees",       label: "Fee Collection" },
+                          { key: "subjects",   label: "Subject Management" },
+                          { key: "timetable",  label: "Timetable Grid" },
+                          { key: "notices",    label: "Notices Board" },
+                        ].map((p) => {
+                          const checked = modalAssignedPages.includes(p.key);
+                          return (
+                            <label
+                              key={p.key}
+                              className={`flex items-center justify-between p-3 border rounded-md cursor-pointer transition select-none ${
+                                checked
+                                  ? "border-indigo-200 bg-indigo-50/30 text-indigo-700 font-semibold"
+                                  : "border-slate-100 hover:bg-slate-50 text-slate-600"
+                              }`}
+                            >
+                              <span className="text-xs">{p.label}</span>
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => handleTogglePageKey(p.key)}
+                                className="w-4 h-4 accent-indigo-600 cursor-pointer rounded"
+                              />
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-2.5 pt-4 border-t border-slate-100 mt-5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setPermissionsModalOpen(false)}
+                className="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 rounded-md text-xs font-bold text-slate-600 transition cursor-pointer"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={handleSavePermissions}
+                disabled={savingPermissions || teachersList.length === 0}
+                className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-bold shadow-md shadow-indigo-600/10 transition cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
+              >
+                {savingPermissions ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Permissions"
+                )}
+              </button>
+            </div>
           </div>
         </div>,
         document.body

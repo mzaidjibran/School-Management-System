@@ -21,7 +21,8 @@ export const markAttendance = async (request, response) => {
     for (const rec of records) {
       try {
         // Validate student ownership
-        const studentExists = await Student.findOne({ _id: rec.student, createdBy: request.userId });
+        const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+        const studentExists = await Student.findOne({ _id: rec.student, createdBy: ownerId });
         if (!studentExists) continue;
 
         if (request.headers["x-branch-id"]) rec.branch = request.headers["x-branch-id"];
@@ -63,7 +64,8 @@ export const getAttendanceByClassAndDate = async (request, response) => {
       });
     }
 
-    const classExists = await Class.findOne({ _id: classId, createdBy: request.userId });
+    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+    const classExists = await Class.findOne({ _id: classId, createdBy: ownerId });
     if (!classExists) {
       return response.status(403).json({
         success: false,
@@ -82,10 +84,14 @@ export const getAttendanceByClassAndDate = async (request, response) => {
       class: classId,
       date: { $gte: start, $lte: end },
     };
-    if (section) {
-      query.schoolSection = section;
-    } else if (request.headers["x-section"]) {
-      query.schoolSection = request.headers["x-section"];
+    if (request.user && request.user.role === "teacher") {
+      query.schoolSection = request.user.gender === "female" ? "girls" : "boys";
+    } else {
+      if (section) {
+        query.schoolSection = section;
+      } else if (request.headers["x-section"]) {
+        query.schoolSection = request.headers["x-section"];
+      }
     }
     if (request.headers["x-branch-id"]) {
       query.branch = request.headers["x-branch-id"];
@@ -115,7 +121,8 @@ export const getAttendanceByStudent = async (request, response) => {
     const { studentId } = request.params;
     const { month, year } = request.query;
 
-    const studentExists = await Student.findOne({ _id: studentId, createdBy: request.userId });
+    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+    const studentExists = await Student.findOne({ _id: studentId, createdBy: ownerId });
     if (!studentExists) {
       return response.status(403).json({
         success: false,
@@ -177,7 +184,8 @@ export const updateAttendance = async (request, response) => {
       });
     }
 
-    const studentExists = await Student.findOne({ _id: record.student, createdBy: request.userId });
+    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+    const studentExists = await Student.findOne({ _id: record.student, createdBy: ownerId });
     if (!studentExists) {
       return response.status(403).json({
         success: false,
@@ -216,9 +224,15 @@ export const getTodayAttendanceSummary = async (request, response) => {
     const end = new Date(today);
     end.setHours(23, 59, 59, 999);
 
-    const studentQuery = { createdBy: request.userId };
+    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+    const studentQuery = { createdBy: ownerId };
     if (request.headers["x-branch-id"]) studentQuery.branch = request.headers["x-branch-id"];
-    if (request.headers["x-section"]) studentQuery.schoolSection = request.headers["x-section"];
+    
+    if (request.user && request.user.role === "teacher") {
+      studentQuery.schoolSection = request.user.gender === "female" ? "girls" : "boys";
+    } else if (request.headers["x-section"]) {
+      studentQuery.schoolSection = request.headers["x-section"];
+    }
 
     const studentIds = await Student.find(studentQuery).distinct("_id");
     
@@ -227,7 +241,12 @@ export const getTodayAttendanceSummary = async (request, response) => {
       date: { $gte: start, $lte: end },
     };
     if (request.headers["x-branch-id"]) attendanceQuery.branch = request.headers["x-branch-id"];
-    if (request.headers["x-section"]) attendanceQuery.schoolSection = request.headers["x-section"];
+    
+    if (request.user && request.user.role === "teacher") {
+      attendanceQuery.schoolSection = request.user.gender === "female" ? "girls" : "boys";
+    } else if (request.headers["x-section"]) {
+      attendanceQuery.schoolSection = request.headers["x-section"];
+    }
 
     const records = await Attendance.find(attendanceQuery);
 
