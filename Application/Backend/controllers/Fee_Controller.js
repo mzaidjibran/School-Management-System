@@ -119,7 +119,14 @@ export const getAllFees = async (request, response) => {
     if (request.headers["x-section"]) filter.schoolSection = request.headers["x-section"];
 
     const fees = await Fee.find(filter)
-      .populate("student", "firstName lastName rollNumber class section")  // ← yeh already tha
+      .populate({
+        path: "student",
+        select: "firstName lastName rollNumber currentClass section",
+        populate: {
+          path: "currentClass",
+          select: "name",
+        },
+      })
       .sort({ year: -1, month: -1, dueDate: 1 });
 
     response.status(200).json({

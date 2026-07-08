@@ -3,6 +3,20 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/useAuth.js";
 import toast from "react-hot-toast";
 import {
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import {
   GraduationCap,
   Users,
   School,
@@ -42,6 +56,8 @@ export default function Dashboard() {
   const [exams, setExams] = useState([]);
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [feeChartData, setFeeChartData] = useState([]);
+  const [enrollmentChartData, setEnrollmentChartData] = useState([]);
 
   // ── Clock ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -120,13 +136,61 @@ export default function Dashboard() {
         const today = new Date();
         setExams(
           allExams
-            .filter((e) => new Date(e.date) >= today)
-            .sort((a, b) => new Date(a.date) - new Date(b.date))
+            .filter((e) => new Date(e.examDate || e.date) >= today)
+            .sort((a, b) => new Date(a.examDate || a.date) - new Date(b.examDate || b.date))
             .slice(0, 2),
         );
 
-        setNotices((noticeData?.data ?? []).slice(0, 3));
-        setRecentFees((feeData?.data ?? []).slice(0, 4));
+        const fetchedNotices = noticeData?.notices || noticeData?.data || [];
+        setNotices(fetchedNotices.slice(0, 3));
+        
+        const fetchedFees = feeData?.data || [];
+        setRecentFees(fetchedFees.slice(0, 4));
+
+        // Group & sum real fees by month for charts
+        if (fetchedFees.length) {
+          const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+          const groupedFees = {};
+          
+          // Sort fees chronologically
+          const sortedFees = [...fetchedFees].sort(
+            (a, b) => new Date(a.createdAt || a.dueDate) - new Date(b.createdAt || b.dueDate)
+          );
+          
+          sortedFees.forEach(fee => {
+            const date = new Date(fee.createdAt || fee.dueDate);
+            const m = months[date.getMonth()];
+            const y = date.getFullYear().toString().slice(-2);
+            const label = `${m} ${y}`;
+            if (!groupedFees[label]) {
+              groupedFees[label] = 0;
+            }
+            groupedFees[label] += fee.amount || 0;
+          });
+          
+          const formattedFees = Object.entries(groupedFees)
+            .map(([name, amount]) => ({ name, amount }))
+            .slice(-6);
+          setFeeChartData(formattedFees);
+        }
+
+        // Group & count real students by class for charts
+        if (studData?.data) {
+          const groupedStuds = {};
+          studData.data.forEach(student => {
+            const className = student.currentClass?.name || "Unassigned";
+            if (!groupedStuds[className]) {
+              groupedStuds[className] = 0;
+            }
+            groupedStuds[className]++;
+          });
+          
+          const formattedStuds = Object.entries(groupedStuds)
+            .map(([name, count]) => ({ name, count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 6);
+          setEnrollmentChartData(formattedStuds);
+        }
 
         if (attData?.data) {
           setAttendance({
@@ -364,6 +428,18 @@ export default function Dashboard() {
             ))}
           </div>
 
+          {/* Analytics Graphs Grid */}
+          {((isAdmin || assignedPages.includes("fees")) || (isAdmin || assignedPages.includes("students"))) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {(isAdmin || assignedPages.includes("fees")) && (
+                <FeeCollectionsChart data={feeChartData} />
+              )}
+              {(isAdmin || assignedPages.includes("students")) && (
+                <StudentEnrollmentChart data={enrollmentChartData} />
+              )}
+            </div>
+          )}
+
           {/* Recent Fees */}
           {(isAdmin || assignedPages.includes("fees")) && (
             <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-5">
@@ -397,17 +473,19 @@ export default function Dashboard() {
                           className="border-b border-slate-50 hover:bg-slate-50/80 transition-colors"
                         >
                           <td className={tdClass + " font-semibold text-slate-800"}>
-                            {fee.studentId?.name || fee.studentName || "—"}
+                            {fee.student
+                              ? `${fee.student.firstName || ""} ${fee.student.lastName || ""}`.trim()
+                              : (fee.studentName || "—")}
                           </td>
                           <td className={tdClass}>
-                            {fee.classId?.name || fee.className || "—"}
+                            {fee.student?.currentClass?.name || fee.className || "—"}
                           </td>
                           <td className={tdClass + " font-semibold text-slate-900"}>
                             ₨ {fee.amount?.toLocaleString() || "—"}
                           </td>
                           <td className={tdClass}>
-                            {fee.date
-                              ? new Date(fee.date).toLocaleDateString("en-PK")
+                            {fee.dueDate || fee.date || fee.createdAt
+                              ? new Date(fee.dueDate || fee.date || fee.createdAt).toLocaleDateString("en-PK")
                               : "—"}
                           </td>
                           <td className={tdClass}>
@@ -426,17 +504,21 @@ export default function Dashboard() {
                     {recentFees.map((fee, i) => (
                       <div key={i} className="p-2.5 border border-slate-100 rounded-md space-y-1.5 bg-slate-50/30">
                         <div className="flex justify-between items-center">
-                          <strong className="text-xs font-bold text-slate-800">{fee.studentId?.name || fee.studentName || "—"}</strong>
+                          <strong className="text-xs font-bold text-slate-800">
+                            {fee.student
+                              ? `${fee.student.firstName || ""} ${fee.student.lastName || ""}`.trim()
+                              : (fee.studentName || "—")}
+                          </strong>
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold capitalize ${feeStatusColor(fee.status)}`}>
                             {fee.status || "—"}
                           </span>
                         </div>
                         <div className="flex justify-between text-[11px] text-slate-500">
-                          <span>Class: {fee.classId?.name || fee.className || "—"}</span>
+                          <span>Class: {fee.student?.currentClass?.name || fee.className || "—"}</span>
                           <span className="font-semibold text-slate-800">₨ {fee.amount?.toLocaleString() || "—"}</span>
                         </div>
                         <div className="text-[10px] text-slate-400">
-                          Date: {fee.date ? new Date(fee.date).toLocaleDateString("en-PK") : "—"}
+                          Date: {fee.dueDate || fee.date || fee.createdAt ? new Date(fee.dueDate || fee.date || fee.createdAt).toLocaleDateString("en-PK") : "—"}
                         </div>
                       </div>
                     ))}
@@ -661,6 +743,169 @@ export default function Dashboard() {
               ))}
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Custom Animated Recharts Area Chart for Fees ─────────────────────
+function FeeCollectionsChart({ data }) {
+  const displayData = data && data.length ? data : [
+    { name: "No Data", amount: 0 },
+  ];
+
+  return (
+    <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-5 space-y-4">
+      <div className="flex justify-between items-center pb-3 border-b border-slate-100/60">
+        <h3 className="text-xs font-bold text-slate-800 flex items-center gap-2">
+          <span className="w-2 h-2 bg-indigo-650 rounded-full" />
+          Monthly Fee Collections (PKR)
+        </h3>
+        <span className="text-[10px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded font-extrabold uppercase">Real DB Data</span>
+      </div>
+
+      <div className="h-[180px] w-full text-xs font-semibold">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={displayData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <defs>
+              <linearGradient id="colorFee" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#4f46e5" stopOpacity="0.2" />
+                <stop offset="95%" stopColor="#4f46e5" stopOpacity="0.0" />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f8fafc" vertical={false} />
+            <XAxis 
+              dataKey="name" 
+              stroke="#94a3b8" 
+              fontSize={9} 
+              tickLine={false} 
+              axisLine={false} 
+            />
+            <YAxis 
+              stroke="#94a3b8" 
+              fontSize={9} 
+              tickLine={false} 
+              axisLine={false} 
+              tickFormatter={(v) => `₨${v >= 1000 ? (v / 1000) + "k" : v}`}
+            />
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: "#0f172a", 
+                border: "none", 
+                borderRadius: "6px",
+                color: "#fff",
+                fontSize: "10px",
+                fontWeight: "bold"
+              }}
+              formatter={(v) => [`₨ ${v.toLocaleString()}`, "Amount"]}
+            />
+            <Area 
+              type="monotone" 
+              dataKey="amount" 
+              stroke="#4f46e5" 
+              strokeWidth={2} 
+              fillOpacity={1} 
+              fill="url(#colorFee)" 
+              animationDuration={1200}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
+
+// ─── Custom Animated Recharts Donut Chart for Enrollment ──────────────
+function StudentEnrollmentChart({ data }) {
+  const displayData = data && data.length ? data : [
+    { name: "No Class", count: 0 }
+  ];
+
+  const totalStudents = displayData.reduce((sum, d) => sum + d.count, 0);
+  
+  const chartData = displayData.map(d => ({
+    ...d,
+    value: d.count,
+    percentage: totalStudents ? ((d.count / totalStudents) * 100).toFixed(1) : 0
+  }));
+
+  const COLORS = [
+    "#3b82f6", // Blue
+    "#10b981", // Emerald
+    "#f59e0b", // Amber
+    "#ef4444", // Rose
+    "#8b5cf6", // Purple
+    "#ec4899", // Pink
+    "#14b8a6", // Teal
+    "#f97316"  // Orange
+  ];
+
+  return (
+    <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-5 space-y-4 flex flex-col justify-between">
+      <div className="flex justify-between items-center pb-3 border-b border-slate-100/60">
+        <h3 className="text-xs font-bold text-slate-800 flex items-center gap-2">
+          <span className="w-2 h-2 bg-blue-600 rounded-full" />
+          Student Class Enrollment
+        </h3>
+        <span className="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded font-extrabold uppercase">Real DB Data</span>
+      </div>
+
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-6 min-h-[180px]">
+        {/* Left Side: Donut Chart */}
+        <div className="w-[140px] h-[140px] shrink-0 relative flex items-center justify-center">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={chartData}
+                cx="50%"
+                cy="50%"
+                innerRadius={45}
+                outerRadius={60}
+                paddingAngle={3}
+                dataKey="value"
+                animationDuration={1200}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
+                ))}
+              </Pie>
+            </PieChart>
+          </ResponsiveContainer>
+
+          {/* Center Text inside Donut */}
+          <div className="absolute text-center">
+            <span className="block text-lg font-black text-slate-800 leading-none">
+              {totalStudents}
+            </span>
+            <span className="text-[8px] text-slate-400 font-extrabold uppercase tracking-wider">
+              Total
+            </span>
+          </div>
+        </div>
+
+        {/* Right Side: Beautiful Infographic Legend */}
+        <div className="flex-1 w-full space-y-2 max-h-[160px] overflow-y-auto pr-1">
+          {chartData.map((d, index) => (
+            <div key={index} className="flex items-center justify-between text-xs py-1 border-b border-slate-50/50 last:border-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <span 
+                  className="w-1.5 h-3 rounded-full shrink-0"
+                  style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                />
+                <span className="font-bold text-slate-700 truncate">{d.name}</span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-slate-400 font-semibold">{d.count} studs</span>
+                <span 
+                  className="font-black text-[11px]"
+                  style={{ color: COLORS[index % COLORS.length] }}
+                >
+                  {d.percentage}%
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
