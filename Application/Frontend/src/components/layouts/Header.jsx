@@ -240,7 +240,7 @@ export default function ProHeader() {
               <span className="text-white text-base xl:text-lg font-bold">S</span>
             </div>
             <div className="flex flex-col select-none hidden md:flex">
-              <span className="text-[10px] xl:text-xs 2xl:text-sm font-black text-slate-800 font-serif leading-none tracking-tight">Punjab Public</span>
+              <span className="text-[10px] xl:text-xs 2xl:text-sm font-bold text-slate-800 font-serif leading-none tracking-tight">Punjab Public</span>
               <span className="text-[8px] xl:text-[9px] 2xl:text-[10px] font-bold text-indigo-600 tracking-widest uppercase mt-0.5">High School</span>
             </div>
           </div>
@@ -254,7 +254,7 @@ export default function ProHeader() {
                   to={item.path}
                   end={item.path === "/"}
                   className={({ isActive }) =>
-                    `relative px-1.5 py-1.5 xl:px-2.5 xl:py-2 2xl:px-3 2xl:py-2 text-[10px] xl:text-xs 2xl:text-sm font-extrabold rounded-md transition-all duration-200 whitespace-nowrap
+                    `relative px-1.5 py-1.5 xl:px-2.5 xl:py-2 2xl:px-3 2xl:py-2 text-[10px] xl:text-xs 2xl:text-sm font-semibold rounded-md transition-all duration-200 whitespace-nowrap
                     ${isActive
                       ? "text-indigo-700 bg-indigo-50/80"
                       : "text-slate-650 hover:text-indigo-600 hover:bg-slate-100/60"
@@ -288,7 +288,7 @@ export default function ProHeader() {
                 title="Click to Switch Branch or Section"
               >
                 <div className="hidden md:flex flex-col text-right">
-                  <span className="text-[9px] xl:text-[10px] 2xl:text-[11px] font-extrabold text-indigo-700 leading-tight truncate max-w-[70px] xl:max-w-[100px] 2xl:max-w-[140px]">
+                  <span className="text-[9px] xl:text-[10px] 2xl:text-[11px] font-semibold text-indigo-700 leading-tight truncate max-w-[70px] xl:max-w-[100px] 2xl:max-w-[140px]">
                     {activeBranchName || "Select Branch"}
                   </span>
                   <span className="text-[7px] xl:text-[8px] 2xl:text-[9px] font-bold text-indigo-500 capitalize leading-none">

@@ -700,8 +700,8 @@ export default function Login() {
           justify-content: center; 
           align-items: center; 
           min-height: 100vh; 
-          background-color: #0c0a21;
-          background-image: radial-gradient(circle at 50% 50%, #1e1945 0%, #0c0a21 100%);
+          background-color: #FFF1E7;
+          background-image: radial-gradient(circle at 50% 50%, #FFF1E7 0%, #dbe8f1 100%);
           position: relative;
           overflow: hidden;
           font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -712,12 +712,12 @@ export default function Login() {
           position: fixed;
           width: 600px;
           height: 600px;
-          background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, rgba(217, 70, 239, 0.03) 50%, transparent 70%);
+          background: radial-gradient(circle, rgba(50, 96, 128, 0.1) 0%, rgba(128, 82, 50, 0.02) 50%, transparent 70%);
           border-radius: 50%;
           transform: translate(-50%, -50%);
           pointer-events: none;
           z-index: 2;
-          mix-blend-mode: screen;
+          mix-blend-mode: multiply;
         }
 
         /* Floating background items */
@@ -731,7 +731,7 @@ export default function Login() {
         .floating-item {
           position: absolute;
           bottom: -50px;
-          color: rgba(99, 102, 241, 0.15);
+          color: rgba(50, 96, 128, 0.12);
           animation: rise 25s linear infinite;
           opacity: 0;
         }
@@ -764,15 +764,15 @@ export default function Login() {
           }
         }
 
-        /* Dual-Section Login Card */
+        /* Compact Centered Login Card */
         .signin-card { 
-          width: 100%; 
-          max-width: 420px; 
-          border-radius: 2rem; 
+          width: 90% !important; 
+          max-width: 360px !important; 
+          border-radius: 1.25rem !important; 
           background: #ffffff; 
-          box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5); 
+          box-shadow: 0 20px 50px rgba(50, 96, 128, 0.12) !important; 
           z-index: 10;
-          margin: 1.5rem;
+          margin: auto !important;
           position: relative;
           overflow: hidden;
           animation: entrySlide 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -786,8 +786,8 @@ export default function Login() {
 
         /* CARD HEADER (Gradient) */
         .card-header-section {
-          background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-          padding: 2.5rem 2rem 2rem 2rem;
+          background: linear-gradient(135deg, #326080 0%, #4e7e9f 100%);
+          padding: 1.75rem 1.5rem 1.25rem 1.5rem !important;
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -809,11 +809,11 @@ export default function Login() {
         .signin-logo {
           display: flex;
           justify-content: center;
-          margin-bottom: 1rem;
+          margin-bottom: 0.75rem !important;
         }
         .logo-ring {
-          width: 66px;
-          height: 66px;
+          width: 52px !important;
+          height: 52px !important;
           border-radius: 50%;
           background: rgba(255, 255, 255, 0.15);
           backdrop-filter: blur(10px);
@@ -828,14 +828,14 @@ export default function Login() {
         }
         .logo-orbit-dot {
           position: absolute;
-          width: 6px;
-          height: 6px;
+          width: 5px !important;
+          height: 5px !important;
           background-color: #ffffff;
           border-radius: 50%;
-          box-shadow: 0 0 8px #ffffff, 0 0 15px #6366f1;
-          top: -3px;
-          left: calc(50% - 3px);
-          transform-origin: 3px 36px;
+          box-shadow: 0 0 6px #ffffff, 0 0 12px #326080;
+          top: -2.5px;
+          left: calc(50% - 2.5px);
+          transform-origin: 2.5px 29px !important;
           animation: orbit 4s linear infinite;
           z-index: 5;
         }
@@ -862,32 +862,32 @@ export default function Login() {
 
         /* School Details */
         .header-title {
-          font-size: 1.5rem;
-          font-weight: 800;
-          margin: 0 0 0.25rem 0;
+          font-size: 1.2rem !important;
+          font-weight: 750 !important;
+          margin: 0 0 0.2rem 0;
           letter-spacing: -0.01em;
           text-shadow: 0 2px 4px rgba(0,0,0,0.15);
         }
         .header-subtitle {
-          font-size: 0.85rem;
+          font-size: 0.75rem !important;
           color: rgba(255, 255, 255, 0.75);
-          margin: 0 0 1.25rem 0;
+          margin: 0 0 1rem 0 !important;
           font-weight: 400;
         }
 
         /* Badge Row */
         .badge-row {
           display: flex;
-          gap: 0.5rem;
+          gap: 0.4rem !important;
           justify-content: center;
         }
         .header-badge {
           background: rgba(255, 255, 255, 0.12);
           border: 1px solid rgba(255, 255, 255, 0.25);
           color: #ffffff;
-          padding: 0.25rem 0.65rem;
+          padding: 0.2rem 0.5rem !important;
           border-radius: 2rem;
-          font-size: 0.675rem;
+          font-size: 0.625rem !important;
           font-weight: 600;
           letter-spacing: 0.05em;
           text-transform: uppercase;
@@ -896,18 +896,18 @@ export default function Login() {
         /* CARD BODY (White Form) */
         .card-body-section {
           background: #ffffff;
-          padding: 2.25rem 2.25rem 2rem 2.25rem;
+          padding: 1.5rem 1.5rem 1.25rem 1.5rem !important;
         }
         .body-title {
-          font-size: 1.35rem;
+          font-size: 1.15rem !important;
           font-weight: 700;
           color: #1e293b;
-          margin: 0 0 0.25rem 0;
+          margin: 0 0 0.2rem 0;
         }
         .body-subtitle {
-          font-size: 0.875rem;
+          font-size: 0.775rem !important;
           color: #64748b;
-          margin: 0 0 1.75rem 0;
+          margin: 0 0 1.25rem 0 !important;
         }
 
         /* Form styling */
@@ -917,8 +917,8 @@ export default function Login() {
         }
         .form-label {
           display: block; 
-          margin-bottom: 0.4rem; 
-          font-size: 0.825rem; 
+          margin-bottom: 0.35rem !important; 
+          font-size: 0.775rem !important; 
           font-weight: 600; 
           color: #475569;
           letter-spacing: 0.01em;
@@ -930,32 +930,32 @@ export default function Login() {
         }
         .input-icon {
           position: absolute;
-          left: 1rem;
+          left: 0.85rem !important;
           color: #94a3b8;
           pointer-events: none;
           transition: color 0.2s;
         }
         .form-control { 
           width: 100%;
-          border-radius: 0.75rem; 
+          border-radius: 0.5rem !important; 
           border: 1.5px solid #e2e8f0; 
           background: #f8fafc;
-          padding: 0.7rem 1rem 0.7rem 2.6rem; 
+          padding: 0.55rem 1rem 0.55rem 2.3rem !important; 
           color: #0f172a;
-          font-size: 0.925rem;
+          font-size: 0.85rem !important;
           transition: all 0.25s ease; 
         }
         .form-control::placeholder {
           color: #94a3b8;
         }
         .form-control:focus { 
-          border-color: #4f46e5; 
-          box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); 
+          border-color: #326080; 
+          box-shadow: 0 0 0 3px rgba(50, 96, 128, 0.1); 
           background: #ffffff;
           outline: none; 
         }
         .form-control:focus ~ .input-icon {
-          color: #4f46e5;
+          color: #326080;
         }
 
         /* Password Toggle */
@@ -994,12 +994,12 @@ export default function Login() {
         .remember-checkbox {
           width: 15px;
           height: 15px;
-          accent-color: #4f46e5;
+          accent-color: #326080;
           border-radius: 4px;
           cursor: pointer;
         }
         .btn-link { 
-          color: #4f46e5; 
+          color: #326080; 
           font-size: 0.85rem; 
           font-weight: 600;
           background: none; 
@@ -1009,13 +1009,13 @@ export default function Login() {
           padding: 0;
         }
         .btn-link:hover { 
-          color: #3730a3; 
+          color: #1c3f58; 
         }
 
         /* Primary Sign-In Button */
         .btn-primary { 
           width: 100%;
-          background: linear-gradient(90deg, #4f46e5 0%, #6366f1 100%); 
+          background: linear-gradient(90deg, #326080 0%, #4e7e9f 100%); 
           border: none; 
           border-radius: 0.75rem; 
           padding: 0.8rem; 
@@ -1023,13 +1023,13 @@ export default function Login() {
           color: #ffffff; 
           cursor: pointer;
           font-size: 0.95rem;
-          box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+          box-shadow: 0 4px 12px rgba(50, 96, 128, 0.25);
           transition: all 0.25s ease;
         }
         .btn-primary:hover:not(:disabled) { 
           opacity: 0.95;
           transform: translateY(-1px);
-          box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
+          box-shadow: 0 6px 16px rgba(50, 96, 128, 0.35);
         }
         .btn-primary:active:not(:disabled) {
           transform: translateY(0);
@@ -1065,7 +1065,7 @@ export default function Login() {
           transition: color 0.2s;
         }
         .developer-link:hover {
-          color: #4f46e5;
+          color: #326080;
         }
 
         /* nullstack Floating Brand Badge (Bottom-Left) */
@@ -1092,8 +1092,8 @@ export default function Login() {
         }
         .nullstack-float-badge:hover {
           background: rgba(0, 0, 0, 0.85);
-          border-color: rgba(99, 102, 241, 0.4);
-          box-shadow: 0 0 15px rgba(99, 102, 241, 0.25);
+          border-color: rgba(50, 96, 128, 0.4);
+          box-shadow: 0 0 15px rgba(50, 96, 128, 0.25);
         }
         .nullstack-badge-inner {
           width: 20px;
@@ -1115,7 +1115,7 @@ export default function Login() {
         .forgot-modal-backdrop { 
           position: fixed; 
           inset: 0; 
-          background: rgba(12, 10, 33, 0.75); 
+          background: rgba(255, 241, 231, 0.75); 
           backdrop-filter: blur(10px);
           -webkit-backdrop-filter: blur(10px);
           display: flex; 
@@ -1137,7 +1137,7 @@ export default function Login() {
           border-radius: 1.5rem; 
           background: #ffffff; 
           border: 1px solid #e2e8f0; 
-          box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2); 
+          box-shadow: 0 25px 50px rgba(50, 96, 128, 0.1); 
           color: #1e293b;
           animation: modalEntrance 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
           max-height: 90vh;
@@ -1178,7 +1178,7 @@ export default function Login() {
           color: #0f172a !important;
         }
         .modal-input:focus {
-          border-color: #4f46e5 !important;
+          border-color: #326080 !important;
           background: #ffffff !important;
         }
 
@@ -1219,7 +1219,7 @@ export default function Login() {
         .btn-dev-access {
           background: none;
           border: none;
-          color: #4f46e5;
+          color: #326080;
           font-size: 0.825rem;
           font-weight: 600;
           cursor: pointer;
@@ -1229,8 +1229,8 @@ export default function Login() {
           gap: 0.25rem;
         }
         .btn-dev-access:hover {
-          color: #3730a3;
-          text-shadow: 0 0 8px rgba(79, 70, 229, 0.15);
+          color: #1c3f58;
+          text-shadow: 0 0 8px rgba(50, 96, 128, 0.15);
         }
         .dev-dashboard-modal {
           max-width: 720px !important;
@@ -1306,7 +1306,7 @@ export default function Login() {
           width: 32px;
           height: 32px;
           border-radius: 50%;
-          background: #4f46e5;
+          background: #326080;
           color: #ffffff;
           display: flex;
           align-items: center;

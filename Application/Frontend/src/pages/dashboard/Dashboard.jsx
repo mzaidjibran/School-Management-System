@@ -414,7 +414,7 @@ export default function Dashboard() {
           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider text-indigo-600 bg-indigo-50 uppercase">
             Punjab Public High School
           </span>
-          <h1 className="text-lg md:text-xl font-black text-slate-800 mt-1.5 leading-tight">
+          <h1 className="text-lg md:text-xl font-bold text-slate-800 mt-1.5 leading-tight">
             {greeting}, {userName || "Admin"}
           </h1>
           <p className="text-xs text-slate-500 mt-1 font-medium flex items-center gap-2">
@@ -446,7 +446,7 @@ export default function Dashboard() {
                   <p className="text-[10px] text-slate-500 font-bold truncate">
                     {stat.label}
                   </p>
-                  <p className="text-base font-extrabold text-slate-800 leading-tight mt-0.5">
+                  <p className="text-base font-bold text-slate-800 leading-tight mt-0.5">
                     {stat.value}
                   </p>
                 </div>
@@ -740,10 +740,10 @@ export default function Dashboard() {
 
                     {/* Center Text inside Donut */}
                     <div className="absolute text-center">
-                      <span className="block text-base font-black text-slate-800 leading-none">
+                      <span className="block text-base font-bold text-slate-800 leading-none">
                         {attPct !== "—" ? `${attPct}%` : "—%"}
                       </span>
-                      <span className="text-[7px] text-slate-400 font-extrabold uppercase tracking-wider mt-0.5">
+                      <span className="text-[7px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">
                         Rate
                       </span>
                     </div>
@@ -762,7 +762,7 @@ export default function Dashboard() {
                           <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${a.badge}`} />
                           <span className="text-[10px] font-bold truncate opacity-80">{a.label}</span>
                         </div>
-                        <span className="text-sm font-black mt-1 leading-none text-slate-850">{a.val}</span>
+                        <span className="text-sm font-bold mt-1 leading-none text-slate-850">{a.val}</span>
                       </div>
                     ))}
                   </div>
@@ -932,10 +932,10 @@ function StudentEnrollmentChart({ data }) {
 
           {/* Center Text inside Donut */}
           <div className="absolute text-center">
-            <span className="block text-lg font-black text-slate-800 leading-none">
+            <span className="block text-lg font-bold text-slate-800 leading-none">
               {totalStudents}
             </span>
-            <span className="text-[8px] text-slate-400 font-extrabold uppercase tracking-wider">
+            <span className="text-[8px] text-slate-400 font-semibold uppercase tracking-wider">
               Total
             </span>
           </div>
@@ -955,7 +955,7 @@ function StudentEnrollmentChart({ data }) {
               <div className="flex items-center gap-2 shrink-0">
                 <span className="text-slate-400 font-semibold">{d.count} studs</span>
                 <span 
-                  className="font-black text-[11px]"
+                  className="font-bold text-[11px]"
                   style={{ color: COLORS[index % COLORS.length] }}
                 >
                   {d.percentage}%
