@@ -248,7 +248,33 @@ export const getTodayAttendanceSummary = async (request, response) => {
       attendanceQuery.schoolSection = request.headers["x-section"];
     }
 
-    const records = await Attendance.find(attendanceQuery);
+    let records = await Attendance.find(attendanceQuery);
+    let summaryDate = today;
+
+    // Fallback: If no records for today, fetch the most recent day's records
+    if (records.length === 0) {
+      const searchCriteria = { student: { $in: studentIds } };
+      if (request.headers["x-branch-id"]) searchCriteria.branch = request.headers["x-branch-id"];
+      
+      if (request.user && request.user.role === "teacher") {
+        searchCriteria.schoolSection = request.user.gender === "female" ? "girls" : "boys";
+      } else if (request.headers["x-section"]) {
+        searchCriteria.schoolSection = request.headers["x-section"];
+      }
+
+      const latestRecord = await Attendance.findOne(searchCriteria).sort({ date: -1 });
+
+      if (latestRecord) {
+        summaryDate = latestRecord.date;
+        const startLatest = new Date(summaryDate);
+        startLatest.setHours(0, 0, 0, 0);
+        const endLatest = new Date(summaryDate);
+        endLatest.setHours(23, 59, 59, 999);
+
+        attendanceQuery.date = { $gte: startLatest, $lte: endLatest };
+        records = await Attendance.find(attendanceQuery);
+      }
+    }
 
     const summary = {
       total:   records.length,
@@ -256,6 +282,7 @@ export const getTodayAttendanceSummary = async (request, response) => {
       absent:  records.filter((r) => r.status === "absent").length,
       late:    records.filter((r) => r.status === "late").length,
       leave:   records.filter((r) => r.status === "leave").length,
+      date:    summaryDate
     };
 
     response.status(200).json({

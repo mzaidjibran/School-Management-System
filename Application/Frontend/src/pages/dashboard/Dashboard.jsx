@@ -198,6 +198,7 @@ export default function Dashboard() {
             absent: attData.data.absent,
             leave: attData.data.leave,
             late: attData.data.late,
+            date: attData.data.date,
           });
         } else {
           setAttendance(null);
@@ -596,11 +597,11 @@ export default function Dashboard() {
                                 {ex.title || ex.name || "—"}
                               </td>
                               <td className={tdClass}>
-                                {ex.subject?.name || ex.subjectName || "—"}
+                                {ex.subject || ex.subjectName || "—"}
                               </td>
                               <td className={tdClass + " font-medium"}>
-                                {ex.date
-                                  ? new Date(ex.date).toLocaleDateString("en-PK")
+                                {ex.examDate || ex.date
+                                  ? new Date(ex.examDate || ex.date).toLocaleDateString("en-PK")
                                   : "—"}
                               </td>
                             </tr>
@@ -614,11 +615,11 @@ export default function Dashboard() {
                             <div className="flex justify-between items-center">
                               <strong className="text-xs font-bold text-slate-800">{ex.title || ex.name || "—"}</strong>
                               <span className="text-[10px] text-slate-400">
-                                {ex.date ? new Date(ex.date).toLocaleDateString("en-PK") : "—"}
+                                {ex.examDate || ex.date ? new Date(ex.examDate || ex.date).toLocaleDateString("en-PK") : "—"}
                               </span>
                             </div>
                             <div className="text-[11px] text-slate-500">
-                              Subject: {ex.subject?.name || ex.subjectName || "—"}
+                              Subject: {ex.subject || ex.subjectName || "—"}
                             </div>
                           </div>
                         ))}
@@ -694,7 +695,14 @@ export default function Dashboard() {
                   <span className="w-2 h-2 bg-emerald-500 rounded-full" />
                   Today's Attendance Status
                 </h3>
-                <span className="text-[10px] text-emerald-650 bg-emerald-50 px-2 py-0.5 rounded font-extrabold uppercase">Daily Summary</span>
+                <span className="text-[10px] text-emerald-650 bg-emerald-50 px-2 py-0.5 rounded font-extrabold uppercase">
+                  {attendance?.date
+                    ? new Date(attendance.date).toLocaleDateString("en-PK", {
+                        day: "numeric",
+                        month: "short",
+                      })
+                    : "Daily Summary"}
+                </span>
               </div>
 
               {attendance ? (
