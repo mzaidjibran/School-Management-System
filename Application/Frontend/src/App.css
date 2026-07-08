@@ -12,11 +12,48 @@
 main {
   width: 100% !important;
   max-width: 100% !important;
-  padding-top: 1.5rem !important;
-  padding-bottom: 1.5rem !important;
+  padding-top: 1.25rem !important;
+  padding-bottom: 1.25rem !important;
   padding-left: 1.5rem !important;
   padding-right: 1.5rem !important;
   box-sizing: border-box;
+}
+
+/* ─── High-Density Card Spacing & Grid Gap Overrides inside Pages ─── */
+main .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse))) !important;
+  margin-bottom: calc(1rem * var(--tw-space-y-reverse)) !important;
+}
+main .space-y-5 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.875rem * calc(1 - var(--tw-space-y-reverse))) !important;
+  margin-bottom: calc(0.875rem * var(--tw-space-y-reverse)) !important;
+}
+main .space-y-4 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse))) !important;
+  margin-bottom: calc(0.75rem * var(--tw-space-y-reverse)) !important;
+}
+
+main .gap-6 {
+  gap: 1rem !important;
+}
+main .gap-5 {
+  gap: 0.75rem !important;
+}
+main .gap-4 {
+  gap: 0.625rem !important;
+}
+
+main .p-6 {
+  padding: 1.125rem !important;
+}
+main .p-5 {
+  padding: 0.875rem !important;
+}
+main .p-4 {
+  padding: 0.75rem !important;
 }
 
 /* Force all inner page wrappers to stretch 100% width and remove internal paddings/margins */
@@ -46,8 +83,8 @@ main div[class*="min-h-screen"]:not(.fixed):not(.absolute) {
 /* Mobile responsive view: optimize screen space by reducing side padding */
 @media (max-width: 640px) {
   main {
-    padding-top: 1rem !important;
-    padding-bottom: 1rem !important;
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
     padding-left: 0.5rem !important;
     padding-right: 0.5rem !important;
   }

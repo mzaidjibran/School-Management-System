@@ -407,17 +407,17 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/50 py-6 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50/50 py-2.5 px-0">
       {/* Header Greeting */}
-      <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-6 mb-6 flex flex-col gap-1">
+      <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-3.5 mb-3 flex flex-col gap-0.5">
         <div>
           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider text-indigo-600 bg-indigo-50 uppercase">
             Punjab Public High School
           </span>
-          <h1 className="text-xl md:text-2xl font-black text-slate-800 mt-2 leading-tight">
+          <h1 className="text-lg md:text-xl font-black text-slate-800 mt-1.5 leading-tight">
             {greeting}, {userName || "Admin"}
           </h1>
-          <p className="text-xs text-slate-500 mt-1.5 font-medium flex items-center gap-2">
+          <p className="text-xs text-slate-500 mt-1 font-medium flex items-center gap-2">
             <Clock size={12} className="text-indigo-500" />
             <span>{formattedDate}</span>
             <span className="text-slate-300">•</span>
@@ -429,24 +429,24 @@ export default function Dashboard() {
       </div>
 
       {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* Left Side: Main Content (2/3 width) */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-3">
           {/* Overview Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
             {visibleOverviewStats.map((stat, idx) => (
               <div
                 key={idx}
-                className="bg-white rounded-md border border-slate-100/80 shadow-sm p-4 flex items-center gap-3.5 hover:shadow-md transition duration-200"
+                className="bg-white rounded-md border border-slate-100/80 shadow-sm p-2.5 flex items-center gap-2.5 hover:shadow-md transition duration-200"
               >
-                <div className="w-10 h-10 bg-indigo-50 rounded-md flex items-center justify-center shadow-sm shrink-0">
+                <div className="w-9 h-9 bg-indigo-50 rounded-md flex items-center justify-center shadow-sm shrink-0">
                   {stat.icon}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs text-slate-500 font-medium truncate">
+                  <p className="text-[10px] text-slate-500 font-bold truncate">
                     {stat.label}
                   </p>
-                  <p className="text-lg font-extrabold text-slate-800 leading-tight mt-0.5">
+                  <p className="text-base font-extrabold text-slate-800 leading-tight mt-0.5">
                     {stat.value}
                   </p>
                 </div>
@@ -456,7 +456,7 @@ export default function Dashboard() {
 
           {/* Analytics Graphs Grid */}
           {((isAdmin || assignedPages.includes("fees")) || (isAdmin || assignedPages.includes("students"))) && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {(isAdmin || assignedPages.includes("fees")) && (
                 <FeeCollectionsChart data={feeChartData} />
               )}
@@ -468,7 +468,7 @@ export default function Dashboard() {
 
           {/* Recent Fees */}
           {(isAdmin || assignedPages.includes("fees")) && (
-            <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-5">
+            <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-3.5">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-bold text-slate-800">
                   Recent Fee Collections
@@ -560,10 +560,10 @@ export default function Dashboard() {
 
           {/* Upcoming Exams + Notices Side by Side */}
           {((isAdmin || assignedPages.includes("exams")) || (isAdmin || assignedPages.includes("notices"))) && (
-            <div className={`grid grid-cols-1 ${((isAdmin || assignedPages.includes("exams")) && (isAdmin || assignedPages.includes("notices"))) ? "md:grid-cols-2" : ""} gap-6`}>
+            <div className={`grid grid-cols-1 ${((isAdmin || assignedPages.includes("exams")) && (isAdmin || assignedPages.includes("notices"))) ? "md:grid-cols-2" : ""} gap-3`}>
               {/* Upcoming Exams */}
               {(isAdmin || assignedPages.includes("exams")) && (
-                <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-5">
+                <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-3.5">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-sm font-bold text-slate-800">
                       Upcoming Exams
@@ -635,7 +635,7 @@ export default function Dashboard() {
 
               {/* Notices */}
               {(isAdmin || assignedPages.includes("notices")) && (
-                <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-5">
+                <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-3.5">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
                       <Megaphone size={16} className="text-indigo-600" /> Notice
@@ -689,7 +689,7 @@ export default function Dashboard() {
         <div className="space-y-6">
           {/* Today's Attendance */}
           {(isAdmin || assignedPages.includes("attendance")) && (
-            <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-5 space-y-4">
+            <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-3.5 space-y-2.5">
               <div className="flex justify-between items-center pb-3 border-b border-slate-100/60">
                 <h3 className="text-xs font-bold text-slate-800 flex items-center gap-2">
                   <span className="w-2 h-2 bg-emerald-500 rounded-full" />
@@ -713,10 +713,10 @@ export default function Dashboard() {
                       <PieChart>
                         <Pie
                           data={[
-                            { name: "Present", value: attendance.present, color: "#10b981" },
-                            { name: "Absent", value: attendance.absent, color: "#ef4444" },
-                            { name: "Leave", value: attendance.leave, color: "#f59e0b" },
-                            { name: "Late", value: attendance.late, color: "#3b82f6" },
+                            { name: "Present", value: attendance.present, color: "#326080" },
+                            { name: "Absent", value: attendance.absent, color: "#805232" },
+                            { name: "Leave", value: attendance.leave, color: "#B5D2E6" },
+                            { name: "Late", value: attendance.late, color: "#4e7e9f" },
                           ].filter(d => d.value > 0)}
                           cx="50%"
                           cy="50%"
@@ -727,10 +727,10 @@ export default function Dashboard() {
                           animationDuration={1200}
                         >
                           {[
-                            { name: "Present", value: attendance.present, color: "#10b981" },
-                            { name: "Absent", value: attendance.absent, color: "#ef4444" },
-                            { name: "Leave", value: attendance.leave, color: "#f59e0b" },
-                            { name: "Late", value: attendance.late, color: "#3b82f6" },
+                            { name: "Present", value: attendance.present, color: "#326080" },
+                            { name: "Absent", value: attendance.absent, color: "#805232" },
+                            { name: "Leave", value: attendance.leave, color: "#B5D2E6" },
+                            { name: "Late", value: attendance.late, color: "#4e7e9f" },
                           ].filter(d => d.value > 0).map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
                           ))}
@@ -776,18 +776,18 @@ export default function Dashboard() {
           )}
 
           {/* Quick Links */}
-          <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-5 space-y-4">
+          <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-3.5 space-y-2.5">
             <h3 className="text-xs font-bold text-slate-800 flex items-center gap-2 pb-3 border-b border-slate-100/60">
               <School size={16} className="text-indigo-600" /> Quick Actions Links
             </h3>
-            <div className="grid grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-3 gap-2">
               {visibleQuickLinks.map((link) => {
                 const hoverStyle = getQuickLinkStyle(link.name);
                 return (
                   <button
                     key={link.name}
                     onClick={() => navigate(link.path)}
-                    className={`flex flex-col items-center gap-2 p-3 bg-slate-50/30 border border-slate-100/60 rounded-md transition-all duration-150 group text-center cursor-pointer ${hoverStyle}`}
+                    className={`flex flex-col items-center gap-1.5 p-2 bg-slate-50/30 border border-slate-100/60 rounded-md transition-all duration-150 group text-center cursor-pointer ${hoverStyle}`}
                   >
                     <div className="w-8 h-8 rounded flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                       {link.icon}
@@ -813,7 +813,7 @@ function FeeCollectionsChart({ data }) {
   ];
 
   return (
-    <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-5 space-y-4">
+    <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-3.5 space-y-2.5">
       <div className="flex justify-between items-center pb-3 border-b border-slate-100/60">
         <h3 className="text-xs font-bold text-slate-800 flex items-center gap-2">
           <span className="w-2 h-2 bg-indigo-650 rounded-full" />
@@ -827,8 +827,8 @@ function FeeCollectionsChart({ data }) {
           <AreaChart data={displayData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="colorFee" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#4f46e5" stopOpacity="0.2" />
-                <stop offset="95%" stopColor="#4f46e5" stopOpacity="0.0" />
+                <stop offset="5%" stopColor="#326080" stopOpacity="0.2" />
+                <stop offset="95%" stopColor="#326080" stopOpacity="0.0" />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#f8fafc" vertical={false} />
@@ -860,7 +860,7 @@ function FeeCollectionsChart({ data }) {
             <Area 
               type="monotone" 
               dataKey="amount" 
-              stroke="#4f46e5" 
+              stroke="#326080" 
               strokeWidth={2} 
               fillOpacity={1} 
               fill="url(#colorFee)" 
@@ -888,18 +888,18 @@ function StudentEnrollmentChart({ data }) {
   }));
 
   const COLORS = [
-    "#3b82f6", // Blue
-    "#10b981", // Emerald
-    "#f59e0b", // Amber
-    "#ef4444", // Rose
-    "#8b5cf6", // Purple
-    "#ec4899", // Pink
-    "#14b8a6", // Teal
-    "#f97316"  // Orange
+    "#326080", // Deep Marine Blue
+    "#805232", // Warm Brown
+    "#B5D2E6", // Light Sky Blue
+    "#4e7e9f", // Slate Blue
+    "#a47858", // Warm Tan
+    "#89b8d9", // Sky Blue
+    "#5d3920", // Dark Earth
+    "#dcecf7", // Ice Blue
   ];
 
   return (
-    <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-5 space-y-4 flex flex-col justify-between">
+    <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-3.5 space-y-2.5 flex flex-col justify-between">
       <div className="flex justify-between items-center pb-3 border-b border-slate-100/60">
         <h3 className="text-xs font-bold text-slate-800 flex items-center gap-2">
           <span className="w-2 h-2 bg-blue-600 rounded-full" />
