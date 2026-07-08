@@ -369,6 +369,31 @@ export default function Dashboard() {
     return assignedPages.includes(pageKey);
   });
 
+  const getQuickLinkStyle = (name) => {
+    switch (name) {
+      case "Students":
+        return "hover:bg-indigo-50/50 hover:border-indigo-200/50 text-indigo-600";
+      case "Teachers":
+        return "hover:bg-blue-50/50 hover:border-blue-200/50 text-blue-600";
+      case "Classes":
+        return "hover:bg-emerald-50/50 hover:border-emerald-200/50 text-emerald-600";
+      case "Attendance":
+        return "hover:bg-rose-50/50 hover:border-rose-200/50 text-rose-600";
+      case "Exams":
+        return "hover:bg-cyan-50/50 hover:border-cyan-200/50 text-cyan-600";
+      case "Fees":
+        return "hover:bg-green-50/50 hover:border-green-200/50 text-green-600";
+      case "Subjects":
+        return "hover:bg-amber-50/50 hover:border-amber-200/50 text-amber-600";
+      case "Timetable":
+        return "hover:bg-purple-50/50 hover:border-purple-200/50 text-purple-600";
+      case "Notice Board":
+        return "hover:bg-orange-50/50 hover:border-orange-200/50 text-orange-600";
+      default:
+        return "hover:bg-slate-50 hover:border-slate-200 text-slate-650";
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -641,8 +666,8 @@ export default function Dashboard() {
                           </div>
                           <p className="text-xs text-slate-400 mt-1 flex items-center gap-1 font-medium">
                             <Clock size={11} />{" "}
-                            {n.date
-                              ? new Date(n.date).toLocaleDateString("en-PK")
+                            {n.publishDate || n.createdAt
+                              ? new Date(n.publishDate || n.createdAt).toLocaleDateString("en-PK")
                               : "—"}
                           </p>
                         </div>
@@ -663,54 +688,75 @@ export default function Dashboard() {
         <div className="space-y-6">
           {/* Today's Attendance */}
           {(isAdmin || assignedPages.includes("attendance")) && (
-            <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-5">
-              <h3 className="text-sm font-bold text-slate-800 mb-4">
-                Today's Attendance
-              </h3>
+            <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-5 space-y-4">
+              <div className="flex justify-between items-center pb-3 border-b border-slate-100/60">
+                <h3 className="text-xs font-bold text-slate-800 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-emerald-500 rounded-full" />
+                  Today's Attendance Status
+                </h3>
+                <span className="text-[10px] text-emerald-650 bg-emerald-50 px-2 py-0.5 rounded font-extrabold uppercase">Daily Summary</span>
+              </div>
+
               {attendance ? (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-2.5">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-6 min-h-[160px]">
+                  {/* Left Side: Donut Chart */}
+                  <div className="w-[120px] h-[120px] shrink-0 relative flex items-center justify-center">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={[
+                            { name: "Present", value: attendance.present, color: "#10b981" },
+                            { name: "Absent", value: attendance.absent, color: "#ef4444" },
+                            { name: "Leave", value: attendance.leave, color: "#f59e0b" },
+                            { name: "Late", value: attendance.late, color: "#3b82f6" },
+                          ].filter(d => d.value > 0)}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={38}
+                          outerRadius={50}
+                          paddingAngle={2}
+                          dataKey="value"
+                          animationDuration={1200}
+                        >
+                          {[
+                            { name: "Present", value: attendance.present, color: "#10b981" },
+                            { name: "Absent", value: attendance.absent, color: "#ef4444" },
+                            { name: "Leave", value: attendance.leave, color: "#f59e0b" },
+                            { name: "Late", value: attendance.late, color: "#3b82f6" },
+                          ].filter(d => d.value > 0).map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                          ))}
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+
+                    {/* Center Text inside Donut */}
+                    <div className="absolute text-center">
+                      <span className="block text-base font-black text-slate-800 leading-none">
+                        {attPct !== "—" ? `${attPct}%` : "—%"}
+                      </span>
+                      <span className="text-[7px] text-slate-400 font-extrabold uppercase tracking-wider mt-0.5">
+                        Rate
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Right Side: Details Grid */}
+                  <div className="flex-1 w-full grid grid-cols-2 gap-2">
                     {[
-                      {
-                        label: "Present",
-                        val: attendance.present,
-                        color:
-                          "text-emerald-700 bg-emerald-50 border-emerald-100",
-                      },
-                      {
-                        label: "Absent",
-                        val: attendance.absent,
-                        color: "text-rose-700 bg-rose-50 border-rose-100",
-                      },
-                      {
-                        label: "Leave",
-                        val: attendance.leave,
-                        color: "text-amber-700 bg-amber-50 border-amber-100",
-                      },
-                      {
-                        label: "Late",
-                        val: attendance.late,
-                        color: "text-blue-700 bg-blue-50 border-blue-100",
-                      },
+                      { label: "Present", val: attendance.present, color: "text-emerald-700 bg-emerald-50/50 border-emerald-100/50 hover:bg-emerald-50", badge: "bg-emerald-500" },
+                      { label: "Absent", val: attendance.absent, color: "text-rose-700 bg-rose-50/50 border-rose-100/50 hover:bg-rose-50", badge: "bg-rose-500" },
+                      { label: "Leave", val: attendance.leave, color: "text-amber-700 bg-amber-50/50 border-amber-100/50 hover:bg-amber-50", badge: "bg-amber-500" },
+                      { label: "Late", val: attendance.late, color: "text-blue-700 bg-blue-50/50 border-blue-100/50 hover:bg-blue-50", badge: "bg-blue-500" },
                     ].map((a) => (
-                      <div
-                        key={a.label}
-                        className={`text-center p-3 rounded-md border ${a.color}`}
-                      >
-                        <p className="text-xl font-extrabold">{a.val}</p>
-                        <p className="text-xs font-semibold opacity-90 mt-0.5">
-                          {a.label}
-                        </p>
+                      <div key={a.label} className={`p-2 border rounded-md flex flex-col justify-center transition duration-150 ${a.color}`}>
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${a.badge}`} />
+                          <span className="text-[10px] font-bold truncate opacity-80">{a.label}</span>
+                        </div>
+                        <span className="text-sm font-black mt-1 leading-none text-slate-850">{a.val}</span>
                       </div>
                     ))}
-                  </div>
-                  <div className="pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
-                    <span className="text-slate-500 font-medium">
-                      Attendance Rate:
-                    </span>
-                    <span className="text-sm font-extrabold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full">
-                      {attPct}%
-                    </span>
                   </div>
                 </div>
               ) : (
@@ -722,25 +768,28 @@ export default function Dashboard() {
           )}
 
           {/* Quick Links */}
-          <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-5">
-            <h3 className="text-sm font-bold text-slate-800 mb-4">
-              Quick Links
+          <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-5 space-y-4">
+            <h3 className="text-xs font-bold text-slate-800 flex items-center gap-2 pb-3 border-b border-slate-100/60">
+              <School size={16} className="text-indigo-600" /> Quick Actions Links
             </h3>
             <div className="grid grid-cols-3 gap-2.5">
-              {visibleQuickLinks.map((link) => (
-                <button
-                  key={link.name}
-                  onClick={() => navigate(link.path)}
-                  className="flex flex-col items-center gap-1.5 p-2.5 bg-slate-50 border border-slate-100 rounded-md hover:bg-indigo-50 hover:border-indigo-100 transition group text-center cursor-pointer"
-                >
-                  <div className="w-8 h-8 rounded-md flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                    {link.icon}
-                  </div>
-                  <span className="text-[11px] text-slate-600 group-hover:text-indigo-600 font-bold leading-tight">
-                    {link.name}
-                  </span>
-                </button>
-              ))}
+              {visibleQuickLinks.map((link) => {
+                const hoverStyle = getQuickLinkStyle(link.name);
+                return (
+                  <button
+                    key={link.name}
+                    onClick={() => navigate(link.path)}
+                    className={`flex flex-col items-center gap-2 p-3 bg-slate-50/30 border border-slate-100/60 rounded-md transition-all duration-150 group text-center cursor-pointer ${hoverStyle}`}
+                  >
+                    <div className="w-8 h-8 rounded flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                      {link.icon}
+                    </div>
+                    <span className="text-[10px] text-slate-650 font-bold group-hover:text-inherit transition leading-tight">
+                      {link.name}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
