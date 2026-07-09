@@ -453,7 +453,7 @@ export default function TeacherPayroll() {
                   <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] text-slate-500 font-bold uppercase">
                     <th className="px-3.5 py-2.5">Staff Details</th>
                     <th className="px-3.5 py-2.5">Salary Basis</th>
-                    <th className="px-3.5 py-2.5">Rate (PKR)</th>
+                    <th className="px-3.5 py-2.5">Base Salary (PKR)</th>
                     <th className="px-3.5 py-2.5 w-[90px]">Units</th>
                     <th className="px-3.5 py-2.5 w-[110px]">Allowances</th>
                     <th className="px-3.5 py-2.5 w-[110px]">Deductions</th>
@@ -725,7 +725,7 @@ export default function TeacherPayroll() {
 
                       {/* Rate */}
                       <div className="space-y-1">
-                        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Rate (PKR)</span>
+                        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Base Salary (PKR)</span>
                         <div className="flex gap-1 items-center">
                           <input
                             type="number"
