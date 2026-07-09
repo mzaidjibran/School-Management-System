@@ -18,6 +18,7 @@ import AddStudent from "../pages/students/AddStudent";
 import TeacherPage from "../pages/teachers/TeacherPage";
 import TeacherList from "../pages/teachers/TeacherList";
 import AddTeacher from "../pages/teachers/AddTeacher";
+import TeacherPayroll from "../pages/teachers/TeacherPayroll";
 
 // Classes
 import ClassPage from "../pages/classes/ClassPage";
@@ -29,6 +30,7 @@ import AttendancePage from "../pages/attendance/AttendancePage";
 import AttendanceList from "../pages/attendance/AttendanceList";
 import MarkAttendance from "../pages/attendance/MarkAttendance";
 import AttendanceReport from "../pages/attendance/AttendanceReport";
+import StaffAttendance from "../pages/attendance/StaffAttendance";
 
 // Exams
 import ExamPage from "../pages/exams/ExamPage";
@@ -118,6 +120,7 @@ export default function AppRoutes() {
         <Route path="/teachers" element={<PageRoute pageKey="teachers"><TeacherPage /></PageRoute>}>
           <Route index element={<TeacherList />} />
           <Route path="add" element={<AddTeacher />} />
+          <Route path="payroll" element={<AdminRoute><TeacherPayroll /></AdminRoute>} />
         </Route>
 
         {/* Classes */}
@@ -131,6 +134,7 @@ export default function AppRoutes() {
           <Route index element={<AttendanceList />} />
           <Route path="mark" element={<MarkAttendance />} />
           <Route path="reports" element={<AttendanceReport />} />
+          <Route path="staff" element={<AdminRoute><StaffAttendance /></AdminRoute>} />
         </Route>
 
         {/* Exams */}

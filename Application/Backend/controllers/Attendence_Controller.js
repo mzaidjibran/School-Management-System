@@ -1,6 +1,8 @@
 import { Attendance } from "../models/Attendence_Model.js";
 import { Student } from "../models/Student_Model.js";
 import { Class } from "../models/Class_Model.js";
+import { StaffAttendance } from "../models/Staff_Attendence_Model.js";
+import Teacher from "../models/Teacher_Model.js";
 
 // ─── Mark Attendance ──────────────────────────────────────────────
 // Ek ya multiple students ki hazri ek saath mark karo
@@ -292,5 +294,163 @@ export const getTodayAttendanceSummary = async (request, response) => {
     });
   } catch (error) {
     response.status(500).json({ success: false, error: true, message: error.message });
+  }
+};
+
+// ─── Mark Staff (Teacher) Attendance ──────────────────────────────
+export const markStaffAttendance = async (request, response) => {
+  try {
+    const { records, date } = request.body;
+
+    if (!records || !Array.isArray(records) || records.length === 0 || !date) {
+      return response.status(400).json({
+        success: false,
+        error: true,
+        message: "Records array and date are mandatory",
+      });
+    }
+
+    const markedDate = new Date(date);
+    markedDate.setHours(12, 0, 0, 0); // standard timestamp
+
+    const inserted = [];
+    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+
+    for (const rec of records) {
+      try {
+        const { teacherId, status, remarks } = rec;
+
+        // Verify teacher belongs to admin
+        const teacherExists = await Teacher.findOne({ _id: teacherId, userId: ownerId });
+        if (!teacherExists) continue;
+
+        let branchId = null;
+        if (request.headers["x-branch-id"]) {
+          branchId = request.headers["x-branch-id"];
+        }
+
+        const doc = await StaffAttendance.findOneAndUpdate(
+          { teacher: teacherId, date: markedDate },
+          {
+            status,
+            remarks: remarks || null,
+            branch: branchId
+          },
+          { new: true, upsert: true, runValidators: true }
+        );
+        inserted.push(doc);
+      } catch (e) {
+        console.log("Skip staff record:", e.message);
+      }
+    }
+
+    response.status(201).json({
+      success: true,
+      error: false,
+      message: `${inserted.length} staff records marked successfully`,
+      data: inserted,
+    });
+  } catch (error) {
+    response.status(500).json({
+      success: false,
+      error: true,
+      message: error.message,
+    });
+  }
+};
+
+// ─── Get Staff (Teacher) Attendance By Date ────────────────────────
+export const getStaffAttendance = async (request, response) => {
+  try {
+    const { date } = request.query;
+
+    if (!date) {
+      return response.status(400).json({
+        success: false,
+        error: true,
+        message: "Date query param is mandatory",
+      });
+    }
+
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+
+    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+
+    // Get all teachers for this admin
+    const teacherQuery = { userId: ownerId };
+    if (request.headers["x-branch-id"]) {
+      teacherQuery.branch = request.headers["x-branch-id"];
+    }
+    const teachersList = await Teacher.find(teacherQuery);
+    const teacherIds = teachersList.map((t) => t._id);
+
+    const attendanceQuery = {
+      teacher: { $in: teacherIds },
+      date: { $gte: start, $lte: end }
+    };
+    if (request.headers["x-branch-id"]) {
+      attendanceQuery.branch = request.headers["x-branch-id"];
+    }
+
+    const records = await StaffAttendance.find(attendanceQuery).populate("teacher", "name employeeId email profileImage subject status");
+
+    response.status(200).json({
+      success: true,
+      error: false,
+      message: "Staff attendance fetched successfully",
+      data: records,
+    });
+  } catch (error) {
+    response.status(500).json({
+      success: false,
+      error: true,
+      message: error.message,
+    });
+  }
+};
+
+// ─── Update Staff (Teacher) Attendance Record ─────────────────────
+export const updateStaffAttendanceRecord = async (request, response) => {
+  try {
+    const record = await StaffAttendance.findById(request.params.id);
+    if (!record) {
+      return response.status(404).json({
+        success: false,
+        error: true,
+        message: "Staff attendance record not found",
+      });
+    }
+
+    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+    const teacherExists = await Teacher.findOne({ _id: record.teacher, userId: ownerId });
+    if (!teacherExists) {
+      return response.status(403).json({
+        success: false,
+        error: true,
+        message: "Aapko is record ki access nahi hai",
+      });
+    }
+
+    const updated = await StaffAttendance.findByIdAndUpdate(
+      request.params.id,
+      request.body,
+      { new: true, runValidators: true }
+    );
+
+    response.status(200).json({
+      success: true,
+      error: false,
+      message: "Staff attendance updated successfully",
+      data: updated,
+    });
+  } catch (error) {
+    response.status(500).json({
+      success: false,
+      error: true,
+      message: error.message,
+    });
   }
 };

@@ -50,3 +50,26 @@ export const updateAttendance = async (id, data) => {
   if (!response.ok) throw new Error(`Update attendance failed: ${response.status}`);
   return response.json();
 };
+
+// ─── Mark Staff Attendance ────────────────────────────────────────
+export const markStaffAttendance = async (records, date) => {
+  const response = await fetch(`${API_BASE}/api/attendance/staff`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify({ records, date }),
+  });
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || `Mark staff attendance failed: ${response.status}`);
+  return result;
+};
+
+// ─── Get Staff Attendance ─────────────────────────────────────────
+export const getStaffAttendance = async (date) => {
+  const response = await fetch(`${API_BASE}/api/attendance/staff?date=${date}`, {
+    method: "GET",
+    headers: getHeaders(),
+  });
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || `Get staff attendance failed: ${response.status}`);
+  return result;
+};

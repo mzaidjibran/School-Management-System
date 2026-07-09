@@ -15,12 +15,18 @@ export default function TopHeader({ tabs = [] }) {
           {tabs.map((tab) => (
             <NavLink
               key={tab.path}
-              to={tab.path}
+              to={tab.onClick ? "#" : tab.path}
+              onClick={(e) => {
+                if (tab.onClick) {
+                  e.preventDefault();
+                  tab.onClick();
+                }
+              }}
               end
               className={({ isActive }) =>
                 `top-tab-link px-4 py-2 text-xs font-bold rounded-md transition-all duration-200 whitespace-nowrap outline-none flex items-center gap-1.5
                 ${
-                  isActive
+                  isActive && !tab.onClick
                     ? "bg-indigo-50 text-indigo-700 shadow-sm"
                     : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
                 }`
