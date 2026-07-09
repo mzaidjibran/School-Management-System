@@ -206,66 +206,117 @@ export default function StaffAttendance() {
             <span>No active teachers found in database</span>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] text-slate-500 font-bold uppercase">
-                  <th className="px-4 py-2.5">Staff Details</th>
-                  <th className="px-4 py-2.5">Subject</th>
-                  <th className="px-4 py-2.5">Attendance Status</th>
-                  <th className="px-4 py-2.5">Remarks / Reason</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-xs">
-                {teachers.map((teacher) => (
-                  <tr key={teacher._id} className="hover:bg-slate-50/40 transition">
-                    {/* Staff details */}
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-650 ring-1 ring-slate-100 flex-shrink-0">
-                          {teacher.fullName ? teacher.fullName.charAt(0).toUpperCase() : teacher.name?.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-bold text-slate-800 truncate">{teacher.fullName || teacher.name}</p>
-                          <p className="text-[10px] text-slate-400 mt-0.5">Emp ID: {teacher.employeeId || "—"}</p>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Subject */}
-                    <td className="px-4 py-3 text-slate-600 font-medium whitespace-nowrap">
-                      {teacher.subject || "—"}
-                    </td>
-
-                    {/* Status Options */}
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="flex gap-1.5">
-                        {STATUS_OPTIONS.map((opt) => (
-                          <StatusRadio
-                            key={opt}
-                            value={opt}
-                            current={recordsMap[teacher._id]}
-                            onChange={(val) => handleStatusChange(teacher._id, val)}
-                          />
-                        ))}
-                      </div>
-                    </td>
-
-                    {/* Remarks Input */}
-                    <td className="px-4 py-3">
-                      <input
-                        type="text"
-                        placeholder="Add remarks..."
-                        value={remarksMap[teacher._id] || ""}
-                        onChange={(e) => handleRemarksChange(teacher._id, e.target.value)}
-                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-md focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none text-xs text-slate-650 bg-white"
-                      />
-                    </td>
+          <>
+            {/* Desktop View Table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] text-slate-500 font-bold uppercase">
+                    <th className="px-4 py-2.5">Staff Details</th>
+                    <th className="px-4 py-2.5">Subject</th>
+                    <th className="px-4 py-2.5">Attendance Status</th>
+                    <th className="px-4 py-2.5">Remarks / Reason</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs">
+                  {teachers.map((teacher) => (
+                    <tr key={teacher._id} className="hover:bg-slate-50/40 transition">
+                      {/* Staff details */}
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-650 ring-1 ring-slate-100 flex-shrink-0">
+                            {teacher.fullName ? teacher.fullName.charAt(0).toUpperCase() : teacher.name?.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-bold text-slate-800 truncate">{teacher.fullName || teacher.name}</p>
+                            <p className="text-[10px] text-slate-400 mt-0.5">Emp ID: {teacher.employeeId || "—"}</p>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Subject */}
+                      <td className="px-4 py-3 text-slate-600 font-medium whitespace-nowrap">
+                        {teacher.subject || "—"}
+                      </td>
+
+                      {/* Status Options */}
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="flex gap-1.5">
+                          {STATUS_OPTIONS.map((opt) => (
+                            <StatusRadio
+                              key={opt}
+                              value={opt}
+                              current={recordsMap[teacher._id]}
+                              onChange={(val) => handleStatusChange(teacher._id, val)}
+                            />
+                          ))}
+                        </div>
+                      </td>
+
+                      {/* Remarks Input */}
+                      <td className="px-4 py-3">
+                        <input
+                          type="text"
+                          placeholder="Add remarks..."
+                          value={remarksMap[teacher._id] || ""}
+                          onChange={(e) => handleRemarksChange(teacher._id, e.target.value)}
+                          className="w-full px-2.5 py-1.5 border border-slate-200 rounded-md focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none text-xs text-slate-650 bg-white"
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile View Cards */}
+            <div className="block md:hidden space-y-3 p-3">
+              {teachers.map((teacher) => (
+                <div
+                  key={teacher._id}
+                  className="bg-white border border-slate-100 rounded-md p-3.5 space-y-3 shadow-sm hover:shadow transition duration-200"
+                >
+                  {/* Header: Avatar, Name, Subject */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-650 shrink-0">
+                      {teacher.fullName ? teacher.fullName.charAt(0).toUpperCase() : teacher.name?.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-slate-800 text-xs truncate">{teacher.fullName || teacher.name}</p>
+                      <p className="text-[9px] text-slate-400">ID: {teacher.employeeId || "—"} • {teacher.subject || "No Subject"}</p>
+                    </div>
+                  </div>
+
+                  {/* Status selector */}
+                  <div className="space-y-1">
+                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Attendance Status</p>
+                    <div className="flex flex-wrap gap-1.5 pt-0.5">
+                      {STATUS_OPTIONS.map((opt) => (
+                        <StatusRadio
+                          key={opt}
+                          value={opt}
+                          current={recordsMap[teacher._id]}
+                          onChange={(val) => handleStatusChange(teacher._id, val)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Remarks */}
+                  <div className="space-y-1">
+                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Remarks / Reason</p>
+                    <input
+                      type="text"
+                      placeholder="Add remarks..."
+                      value={remarksMap[teacher._id] || ""}
+                      onChange={(e) => handleRemarksChange(teacher._id, e.target.value)}
+                      className="w-full px-2.5 py-1.5 border border-slate-200 rounded-md outline-none text-xs text-slate-650 bg-white focus:border-indigo-500"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 

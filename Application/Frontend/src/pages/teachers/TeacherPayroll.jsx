@@ -410,83 +410,273 @@ export default function TeacherPayroll() {
             <span>No staff records found for this cycle</span>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[950px]">
-              <thead>
-                <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] text-slate-500 font-bold uppercase">
-                  <th className="px-3.5 py-2.5">Staff Details</th>
-                  <th className="px-3.5 py-2.5">Salary Basis</th>
-                  <th className="px-3.5 py-2.5">Rate (PKR)</th>
-                  <th className="px-3.5 py-2.5 w-[90px]">Units</th>
-                  <th className="px-3.5 py-2.5 w-[110px]">Allowances</th>
-                  <th className="px-3.5 py-2.5 w-[110px]">Deductions</th>
-                  <th className="px-3.5 py-2.5">Net Payable</th>
-                  <th className="px-3.5 py-2.5">Payment Cycle</th>
-                  <th className="px-3.5 py-2.5 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-xs">
-                {filteredTeachers.map((teacher) => {
-                  const paidRecord = paidRecords[teacher._id];
-                  const isPaid = !!paidRecord;
+          <>
+            {/* Desktop View Table */}
+            <div className="hidden lg:block overflow-x-auto">
+              <table className="w-full text-left border-collapse min-w-[950px]">
+                <thead>
+                  <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] text-slate-500 font-bold uppercase">
+                    <th className="px-3.5 py-2.5">Staff Details</th>
+                    <th className="px-3.5 py-2.5">Salary Basis</th>
+                    <th className="px-3.5 py-2.5">Rate (PKR)</th>
+                    <th className="px-3.5 py-2.5 w-[90px]">Units</th>
+                    <th className="px-3.5 py-2.5 w-[110px]">Allowances</th>
+                    <th className="px-3.5 py-2.5 w-[110px]">Deductions</th>
+                    <th className="px-3.5 py-2.5">Net Payable</th>
+                    <th className="px-3.5 py-2.5">Payment Cycle</th>
+                    <th className="px-3.5 py-2.5 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs">
+                  {filteredTeachers.map((teacher) => {
+                    const paidRecord = paidRecords[teacher._id];
+                    const isPaid = !!paidRecord;
 
-                  const rate = rates[teacher._id] || 0;
-                  const basis = bases[teacher._id] || "monthly";
-                  const unitVal = units[teacher._id] || 1;
-                  const allowance = allowances[teacher._id] || 0;
-                  const deduction = deductions[teacher._id] || 0;
+                    const rate = rates[teacher._id] || 0;
+                    const basis = bases[teacher._id] || "monthly";
+                    const unitVal = units[teacher._id] || 1;
+                    const allowance = allowances[teacher._id] || 0;
+                    const deduction = deductions[teacher._id] || 0;
 
-                  // Calculation: Rate * Units + Allowance - Deduction
-                  const grossBase = rate * unitVal;
-                  const netPay = grossBase + allowance - deduction;
+                    // Calculation: Rate * Units + Allowance - Deduction
+                    const grossBase = rate * unitVal;
+                    const netPay = grossBase + allowance - deduction;
 
-                  return (
-                    <tr key={teacher._id} className="hover:bg-slate-50/40 transition">
-                      {/* Details */}
-                      <td className="px-3.5 py-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-650 shrink-0">
-                            {teacher.fullName ? teacher.fullName.charAt(0).toUpperCase() : teacher.name?.charAt(0).toUpperCase()}
+                    return (
+                      <tr key={teacher._id} className="hover:bg-slate-50/40 transition">
+                        {/* Details */}
+                        <td className="px-3.5 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-650 shrink-0">
+                              {teacher.fullName ? teacher.fullName.charAt(0).toUpperCase() : teacher.name?.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-bold text-slate-800 truncate">{teacher.fullName || teacher.name}</p>
+                              <p className="text-[9px] text-slate-400 mt-0.5">Emp ID: {teacher.employeeId}</p>
+                            </div>
                           </div>
-                          <div className="min-w-0">
-                            <p className="font-bold text-slate-800 truncate">{teacher.fullName || teacher.name}</p>
-                            <p className="text-[9px] text-slate-400 mt-0.5">Emp ID: {teacher.employeeId}</p>
+                        </td>
+
+                        {/* Salary Basis */}
+                        <td className="px-3.5 py-3">
+                          <select
+                            disabled={isPaid}
+                            value={basis}
+                            onChange={(e) => handleBasisChange(teacher._id, e.target.value)}
+                            className="px-2 py-1 border border-slate-200 rounded outline-none text-xs text-slate-650 bg-white font-medium focus:border-indigo-500 disabled:opacity-65"
+                          >
+                            <option value="monthly">Monthly</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="daily">Daily</option>
+                          </select>
+                        </td>
+
+                        {/* Salary Rate input + profile save */}
+                        <td className="px-3.5 py-3">
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="number"
+                              min="0"
+                              disabled={isPaid}
+                              value={rate || ""}
+                              onChange={(e) => handleRateChange(teacher._id, e.target.value)}
+                              className="w-20 px-2 py-1 border border-slate-200 rounded outline-none text-xs font-semibold text-slate-700 bg-white focus:border-indigo-500 disabled:opacity-65"
+                            />
+                            {!isPaid && (
+                              <button
+                                type="button"
+                                onClick={() => handleSaveBaseSettings(teacher._id)}
+                                disabled={savingSettings[teacher._id]}
+                                title="Save settings to profile"
+                                className="p-1 rounded text-indigo-600 bg-indigo-50 hover:bg-indigo-100 disabled:opacity-50 shrink-0 flex items-center justify-center cursor-pointer"
+                              >
+                                {savingSettings[teacher._id] ? (
+                                  <Loader2 size={12} className="animate-spin" />
+                                ) : (
+                                  <Save size={12} />
+                                )}
+                              </button>
+                            )}
                           </div>
+                        </td>
+
+                        {/* Units */}
+                        <td className="px-3.5 py-3">
+                          <input
+                            type="number"
+                            min="0.5"
+                            step="0.5"
+                            disabled={isPaid}
+                            value={unitVal || ""}
+                            onChange={(e) => handleUnitsChange(teacher._id, e.target.value)}
+                            className="w-14 px-2 py-1 border border-slate-200 rounded outline-none text-xs text-slate-650 bg-white focus:border-indigo-500 disabled:opacity-65"
+                          />
+                        </td>
+
+                        {/* Allowance */}
+                        <td className="px-3.5 py-3">
+                          <input
+                            type="number"
+                            min="0"
+                            disabled={isPaid}
+                            value={allowance || ""}
+                            onChange={(e) => handleAllowanceChange(teacher._id, e.target.value)}
+                            placeholder="0"
+                            className="w-20 px-2 py-1 border border-slate-200 rounded outline-none text-xs text-slate-650 bg-white focus:border-indigo-500 disabled:opacity-65"
+                          />
+                        </td>
+
+                        {/* Deduction */}
+                        <td className="px-3.5 py-3">
+                          <input
+                            type="number"
+                            min="0"
+                            disabled={isPaid}
+                            value={deduction || ""}
+                            onChange={(e) => handleDeductionChange(teacher._id, e.target.value)}
+                            placeholder="0"
+                            className="w-20 px-2 py-1 border border-slate-200 rounded outline-none text-xs text-slate-650 bg-white focus:border-indigo-500 disabled:opacity-65"
+                          />
+                        </td>
+
+                        {/* Net Payable */}
+                        <td className="px-3.5 py-3 font-bold text-slate-800 whitespace-nowrap">
+                          PKR {netPay.toLocaleString()}
+                        </td>
+
+                        {/* Status Check */}
+                        <td className="px-3.5 py-3 whitespace-nowrap">
+                          {isPaid ? (
+                            <div className="flex flex-col gap-0.5">
+                              <span className="px-2 py-0.5 w-fit bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-md font-bold text-[9px] uppercase leading-tight">
+                                Paid
+                              </span>
+                              <span className="text-[8px] text-slate-400">
+                                {new Date(paidRecord.paymentDate).toLocaleDateString()}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded-md font-bold text-[9px] uppercase leading-tight">
+                              Unpaid
+                            </span>
+                          )}
+                        </td>
+
+                        {/* Actions */}
+                        <td className="px-3.5 py-3 whitespace-nowrap">
+                          <div className="flex items-center justify-center gap-2">
+                            {isPaid ? (
+                              <button
+                                type="button"
+                                onClick={() => handleGenerateSlip(teacher, paidRecord)}
+                                className="flex items-center gap-1 px-2.5 py-1.5 bg-[#805232] text-white hover:bg-[#6c4327] hover:shadow-md rounded-md font-bold text-[10px] transition cursor-pointer"
+                              >
+                                <FileText size={12} />
+                                Pay Slip
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handlePaySalary(teacher._id, teacher.fullName || teacher.name, netPay)}
+                                disabled={paying[teacher._id]}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-[#326080] text-white hover:bg-[#284f6b] hover:shadow-md rounded-md font-bold text-[10px] transition disabled:opacity-50 cursor-pointer"
+                              >
+                                {paying[teacher._id] ? (
+                                  <Loader2 size={12} className="animate-spin" />
+                                ) : (
+                                  <ArrowRight size={12} />
+                                )}
+                                Pay Salary
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile View Cards */}
+            <div className="block lg:hidden space-y-3.5 p-3">
+              {filteredTeachers.map((teacher) => {
+                const paidRecord = paidRecords[teacher._id];
+                const isPaid = !!paidRecord;
+
+                const rate = rates[teacher._id] || 0;
+                const basis = bases[teacher._id] || "monthly";
+                const unitVal = units[teacher._id] || 1;
+                const allowance = allowances[teacher._id] || 0;
+                const deduction = deductions[teacher._id] || 0;
+
+                const grossBase = rate * unitVal;
+                const netPay = grossBase + allowance - deduction;
+
+                return (
+                  <div
+                    key={teacher._id}
+                    className="bg-white border border-slate-100 rounded-md p-3.5 space-y-3.5 shadow-sm hover:shadow transition duration-200"
+                  >
+                    {/* Teacher Details */}
+                    <div className="flex items-center justify-between gap-3 border-b border-slate-100/60 pb-2.5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-650 shrink-0">
+                          {teacher.fullName ? teacher.fullName.charAt(0).toUpperCase() : teacher.name?.charAt(0).toUpperCase()}
                         </div>
-                      </td>
+                        <div className="min-w-0">
+                          <p className="font-bold text-slate-800 text-xs truncate">{teacher.fullName || teacher.name}</p>
+                          <p className="text-[9px] text-slate-400">ID: {teacher.employeeId} • {teacher.subject || "Teacher"}</p>
+                        </div>
+                      </div>
+                      <div>
+                        {isPaid ? (
+                          <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-md font-bold text-[9px] uppercase">
+                            Paid
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded-md font-bold text-[9px] uppercase">
+                            Unpaid
+                          </span>
+                        )}
+                      </div>
+                    </div>
 
-                      {/* Salary Basis */}
-                      <td className="px-3.5 py-3">
+                    {/* Inputs and details grid */}
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      {/* Basis */}
+                      <div className="space-y-1">
+                        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Salary Basis</span>
                         <select
                           disabled={isPaid}
                           value={basis}
                           onChange={(e) => handleBasisChange(teacher._id, e.target.value)}
-                          className="px-2 py-1 border border-slate-200 rounded outline-none text-xs text-slate-650 bg-white font-medium focus:border-indigo-500 disabled:opacity-65"
+                          className="w-full px-2.5 py-1.5 border border-slate-200 rounded outline-none text-xs text-slate-650 bg-white font-medium focus:border-indigo-500 disabled:opacity-65"
                         >
                           <option value="monthly">Monthly</option>
                           <option value="weekly">Weekly</option>
                           <option value="daily">Daily</option>
                         </select>
-                      </td>
+                      </div>
 
-                      {/* Salary Rate input + profile save */}
-                      <td className="px-3.5 py-3">
-                        <div className="flex items-center gap-1">
+                      {/* Rate */}
+                      <div className="space-y-1">
+                        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Rate (PKR)</span>
+                        <div className="flex gap-1 items-center">
                           <input
                             type="number"
                             min="0"
                             disabled={isPaid}
                             value={rate || ""}
                             onChange={(e) => handleRateChange(teacher._id, e.target.value)}
-                            className="w-20 px-2 py-1 border border-slate-200 rounded outline-none text-xs font-semibold text-slate-700 bg-white focus:border-indigo-500 disabled:opacity-65"
+                            className="w-full px-2 py-1 border border-slate-200 rounded outline-none text-xs font-semibold text-slate-700 bg-white focus:border-indigo-500 disabled:opacity-65"
                           />
                           {!isPaid && (
                             <button
                               type="button"
                               onClick={() => handleSaveBaseSettings(teacher._id)}
                               disabled={savingSettings[teacher._id]}
-                              title="Save settings to profile"
-                              className="p-1 rounded text-indigo-600 bg-indigo-50 hover:bg-indigo-100 disabled:opacity-50 shrink-0 flex items-center justify-center cursor-pointer"
+                              className="p-1.5 rounded text-indigo-600 bg-indigo-50 hover:bg-indigo-100 disabled:opacity-50 shrink-0 flex items-center justify-center cursor-pointer"
                             >
                               {savingSettings[teacher._id] ? (
                                 <Loader2 size={12} className="animate-spin" />
@@ -496,10 +686,11 @@ export default function TeacherPayroll() {
                             </button>
                           )}
                         </div>
-                      </td>
+                      </div>
 
                       {/* Units */}
-                      <td className="px-3.5 py-3">
+                      <div className="space-y-1">
+                        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Working Units</span>
                         <input
                           type="number"
                           min="0.5"
@@ -507,12 +698,19 @@ export default function TeacherPayroll() {
                           disabled={isPaid}
                           value={unitVal || ""}
                           onChange={(e) => handleUnitsChange(teacher._id, e.target.value)}
-                          className="w-14 px-2 py-1 border border-slate-200 rounded outline-none text-xs text-slate-650 bg-white focus:border-indigo-500 disabled:opacity-65"
+                          className="w-full px-2 py-1 border border-slate-200 rounded outline-none text-xs text-slate-650 bg-white focus:border-indigo-500 disabled:opacity-65"
                         />
-                      </td>
+                      </div>
+
+                      {/* Gross Base display */}
+                      <div className="space-y-1">
+                        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Gross Base</span>
+                        <span className="block text-xs font-bold text-slate-700 py-1">PKR {grossBase.toLocaleString()}</span>
+                      </div>
 
                       {/* Allowance */}
-                      <td className="px-3.5 py-3">
+                      <div className="space-y-1">
+                        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Allowances (PKR)</span>
                         <input
                           type="number"
                           min="0"
@@ -520,12 +718,13 @@ export default function TeacherPayroll() {
                           value={allowance || ""}
                           onChange={(e) => handleAllowanceChange(teacher._id, e.target.value)}
                           placeholder="0"
-                          className="w-20 px-2 py-1 border border-slate-200 rounded outline-none text-xs text-slate-650 bg-white focus:border-indigo-500 disabled:opacity-65"
+                          className="w-full px-2 py-1 border border-slate-200 rounded outline-none text-xs text-slate-650 bg-white focus:border-indigo-500 disabled:opacity-65"
                         />
-                      </td>
+                      </div>
 
                       {/* Deduction */}
-                      <td className="px-3.5 py-3">
+                      <div className="space-y-1">
+                        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Deductions (PKR)</span>
                         <input
                           type="number"
                           min="0"
@@ -533,68 +732,46 @@ export default function TeacherPayroll() {
                           value={deduction || ""}
                           onChange={(e) => handleDeductionChange(teacher._id, e.target.value)}
                           placeholder="0"
-                          className="w-20 px-2 py-1 border border-slate-200 rounded outline-none text-xs text-slate-650 bg-white focus:border-indigo-500 disabled:opacity-65"
+                          className="w-full px-2 py-1 border border-slate-200 rounded outline-none text-xs text-slate-650 bg-white focus:border-indigo-500 disabled:opacity-65"
                         />
-                      </td>
+                      </div>
+                    </div>
 
-                      {/* Net Payable */}
-                      <td className="px-3.5 py-3 font-bold text-slate-800 whitespace-nowrap">
-                        PKR {netPay.toLocaleString()}
-                      </td>
+                    {/* Total & Action Footer */}
+                    <div className="flex items-center justify-between border-t border-slate-100/60 pt-3 mt-1">
+                      <div className="min-w-0">
+                        <span className="text-[9px] text-slate-400 font-bold uppercase block leading-none">Net Payable</span>
+                        <span className="text-xs font-bold text-slate-800 mt-1 block">PKR {netPay.toLocaleString()}</span>
+                      </div>
 
-                      {/* Status Check */}
-                      <td className="px-3.5 py-3 whitespace-nowrap">
+                      <div className="shrink-0">
                         {isPaid ? (
-                          <div className="flex flex-col gap-0.5">
-                            <span className="px-2 py-0.5 w-fit bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-md font-bold text-[9px] uppercase leading-tight">
-                              Paid
-                            </span>
-                            <span className="text-[8px] text-slate-400">
-                              {new Date(paidRecord.paymentDate).toLocaleDateString()}
-                            </span>
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleGenerateSlip(teacher, paidRecord)}
+                            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#805232] text-white hover:bg-[#6c4327] hover:shadow-md rounded-md font-bold text-[10px] transition cursor-pointer"
+                          >
+                            <FileText size={11} />
+                            Pay Slip
+                          </button>
                         ) : (
-                          <span className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded-md font-bold text-[9px] uppercase leading-tight">
-                            Unpaid
-                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handlePaySalary(teacher._id, teacher.fullName || teacher.name, netPay)}
+                            disabled={paying[teacher._id]}
+                            className="flex items-center gap-1.5 px-4 py-1.5 bg-[#326080] text-white hover:bg-[#284f6b] hover:shadow-md rounded-md font-bold text-[10px] transition disabled:opacity-50 cursor-pointer"
+                          >
+                            <ArrowRight size={11} />
+                            Pay Salary
+                          </button>
                         )}
-                      </td>
-
-                      {/* Actions */}
-                      <td className="px-3.5 py-3 whitespace-nowrap">
-                        <div className="flex items-center justify-center gap-2">
-                          {isPaid ? (
-                            <button
-                              type="button"
-                              onClick={() => handleGenerateSlip(teacher, paidRecord)}
-                              className="flex items-center gap-1 px-2.5 py-1.5 bg-[#805232] text-white hover:bg-[#6c4327] hover:shadow-md rounded-md font-bold text-[10px] transition cursor-pointer"
-                            >
-                              <FileText size={12} />
-                              Pay Slip
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => handlePaySalary(teacher._id, teacher.fullName || teacher.name, netPay)}
-                              disabled={paying[teacher._id]}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-[#326080] text-white hover:bg-[#284f6b] hover:shadow-md rounded-md font-bold text-[10px] transition disabled:opacity-50 cursor-pointer"
-                            >
-                              {paying[teacher._id] ? (
-                                <Loader2 size={12} className="animate-spin" />
-                              ) : (
-                                <ArrowRight size={12} />
-                              )}
-                              Pay Salary
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
     </div>
