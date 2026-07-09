@@ -23,6 +23,7 @@ export default function TeacherPayroll() {
   // Paid records loaded from database history
   const [paidRecords, setPaidRecords] = useState({});
   const [paying, setPaying] = useState({});
+  const [attendanceStats, setAttendanceStats] = useState({});
 
   // Set default cycle to current month (e.g. "2026-07")
   useEffect(() => {
@@ -69,6 +70,15 @@ export default function TeacherPayroll() {
       });
       setPaidRecords(paidMap);
 
+      // 3. Fetch monthly attendance stats
+      const statsRes = await fetch(`${API_BASE}/api/payroll/attendance-stats?month=${currentMonthName}`, {
+        method: "GET",
+        headers: getHeaders(),
+      });
+      const statsData = await statsRes.json();
+      const statsMap = statsData.data || {};
+      setAttendanceStats(statsMap);
+
       // Initialize inputs with teacher base defaults or paid history
       const initialRates = {};
       const initialBases = {};
@@ -87,18 +97,31 @@ export default function TeacherPayroll() {
           initialDeductions[t._id] = paidRec.deduction;
         } else {
           // Defaults from teacher profile
-          initialRates[t._id] = t.salary || 0;
-          initialBases[t._id] = t.salaryBasis || "monthly";
-          // Default units based on basis
-          if (t.salaryBasis === "daily") {
-            initialUnits[t._id] = 22; // default work days
-          } else if (t.salaryBasis === "weekly") {
-            initialUnits[t._id] = 4; // default weeks
+          const rateVal = t.salary || 0;
+          initialRates[t._id] = rateVal;
+          const basisVal = t.salaryBasis || "monthly";
+          initialBases[t._id] = basisVal;
+
+          const teacherStats = statsMap[t._id] || { present: 0, absent: 0, late: 0, leave: 0 };
+          const activeDays = teacherStats.present + teacherStats.late;
+
+          // Default units based on basis & attendance statistics
+          if (basisVal === "daily") {
+            initialUnits[t._id] = activeDays; // Presents + Lates
+          } else if (basisVal === "weekly") {
+            initialUnits[t._id] = Math.round((activeDays / 6) * 10) / 10; // Weeks worked
           } else {
-            initialUnits[t._id] = 1; // default month
+            initialUnits[t._id] = 1; // 1 month
           }
+
           initialAllowances[t._id] = 0;
-          initialDeductions[t._id] = 0;
+
+          // Auto-prefill deductions for monthly staff absences
+          if (basisVal === "monthly" && teacherStats.absent > 0) {
+            initialDeductions[t._id] = Math.round((rateVal / 30) * teacherStats.absent);
+          } else {
+            initialDeductions[t._id] = 0;
+          }
         }
       });
 
@@ -126,12 +149,24 @@ export default function TeacherPayroll() {
 
   const handleBasisChange = (teacherId, basis) => {
     setBases(prev => ({ ...prev, [teacherId]: basis }));
-    // Update default units automatically when basis is changed
+    
+    const teacherStats = attendanceStats[teacherId] || { present: 0, absent: 0, late: 0, leave: 0 };
+    const activeDays = teacherStats.present + teacherStats.late;
+    const rateVal = rates[teacherId] || 0;
+
     setUnits(prev => {
-      let defaultUnits = 1;
-      if (basis === "daily") defaultUnits = 22;
-      else if (basis === "weekly") defaultUnits = 4;
-      return { ...prev, [teacherId]: defaultUnits };
+      let u = 1;
+      if (basis === "daily") u = activeDays;
+      else if (basis === "weekly") u = Math.round((activeDays / 6) * 10) / 10;
+      return { ...prev, [teacherId]: u };
+    });
+
+    setDeductions(prev => {
+      let d = 0;
+      if (basis === "monthly" && teacherStats.absent > 0) {
+        d = Math.round((rateVal / 30) * teacherStats.absent);
+      }
+      return { ...prev, [teacherId]: d };
     });
   };
 
@@ -452,7 +487,25 @@ export default function TeacherPayroll() {
                             </div>
                             <div className="min-w-0">
                               <p className="font-bold text-slate-800 truncate">{teacher.fullName || teacher.name}</p>
-                              <p className="text-[9px] text-slate-400 mt-0.5">Emp ID: {teacher.employeeId}</p>
+                              <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                                <span className="text-[9px] text-slate-400">Emp ID: {teacher.employeeId}</span>
+                                <span className="text-[8px] px-1 py-0.5 bg-slate-50 border border-slate-200/60 rounded text-slate-500 font-semibold uppercase leading-none">
+                                  {teacher.subject || "Teacher"}
+                                </span>
+                              </div>
+                              
+                              {/* Attendance Stats Badge */}
+                              {(() => {
+                                const stats = attendanceStats[teacher._id] || { present: 0, absent: 0, late: 0, leave: 0 };
+                                return (
+                                  <div className="mt-1 flex items-center gap-1 text-[9px] font-bold text-slate-500 select-none">
+                                    <span className="text-emerald-650 bg-emerald-50 px-1 py-0.5 rounded" title="Presents">P: {stats.present}</span>
+                                    <span className="text-blue-650 bg-blue-50 px-1 py-0.5 rounded" title="Lates">L: {stats.late}</span>
+                                    <span className="text-amber-650 bg-amber-50 px-1 py-0.5 rounded" title="Leaves">Lv: {stats.leave}</span>
+                                    <span className="text-rose-650 bg-rose-50 px-1 py-0.5 rounded" title="Absents">A: {stats.absent}</span>
+                                  </div>
+                                );
+                              })()}
                             </div>
                           </div>
                         </td>
@@ -627,6 +680,17 @@ export default function TeacherPayroll() {
                         <div className="min-w-0">
                           <p className="font-bold text-slate-800 text-xs truncate">{teacher.fullName || teacher.name}</p>
                           <p className="text-[9px] text-slate-400">ID: {teacher.employeeId} • {teacher.subject || "Teacher"}</p>
+                          {(() => {
+                            const stats = attendanceStats[teacher._id] || { present: 0, absent: 0, late: 0, leave: 0 };
+                            return (
+                              <div className="mt-1 flex items-center gap-1 text-[8px] font-bold text-slate-500 select-none">
+                                <span className="text-emerald-650 bg-emerald-50 px-1 py-0.5 rounded">P: {stats.present}</span>
+                                <span className="text-blue-650 bg-blue-50 px-1 py-0.5 rounded">L: {stats.late}</span>
+                                <span className="text-amber-650 bg-amber-50 px-1 py-0.5 rounded">Lv: {stats.leave}</span>
+                                <span className="text-rose-650 bg-rose-50 px-1 py-0.5 rounded">A: {stats.absent}</span>
+                              </div>
+                            );
+                          })()}
                         </div>
                       </div>
                       <div>

@@ -372,10 +372,8 @@ export const getStaffAttendance = async (request, response) => {
       });
     }
 
-    const start = new Date(date);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(date);
-    end.setHours(23, 59, 59, 999);
+    const targetDate = new Date(date);
+    targetDate.setHours(12, 0, 0, 0);
 
     const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
 
@@ -389,7 +387,7 @@ export const getStaffAttendance = async (request, response) => {
 
     const attendanceQuery = {
       teacher: { $in: teacherIds },
-      date: { $gte: start, $lte: end }
+      date: targetDate
     };
     if (request.headers["x-branch-id"]) {
       attendanceQuery.branch = request.headers["x-branch-id"];
