@@ -115,6 +115,7 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
     maritalStatus: "", phone: "", alternatePhone: "", email: "", address: "",
     city: "", subject: "", qualification: "", specialization: "", university: "",
     passingYear: "", employeeId: "", joiningDate: "", experience: "", salary: "",
+    salaryBasis: "monthly", biometricId: "",
     employmentStatus: "", schoolSection: localStorage.getItem("activeSection") || "girls",
     notes: "", emergencyName: "", emergencyPhone: "",
   };
@@ -156,6 +157,8 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
         joiningDate: teacher.joiningDate ? teacher.joiningDate.split("T")[0] : "",
         experience: teacher.experience || "",
         salary: teacher.salary ? String(teacher.salary) : "",
+        salaryBasis: teacher.salaryBasis || "monthly",
+        biometricId: teacher.biometricId || "",
         employmentStatus: teacher.employmentStatus || "",
         schoolSection: teacher.schoolSection || "",
         notes: teacher.notes || "",
@@ -443,6 +446,8 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
                         <FI label="Joining Date" name="joiningDate" type="date" required />
                         <FI label="Experience (years)" name="experience" type="number" />
                         <FI label="Salary (PKR)" name="salary" type="number" />
+                        <FS label="Salary Basis" name="salaryBasis" options={[{value:"monthly",label:"Monthly"},{value:"weekly",label:"Weekly"},{value:"daily",label:"Daily"}]} />
+                        <FI label="Biometric Machine ID (Enroll No)" name="biometricId" />
                         <FS label="Employment Status" name="employmentStatus" options={["Permanent", "Contract", "Probation", "Part-time"]} required />
                         <FS label="School Section" name="schoolSection" options={[{value:"girls",label:"Girls Section"},{value:"boys",label:"Boys Section"}]} required />
                       </div>
