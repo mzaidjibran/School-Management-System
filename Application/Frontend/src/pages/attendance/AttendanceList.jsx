@@ -51,6 +51,12 @@ const StatusBadge = ({ status }) => {
 };
 
 export default function AttendanceList() {
+  // Get local timezone-safe date string (YYYY-MM-DD)
+  const getLocalDateString = () => {
+    const tzoffset = (new Date()).getTimezoneOffset() * 60000;
+    return (new Date(Date.now() - tzoffset)).toISOString().split('T')[0];
+  };
+
   const [classes, setClasses]         = useState([]);
   const [records, setRecords]         = useState([]);
   const [filtered, setFiltered]       = useState([]);
@@ -58,9 +64,7 @@ export default function AttendanceList() {
   const [loadingClasses, setLoadingClasses] = useState(true);
 
   const [selectedClass, setSelectedClass] = useState("");
-  const [selectedDate, setSelectedDate]   = useState(
-    new Date().toISOString().split("T")[0]
-  );
+  const [selectedDate, setSelectedDate]   = useState(getLocalDateString());
   const [search, setSearch]           = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedSection, setSelectedSection] = useState(
@@ -251,10 +255,10 @@ export default function AttendanceList() {
               failCount++;
               continue;
             }
-            markPayload.push({
+             markPayload.push({
               student: matchedStudent._id,
               class: matchedClass ? matchedClass._id : matchedStudent.class?._id || matchedStudent.class,
-              date: row.date || new Date().toISOString().split("T")[0],
+              date: row.date || getLocalDateString(),
               section: (row.schoolSection || "girls").toLowerCase(),
               status: (row.status || "present").toLowerCase(),
               remarks: row.remarks || "",

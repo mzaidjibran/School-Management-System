@@ -496,8 +496,11 @@ export const parseBiometricLogs = async (request, response) => {
         resolvedStatus = "late";
       }
 
-      // Date string formatted for batch mark (e.g. "2026-07-11")
-      const dateStr = logDateObj.toISOString().split("T")[0];
+      // Date string formatted for batch mark (e.g. "2026-07-11") in local time representation
+      const year = logDateObj.getFullYear();
+      const month = String(logDateObj.getMonth() + 1).padStart(2, '0');
+      const day = String(logDateObj.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
 
       mappedRecords.push({
         teacherId: teacher._id,

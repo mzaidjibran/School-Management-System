@@ -35,7 +35,13 @@ export default function StaffAttendance() {
   const [teachers, setTeachers] = useState([]);
   const [recordsMap, setRecordsMap] = useState({});
   const [remarksMap, setRemarksMap] = useState({});
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+  // Get local timezone-safe date string (YYYY-MM-DD)
+  const getLocalDateString = () => {
+    const tzoffset = (new Date()).getTimezoneOffset() * 60000;
+    return (new Date(Date.now() - tzoffset)).toISOString().split('T')[0];
+  };
+
+  const [selectedDate, setSelectedDate] = useState(getLocalDateString());
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -57,7 +63,10 @@ export default function StaffAttendance() {
       const remarks = {};
 
       list.forEach((t) => {
-        const existing = markedRecords.find((r) => r.teacher?._id === t._id);
+        const existing = markedRecords.find((r) => {
+          const rTeacherId = typeof r.teacher === "object" ? r.teacher?._id : r.teacher;
+          return String(rTeacherId) === String(t._id);
+        });
         if (existing) {
           records[t._id] = existing.status;
           remarks[t._id] = existing.remarks || "";
@@ -139,7 +148,7 @@ export default function StaffAttendance() {
             <input
               type="date"
               value={selectedDate}
-              max={new Date().toISOString().split("T")[0]}
+              max={getLocalDateString()}
               onChange={(e) => setSelectedDate(e.target.value)}
               className="text-xs font-bold text-slate-700 outline-none w-full bg-transparent mt-0.5 border-b border-transparent focus:border-indigo-500 py-0.5 transition"
             />
