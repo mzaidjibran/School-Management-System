@@ -143,6 +143,8 @@ export default function AddTeacherPage() {
     joiningDate: "",
     experience: "",
     salary: "",
+    salaryBasis: "monthly",
+    biometricId: "",
     employmentStatus: "",
     schoolSection: localStorage.getItem("activeSection") || "girls",
     notes: "",
@@ -471,6 +473,14 @@ export default function AddTeacherPage() {
                       <Input label="Joining Date" type="date" name="joiningDate" value={formData.joiningDate} onChange={handleInputChange} required error={errors.joiningDate} />
                       <Input label="Experience (years)" type="number" name="experience" value={formData.experience} onChange={handleInputChange} />
                       <Input label="Salary" type="number" name="salary" value={formData.salary} onChange={handleInputChange} />
+                      <Select
+                        label="Salary Basis"
+                        name="salaryBasis"
+                        options={[{ value: "monthly", label: "Monthly" }, { value: "weekly", label: "Weekly" }, { value: "daily", label: "Daily" }]}
+                        value={formData.salaryBasis}
+                        onChange={handleInputChange}
+                      />
+                      <Input label="Biometric Machine ID (Enroll No)" name="biometricId" value={formData.biometricId} onChange={handleInputChange} />
                       <Select
                         label="Employment Status"
                         name="employmentStatus"

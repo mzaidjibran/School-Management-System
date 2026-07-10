@@ -19,6 +19,7 @@ import TeacherPage from "../pages/teachers/TeacherPage";
 import TeacherList from "../pages/teachers/TeacherList";
 import AddTeacher from "../pages/teachers/AddTeacher";
 import TeacherPayroll from "../pages/teachers/TeacherPayroll";
+import BiometricUpload from "../pages/teachers/BiometricUpload";
 
 // Classes
 import ClassPage from "../pages/classes/ClassPage";
@@ -121,6 +122,7 @@ export default function AppRoutes() {
           <Route index element={<TeacherList />} />
           <Route path="add" element={<AddTeacher />} />
           <Route path="payroll" element={<AdminRoute><TeacherPayroll /></AdminRoute>} />
+          <Route path="biometric" element={<AdminRoute><BiometricUpload /></AdminRoute>} />
         </Route>
 
         {/* Classes */}

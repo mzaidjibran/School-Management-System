@@ -30,6 +30,7 @@ const teacherSchema = new mongoose.Schema({
     }],
     salary: { type: Number, default: 0 },
     salaryBasis: { type: String, enum: ['monthly', 'weekly', 'daily'], default: 'monthly' },
+    biometricId: { type: String, default: null },
     employmentStatus: { type: String, enum: ['Permanent', 'Contract', 'Probation', 'Part-time'] },
     status: { type: String, enum: ['active', 'inactive', 'on_leave'], default: 'active' },
     address: { type: String },

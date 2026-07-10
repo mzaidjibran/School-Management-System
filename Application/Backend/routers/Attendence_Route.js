@@ -8,6 +8,7 @@ import {
   markStaffAttendance,
   getStaffAttendance,
   updateStaffAttendanceRecord,
+  parseBiometricLogs,
 } from "../controllers/Attendence_Controller.js";
 import { protect } from "../middleware/Auth_Middleware.js";
 
@@ -19,6 +20,7 @@ router.use(protect);
 router.post("/staff", markStaffAttendance);                        // POST   /api/attendance/staff
 router.get("/staff", getStaffAttendance);                          // GET    /api/attendance/staff?date=
 router.put("/staff/:id", updateStaffAttendanceRecord);             // PUT    /api/attendance/staff/:id
+router.post("/staff/biometric-parse", parseBiometricLogs);         // POST   /api/attendance/staff/biometric-parse
 
 // Student Attendance routes
 router.post("/", markAttendance);                              // POST   /api/attendance

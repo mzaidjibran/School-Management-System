@@ -452,3 +452,76 @@ export const updateStaffAttendanceRecord = async (request, response) => {
     });
   }
 };
+
+// ─── Parse Biometric Logs ─────────────────────────────────────────
+export const parseBiometricLogs = async (request, response) => {
+  try {
+    const { logs } = request.body;
+
+    if (!logs || !Array.isArray(logs)) {
+      return response.status(400).json({
+        success: false,
+        error: true,
+        message: "Logs array is mandatory",
+      });
+    }
+
+    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+    
+    // Fetch all active teachers to map the biometric ID
+    const teachersList = await Teacher.find({ userId: ownerId });
+    
+    const mappedRecords = [];
+
+    for (const log of logs) {
+      const { biometricId, timestamp } = log;
+      if (!biometricId || !timestamp) continue;
+
+      // Find teacher with this biometricId
+      const teacher = teachersList.find(t => t.biometricId === String(biometricId).trim());
+      if (!teacher) continue;
+
+      // Parse timestamp (e.g. "2026-07-11 07:55:00")
+      const logDateObj = new Date(timestamp);
+      if (isNaN(logDateObj.getTime())) continue;
+
+      // Extract time parts to resolve status
+      const hours = logDateObj.getHours();
+      const minutes = logDateObj.getMinutes();
+      const timeStr = logDateObj.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+
+      // Threshold: 08:15 AM (late if hours > 8 or (hours === 8 and minutes > 15))
+      let resolvedStatus = "present";
+      if (hours > 8 || (hours === 8 && minutes > 15)) {
+        resolvedStatus = "late";
+      }
+
+      // Date string formatted for batch mark (e.g. "2026-07-11")
+      const dateStr = logDateObj.toISOString().split("T")[0];
+
+      mappedRecords.push({
+        teacherId: teacher._id,
+        name: teacher.fullName || teacher.name,
+        employeeId: teacher.employeeId,
+        subject: teacher.subject,
+        time: timeStr,
+        status: resolvedStatus,
+        date: dateStr,
+        remarks: `Biometric Log: Check-in at ${timeStr}`
+      });
+    }
+
+    response.status(200).json({
+      success: true,
+      error: false,
+      message: "Biometric logs parsed successfully",
+      data: mappedRecords,
+    });
+  } catch (error) {
+    response.status(500).json({
+      success: false,
+      error: true,
+      message: error.message,
+    });
+  }
+};
