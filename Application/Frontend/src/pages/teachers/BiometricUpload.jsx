@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, Save, ArrowRight } from "lucide-react";
+import { UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, Save, ArrowRight, Info } from "lucide-react";
 import { getHeaders } from "../../api/Api_Helper.js";
 import toast from "react-hot-toast";
 
@@ -214,6 +214,56 @@ export default function BiometricUpload() {
               <p className="text-[9px] text-slate-400">Supports exported biometric logs (.csv files)</p>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Instructions Guide Card */}
+      <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-4">
+        <h3 className="text-xs font-bold text-slate-705 mb-2.5 flex items-center gap-1.5 border-b border-slate-100/50 pb-2">
+          <Info size={14} className="text-[#326080]" />
+          How to Use Biometric Attendance System? (Step-by-Step Guide)
+        </h3>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 text-[11px] leading-relaxed text-slate-500">
+          <div className="bg-slate-50/50 p-2.5 rounded-md border border-slate-100/50 space-y-1">
+            <p className="font-bold text-slate-700 flex items-center gap-1">
+              <span className="w-4.5 h-4.5 rounded-full bg-[#326080] text-white flex items-center justify-center text-[10px] shrink-0">1</span>
+              Finger Registration
+            </p>
+            <p className="text-[10px] text-slate-500 leading-tight">Register staff fingerprints on the biometric machine and note down their numeric User ID (e.g., 101, 102).</p>
+          </div>
+
+          <div className="bg-slate-50/50 p-2.5 rounded-md border border-slate-100/50 space-y-1">
+            <p className="font-bold text-slate-700 flex items-center gap-1">
+              <span className="w-4.5 h-4.5 rounded-full bg-[#326080] text-white flex items-center justify-center text-[10px] shrink-0">2</span>
+              Map IDs in Software
+            </p>
+            <p className="text-[10px] text-slate-500 leading-tight">Go to <b>All Teachers</b> list, click edit, and enter the machine User ID in step 3 (Employment) then save.</p>
+          </div>
+
+          <div className="bg-slate-50/50 p-2.5 rounded-md border border-slate-100/50 space-y-1">
+            <p className="font-bold text-slate-700 flex items-center gap-1">
+              <span className="w-4.5 h-4.5 rounded-full bg-[#326080] text-white flex items-center justify-center text-[10px] shrink-0">3</span>
+              Export USB CSV File
+            </p>
+            <p className="text-[10px] text-slate-500 leading-tight">Insert a USB drive in the biometric machine and export the attendance logs report as a CSV file (.csv).</p>
+          </div>
+
+          <div className="bg-slate-50/50 p-2.5 rounded-md border border-slate-100/50 space-y-1">
+            <p className="font-bold text-slate-700 flex items-center gap-1">
+              <span className="w-4.5 h-4.5 rounded-full bg-[#326080] text-white flex items-center justify-center text-[10px] shrink-0">4</span>
+              Upload & Preview
+            </p>
+            <p className="text-[10px] text-slate-500 leading-tight">Upload the CSV file here. The system automatically calculates Present/Late statuses based on the 08:15 AM threshold.</p>
+          </div>
+
+          <div className="bg-slate-50/50 p-2.5 rounded-md border border-slate-100/50 space-y-1">
+            <p className="font-bold text-slate-700 flex items-center gap-1">
+              <span className="w-4.5 h-4.5 rounded-full bg-[#326080] text-white flex items-center justify-center text-[10px] shrink-0">5</span>
+              Review & Batch Save
+            </p>
+            <p className="text-[10px] text-slate-500 leading-tight">Review the attendance preview table, make any overrides/remarks if needed, and click <b>Save</b> to finalize.</p>
+          </div>
         </div>
       </div>
 
