@@ -141,6 +141,10 @@ const studentSchema = new mongoose.Schema(
       enum: ["girls", "boys"],
       default: null,
     },
+    biometricId: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -149,5 +153,6 @@ const studentSchema = new mongoose.Schema(
 
 studentSchema.index({ rollNumber: 1, createdBy: 1 }, { unique: true, sparse: true });
 studentSchema.index({ admissionNumber: 1, createdBy: 1 }, { unique: true, sparse: true });
+studentSchema.index({ biometricId: 1, createdBy: 1 }, { unique: true, sparse: true });
 
 export const Student = mongoose.model("Student", studentSchema);

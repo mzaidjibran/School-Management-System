@@ -528,3 +528,151 @@ export const parseBiometricLogs = async (request, response) => {
     });
   }
 };
+
+// ─── Parse Student Biometric Logs ─────────────────────────────────────────
+export const parseStudentBiometricLogs = async (request, response) => {
+  try {
+    const { logs } = request.body;
+
+    if (!logs || !Array.isArray(logs)) {
+      return response.status(400).json({
+        success: false,
+        error: true,
+        message: "Logs array is mandatory",
+      });
+    }
+
+    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+    
+    // Fetch all active students to map the biometric ID
+    const query = { createdBy: ownerId, status: "active" };
+    if (request.headers["x-branch-id"]) {
+      query.branch = request.headers["x-branch-id"];
+    }
+    const studentsList = await Student.find(query).populate("currentClass");
+    
+    const mappedRecords = [];
+
+    for (const log of logs) {
+      const { biometricId, timestamp } = log;
+      if (!biometricId || !timestamp) continue;
+
+      // Find student with this biometricId
+      const student = studentsList.find(s => s.biometricId === String(biometricId).trim());
+      if (!student) continue;
+
+      // Parse timestamp (e.g. "2026-07-12 07:55:00")
+      const logDateObj = new Date(timestamp);
+      if (isNaN(logDateObj.getTime())) continue;
+
+      // Extract time parts to resolve status
+      const hours = logDateObj.getHours();
+      const minutes = logDateObj.getMinutes();
+      const timeStr = logDateObj.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+
+      // Threshold: 08:15 AM (late if hours > 8 or (hours === 8 and minutes > 15))
+      let resolvedStatus = "present";
+      if (hours > 8 || (hours === 8 && minutes > 15)) {
+        resolvedStatus = "late";
+      }
+
+      // Date string formatted for batch mark (e.g. "2026-07-12") in local time representation
+      const year = logDateObj.getFullYear();
+      const month = String(logDateObj.getMonth() + 1).padStart(2, '0');
+      const day = String(logDateObj.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
+
+      mappedRecords.push({
+        studentId: student._id,
+        name: student.Name || `${student.firstName} ${student.lastName}`.trim(),
+        rollNumber: student.rollNumber,
+        className: student.currentClass ? student.currentClass.name : "—",
+        classId: student.currentClass ? student.currentClass._id : null,
+        time: timeStr,
+        status: resolvedStatus,
+        date: dateStr,
+        schoolSection: student.schoolSection,
+        remarks: `Biometric Log: Check-in at ${timeStr}`
+      });
+    }
+
+    response.status(200).json({
+      success: true,
+      error: false,
+      message: "Student biometric logs parsed successfully",
+      data: mappedRecords,
+    });
+  } catch (error) {
+    response.status(500).json({
+      success: false,
+      error: true,
+      message: error.message,
+    });
+  }
+};
+
+// ─── Mark Student Biometric Attendance ──────────────────────────────
+export const markStudentBiometricAttendance = async (request, response) => {
+  try {
+    const { records, date } = request.body;
+
+    if (!records || !Array.isArray(records) || records.length === 0 || !date) {
+      return response.status(400).json({
+        success: false,
+        error: true,
+        message: "Records array and date are mandatory",
+      });
+    }
+
+    const markedDate = new Date(date);
+    markedDate.setHours(12, 0, 0, 0); // standard timestamp
+
+    const inserted = [];
+    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+
+    for (const rec of records) {
+      try {
+        const { studentId, status, remarks, classId, schoolSection } = rec;
+
+        // Verify student belongs to admin
+        const studentExists = await Student.findOne({ _id: studentId, createdBy: ownerId });
+        if (!studentExists) continue;
+
+        let branchId = null;
+        if (request.headers["x-branch-id"]) {
+          branchId = request.headers["x-branch-id"];
+        }
+
+        const resolvedClassId = classId || studentExists.currentClass;
+        if (!resolvedClassId) continue;
+
+        const doc = await Attendance.findOneAndUpdate(
+          { student: studentId, class: resolvedClassId, date: markedDate },
+          {
+            status,
+            remarks: remarks || null,
+            branch: branchId,
+            schoolSection: schoolSection || studentExists.schoolSection || null
+          },
+          { new: true, upsert: true, runValidators: true }
+        );
+        inserted.push(doc);
+      } catch (e) {
+        console.log("Skip student record:", e.message);
+      }
+    }
+
+    response.status(201).json({
+      success: true,
+      error: false,
+      message: `${inserted.length} student records marked successfully`,
+      data: inserted,
+    });
+  } catch (error) {
+    response.status(500).json({
+      success: false,
+      error: true,
+      message: error.message,
+    });
+  }
+};

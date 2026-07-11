@@ -1,6 +1,6 @@
 import TopTabs from "../../components/layouts/TopTabs";
 import { Outlet } from "react-router-dom";
-import { ClipboardList, CheckSquare, BarChart3, Users } from "lucide-react";
+import { ClipboardList, CheckSquare, BarChart3, Users, Fingerprint } from "lucide-react";
 import { useAuth } from "../auth/useAuth.js";
 import toast from "react-hot-toast";
 
@@ -15,6 +15,12 @@ export default function AttendancePage() {
       label: "Staff Attendance",
       path: "/attendance/staff",
       icon: <Users size={14} />,
+      onClick: !isAdmin ? () => toast.error("Only administrators are authorized to access this section.") : null
+    },
+    {
+      label: "Biometric Student",
+      path: "/attendance/biometric",
+      icon: <Fingerprint size={14} />,
       onClick: !isAdmin ? () => toast.error("Only administrators are authorized to access this section.") : null
     },
   ];

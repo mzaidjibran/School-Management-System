@@ -142,7 +142,7 @@ const StudentFormModal = ({ isOpen, onClose, student, mode, onSave }) => {
     religion: "", nationality: "", phone: "", email: "", address: "",
     city: "", fatherName: "", motherName: "", parentPhone: "", class: "",
     rollNumber: "", section: "", admissionDate: "", previousSchool: "",
-    medicalInfo: "", emergencyName: "", emergencyPhone: "",
+    medicalInfo: "", emergencyName: "", emergencyPhone: "", biometricId: "",
   };
 
   const [formData, setFormData] = useState(emptyForm);
@@ -195,6 +195,7 @@ const StudentFormModal = ({ isOpen, onClose, student, mode, onSave }) => {
         medicalInfo: student.medicalInfo || "",
         emergencyName: student.emergencyName || "",
         emergencyPhone: student.emergencyPhone || "",
+        biometricId: student.biometricId || "",
       });
       setImagePreview(student.picture || null);
     } else {
@@ -222,6 +223,7 @@ const StudentFormModal = ({ isOpen, onClose, student, mode, onSave }) => {
         medicalInfo: "",
         emergencyName: "",
         emergencyPhone: "",
+        biometricId: "",
       });
       setProfileImage(null);
       setImagePreview(null);
@@ -406,6 +408,7 @@ const StudentFormModal = ({ isOpen, onClose, student, mode, onSave }) => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Input label="Emergency Contact Name" name="emergencyName" value={formData.emergencyName} onChange={handleChange} disabled={isViewOnly} />
                   <Input label="Emergency Contact Phone" type="tel" name="emergencyPhone" value={formData.emergencyPhone} onChange={handleChange} disabled={isViewOnly} />
+                  <Input label="Biometric Machine ID (Enroll No)" name="biometricId" value={formData.biometricId} onChange={handleChange} disabled={isViewOnly} />
                 </div>
               </div>
             </div>
@@ -498,6 +501,7 @@ export default function StudentList() {
         medicalInfo: s.medicalInfo || "",
         emergencyName: s.emergencyName || "",
         emergencyPhone: s.emergencyPhone || "",
+        biometricId: s.biometricId || "",
         picture: s.profileImage
           ? `${API_BASE}${s.profileImage}`
           : `https://ui-avatars.com/api/?name=${encodeURIComponent(
@@ -726,6 +730,7 @@ export default function StudentList() {
             if (getVal(row, "medicalInfo", "medical info")) fd.append("medicalInfo", getVal(row, "medicalInfo", "medical info"));
             if (getVal(row, "emergencyName", "emergency name")) fd.append("emergencyName", getVal(row, "emergencyName", "emergency name"));
             if (getVal(row, "emergencyPhone", "emergency phone")) fd.append("emergencyPhone", getVal(row, "emergencyPhone", "emergency phone"));
+            if (getVal(row, "biometricId", "biometric id", "enroll no", "biometric")) fd.append("biometricId", getVal(row, "biometricId", "biometric id", "enroll no", "biometric"));
 
             await createStudent(fd);
             successCount++;
@@ -782,6 +787,7 @@ export default function StudentList() {
       fd.append("medicalInfo", data.medicalInfo || "");
       fd.append("emergencyName", data.emergencyName || "");
       fd.append("emergencyPhone", data.emergencyPhone || "");
+      fd.append("biometricId", data.biometricId || "");
       fd.append("religion", data.religion || "");
       fd.append("nationality", data.nationality || "");
       fd.append("address", data.address || "");

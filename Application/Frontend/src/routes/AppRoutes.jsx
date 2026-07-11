@@ -32,6 +32,7 @@ import AttendanceList from "../pages/attendance/AttendanceList";
 import MarkAttendance from "../pages/attendance/MarkAttendance";
 import AttendanceReport from "../pages/attendance/AttendanceReport";
 import StaffAttendance from "../pages/attendance/StaffAttendance";
+import StudentBiometricUpload from "../pages/attendance/StudentBiometricUpload";
 
 // Exams
 import ExamPage from "../pages/exams/ExamPage";
@@ -137,6 +138,7 @@ export default function AppRoutes() {
           <Route path="mark" element={<MarkAttendance />} />
           <Route path="reports" element={<AttendanceReport />} />
           <Route path="staff" element={<AdminRoute><StaffAttendance /></AdminRoute>} />
+          <Route path="biometric" element={<AdminRoute><StudentBiometricUpload /></AdminRoute>} />
         </Route>
 
         {/* Exams */}

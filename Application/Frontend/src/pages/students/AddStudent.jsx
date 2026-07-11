@@ -151,6 +151,7 @@ export default function AddStudent() {
     medicalInfo: "",
     emergencyName: "",
     emergencyPhone: "",
+    biometricId: "",
   };
 
   const [formData, setFormData] = useState(emptyForm);
@@ -292,6 +293,7 @@ export default function AddStudent() {
       if (formData.medicalInfo)    fd.append("medicalInfo", formData.medicalInfo);
       if (formData.emergencyName)  fd.append("emergencyName", formData.emergencyName);
       if (formData.emergencyPhone) fd.append("emergencyPhone", formData.emergencyPhone);
+      if (formData.biometricId)    fd.append("biometricId", formData.biometricId);
 
       // Image
       if (profileImage) fd.append("profileImage", profileImage);
@@ -541,6 +543,7 @@ export default function AddStudent() {
                     </div>
                     <Input label="Emergency Contact Name" name="emergencyName" value={formData.emergencyName} onChange={handleInputChange} />
                     <Input label="Emergency Contact Number" type="tel" name="emergencyPhone" value={formData.emergencyPhone} onChange={handleInputChange} />
+                    <Input label="Biometric Machine ID (Enroll No)" name="biometricId" value={formData.biometricId} onChange={handleInputChange} />
                   </div>
                 </div>
               )}
