@@ -504,6 +504,7 @@ export default function AddStudent() {
                       error={errors.class}
                     />
                     <Input label="Roll Number" name="rollNumber" value={formData.rollNumber} onChange={handleInputChange} required error={errors.rollNumber} />
+                    <Input label="Biometric Machine ID (Enroll No)" name="biometricId" value={formData.biometricId} onChange={handleInputChange} />
                     <Input label="Class Section (e.g. A, B)" name="section" value={formData.section} onChange={handleInputChange} />
                     <Select
                       label="School Section"
@@ -543,7 +544,6 @@ export default function AddStudent() {
                     </div>
                     <Input label="Emergency Contact Name" name="emergencyName" value={formData.emergencyName} onChange={handleInputChange} />
                     <Input label="Emergency Contact Number" type="tel" name="emergencyPhone" value={formData.emergencyPhone} onChange={handleInputChange} />
-                    <Input label="Biometric Machine ID (Enroll No)" name="biometricId" value={formData.biometricId} onChange={handleInputChange} />
                   </div>
                 </div>
               )}

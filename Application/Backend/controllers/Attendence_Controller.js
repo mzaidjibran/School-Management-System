@@ -18,7 +18,7 @@ export const markAttendance = async (request, response) => {
       });
     }
 
-    // Ek ek karke save karo
+    // Ek ek karke save karo (upsert design to avoid duplicates)
     const inserted = [];
     for (const rec of records) {
       try {
@@ -27,10 +27,23 @@ export const markAttendance = async (request, response) => {
         const studentExists = await Student.findOne({ _id: rec.student, createdBy: ownerId });
         if (!studentExists) continue;
 
-        if (request.headers["x-branch-id"]) rec.branch = request.headers["x-branch-id"];
-        if (request.headers["x-section"]) rec.schoolSection = request.headers["x-section"];
+        const branchId = request.headers["x-branch-id"] || rec.branch || null;
+        const sectionId = request.headers["x-section"] || rec.schoolSection || null;
 
-        const doc = await Attendance.create(rec);
+        const markedDate = new Date(rec.date);
+        markedDate.setUTCHours(12, 0, 0, 0); // standard midday UTC timestamp
+
+        const doc = await Attendance.findOneAndUpdate(
+          { student: rec.student, class: rec.class, date: markedDate },
+          {
+            status: rec.status,
+            remarks: rec.remarks || null,
+            branch: branchId,
+            schoolSection: sectionId,
+            lateMinutes: rec.lateMinutes || 0
+          },
+          { new: true, upsert: true, runValidators: true }
+        );
         inserted.push(doc);
       } catch (e) {
         console.log("Skip:", e.message);
@@ -76,11 +89,11 @@ export const getAttendanceByClassAndDate = async (request, response) => {
       });
     }
 
-    // Date ka start aur end banao (poora din)
+    // Date ka start aur end banao (poora din in UTC)
     const start = new Date(date);
-    start.setHours(0, 0, 0, 0);
+    start.setUTCHours(0, 0, 0, 0);
     const end = new Date(date);
-    end.setHours(23, 59, 59, 999);
+    end.setUTCHours(23, 59, 59, 999);
 
     const query = {
       class: classId,
@@ -220,11 +233,14 @@ export const updateAttendance = async (request, response) => {
 // ─── Get Today's Attendance Summary (Dashboard ke liye) ───────────
 export const getTodayAttendanceSummary = async (request, response) => {
   try {
-    const today = new Date();
-    const start = new Date(today);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(today);
-    end.setHours(23, 59, 59, 999);
+    // Standardize to PKT (UTC+5) to find the correct local calendar day
+    const today = new Date(Date.now() + 5 * 60 * 60 * 1000);
+    const year = today.getUTCFullYear();
+    const month = today.getUTCMonth();
+    const dayVal = today.getUTCDate();
+
+    const start = new Date(Date.UTC(year, month, dayVal, 0, 0, 0, 0));
+    const end = new Date(Date.UTC(year, month, dayVal, 23, 59, 59, 999));
 
     const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
     const studentQuery = { createdBy: ownerId };
@@ -269,9 +285,9 @@ export const getTodayAttendanceSummary = async (request, response) => {
       if (latestRecord) {
         summaryDate = latestRecord.date;
         const startLatest = new Date(summaryDate);
-        startLatest.setHours(0, 0, 0, 0);
+        startLatest.setUTCHours(0, 0, 0, 0);
         const endLatest = new Date(summaryDate);
-        endLatest.setHours(23, 59, 59, 999);
+        endLatest.setUTCHours(23, 59, 59, 999);
 
         attendanceQuery.date = { $gte: startLatest, $lte: endLatest };
         records = await Attendance.find(attendanceQuery);
@@ -506,6 +522,7 @@ export const parseBiometricLogs = async (request, response) => {
         teacherId: teacher._id,
         name: teacher.fullName || teacher.name,
         employeeId: teacher.employeeId,
+        biometricId: biometricId,
         subject: teacher.subject,
         time: timeStr,
         status: resolvedStatus,
@@ -585,6 +602,7 @@ export const parseStudentBiometricLogs = async (request, response) => {
       mappedRecords.push({
         studentId: student._id,
         name: student.Name || `${student.firstName} ${student.lastName}`.trim(),
+        biometricId: biometricId,
         rollNumber: student.rollNumber,
         className: student.currentClass ? student.currentClass.name : "—",
         classId: student.currentClass ? student.currentClass._id : null,
@@ -625,7 +643,7 @@ export const markStudentBiometricAttendance = async (request, response) => {
     }
 
     const markedDate = new Date(date);
-    markedDate.setHours(12, 0, 0, 0); // standard timestamp
+    markedDate.setUTCHours(12, 0, 0, 0); // standard timestamp
 
     const inserted = [];
     const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
