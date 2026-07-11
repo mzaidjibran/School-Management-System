@@ -1,6 +1,8 @@
-import { useState, useRef } from "react";
-import { UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, Save, ArrowRight, Info } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, Save, ArrowRight, Info, RefreshCw, Calendar, Search } from "lucide-react";
 import { getHeaders } from "../../api/Api_Helper.js";
+import { getAllTeachers } from "../../api/Teacher_Api.js";
+import { getStaffAttendance } from "../../api/Attendence_Api.js";
 import toast from "react-hot-toast";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
@@ -12,6 +14,41 @@ export default function BiometricUpload() {
   const [previewRecords, setPreviewRecords] = useState([]);
   
   const fileInputRef = useRef(null);
+
+  // Get local timezone-safe date string (YYYY-MM-DD)
+  const getLocalDateString = () => {
+    const tzoffset = (new Date()).getTimezoneOffset() * 60000;
+    return (new Date(Date.now() - tzoffset)).toISOString().split('T')[0];
+  };
+
+  const [selectedDate, setSelectedDate] = useState(getLocalDateString());
+  const [savedRecords, setSavedRecords] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+  const [loadingSaved, setLoadingSaved] = useState(false);
+
+  // Load staff list & marked attendance on date changes
+  const fetchSavedAttendance = async () => {
+    setLoadingSaved(true);
+    try {
+      // 1. Fetch active teachers
+      const teachersRes = await getAllTeachers();
+      const list = (teachersRes.data || []).filter(t => t.status === "active" || t.status === "Active" || !t.status);
+      setTeachers(list);
+
+      // 2. Fetch marked attendance for this date
+      const attendanceRes = await getStaffAttendance(selectedDate);
+      setSavedRecords(attendanceRes.data || []);
+    } catch (e) {
+      console.error("Error fetching staff attendance on biometric page:", e);
+      toast.error(e.message || "Failed to load attendance records");
+    } finally {
+      setLoadingSaved(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSavedAttendance();
+  }, [selectedDate]);
 
   // Parse CSV file content on client-side and send logs to backend for name resolution
   const handleFileChange = async (e) => {
@@ -165,6 +202,7 @@ export default function BiometricUpload() {
       toast.success("Biometric attendance saved to database successfully!");
       setPreviewRecords([]);
       setFileName("");
+      fetchSavedAttendance();
     } catch (err) {
       console.error(err);
       toast.error(err.message || "Failed to save attendance logs");
@@ -425,6 +463,149 @@ export default function BiometricUpload() {
           </div>
         </div>
       )}
+
+      {/* Saved daily attendance section */}
+      <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-4 mt-6">
+        <div className="flex items-center justify-between border-b border-slate-100/50 pb-3 mb-4 flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <Calendar size={18} className="text-[#326080]" />
+            <div>
+              <h3 className="text-sm font-bold text-slate-800">Saved Attendance Log</h3>
+              <p className="text-[10px] text-slate-400 font-medium">View currently marked/uploaded teacher attendance records</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              max={getLocalDateString()}
+              className="px-2.5 py-1.5 border border-slate-200 rounded-md outline-none text-xs text-slate-650 bg-white focus:border-[#326080] font-medium"
+            />
+            <button
+              onClick={fetchSavedAttendance}
+              disabled={loadingSaved}
+              type="button"
+              className="p-1.5 border border-slate-200 hover:border-[#326080] text-slate-500 hover:text-[#326080] rounded-md transition duration-150 disabled:opacity-50 cursor-pointer"
+              title="Refresh log"
+            >
+              <RefreshCw size={14} className={loadingSaved ? "animate-spin" : ""} />
+            </button>
+          </div>
+        </div>
+
+        {loadingSaved ? (
+          <div className="p-8 text-center flex flex-col items-center justify-center gap-2 text-slate-400 text-xs">
+            <Loader2 size={20} className="animate-spin text-[#326080]" />
+            <span>Loading database records...</span>
+          </div>
+        ) : teachers.length === 0 ? (
+          <div className="p-8 text-center text-slate-400 text-xs">
+            No active teachers found in the database.
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {savedRecords.length === 0 && (
+              <div className="flex items-start gap-2 p-3 bg-amber-50/40 border border-amber-100 rounded-md text-[11px] text-amber-700 font-medium">
+                <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                <span>No attendance records saved for {selectedDate}. You can upload the biometric CSV above or mark manually in the Staff Attendance section.</span>
+              </div>
+            )}
+
+            {/* Desktop Table */}
+            <div className="overflow-hidden border border-slate-100 rounded-md hidden md:block">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] text-slate-500 font-bold uppercase">
+                    <th className="px-4 py-2.5">Teacher Name</th>
+                    <th className="px-4 py-2.5">Biometric ID (Enroll No)</th>
+                    <th className="px-4 py-2.5">Subject</th>
+                    <th className="px-4 py-2.5">Status</th>
+                    <th className="px-4 py-2.5">Details / Remarks</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs">
+                  {teachers.map((t) => {
+                    const rec = savedRecords.find((r) => {
+                      const rTeacherId = typeof r.teacher === "object" ? r.teacher?._id : r.teacher;
+                      return String(rTeacherId) === String(t._id);
+                    });
+                    
+                    const status = rec ? rec.status : "not_marked";
+                    const remarks = rec ? rec.remarks : "—";
+                    
+                    const badgeStyles = {
+                      present: "bg-emerald-50 text-emerald-700 border-emerald-100",
+                      late: "bg-blue-50 text-blue-700 border-blue-100",
+                      absent: "bg-rose-50 text-rose-700 border-rose-100",
+                      leave: "bg-amber-50 text-amber-700 border-amber-100",
+                      not_marked: "bg-slate-50 text-slate-400 border-slate-100"
+                    };
+
+                    return (
+                      <tr key={t._id} className="hover:bg-slate-50/20 transition">
+                        <td className="px-4 py-2.5 font-bold text-slate-800">{t.fullName || t.name}</td>
+                        <td className="px-4 py-2.5 text-slate-500 font-semibold">{t.biometricId || "Not Registered"}</td>
+                        <td className="px-4 py-2.5 text-slate-500">{t.subject || "—"}</td>
+                        <td className="px-4 py-2.5">
+                          <span className={`px-2 py-0.5 border rounded-full text-[10px] font-bold capitalize select-none ${badgeStyles[status]}`}>
+                            {status === "not_marked" ? "Not Marked" : status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2.5 text-slate-500 max-w-[250px] truncate" title={remarks || ""}>
+                          {remarks || "—"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Cards */}
+            <div className="block md:hidden space-y-3">
+              {teachers.map((t) => {
+                const rec = savedRecords.find((r) => {
+                  const rTeacherId = typeof r.teacher === "object" ? r.teacher?._id : r.teacher;
+                  return String(rTeacherId) === String(t._id);
+                });
+                
+                const status = rec ? rec.status : "not_marked";
+                const remarks = rec ? rec.remarks : "—";
+                
+                const badgeStyles = {
+                  present: "bg-emerald-50 text-emerald-700 border-emerald-100",
+                  late: "bg-blue-50 text-blue-700 border-blue-100",
+                  absent: "bg-rose-50 text-rose-700 border-rose-100",
+                  leave: "bg-amber-50 text-amber-700 border-amber-100",
+                  not_marked: "bg-slate-50 text-slate-400 border-slate-100"
+                };
+
+                return (
+                  <div key={t._id} className="bg-white border border-slate-100 rounded-md p-3 space-y-2 shadow-sm">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-bold text-slate-800">{t.fullName || t.name}</span>
+                      <span className={`px-2 py-0.5 border rounded-full text-[9px] font-bold capitalize ${badgeStyles[status]}`}>
+                        {status === "not_marked" ? "Not Marked" : status}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-1 text-[10px] text-slate-400 font-semibold">
+                      <div>Biometric ID: <span className="text-slate-600 font-bold">{t.biometricId || "Not Registered"}</span></div>
+                      <div>Subject: <span className="text-slate-600 font-bold">{t.subject || "—"}</span></div>
+                    </div>
+                    {remarks && remarks !== "—" && (
+                      <div className="text-[10px] bg-slate-50 border border-slate-100 rounded p-1.5 text-slate-500 font-medium leading-tight">
+                        {remarks}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
