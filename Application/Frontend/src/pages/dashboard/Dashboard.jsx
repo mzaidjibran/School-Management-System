@@ -52,6 +52,7 @@ export default function Dashboard() {
   // ── Real data states ──────────────────────────────────────────
   const [stats, setStats] = useState(null);
   const [attendance, setAttendance] = useState(null);
+  const [teacherAttendance, setTeacherAttendance] = useState(null);
   const [recentFees, setRecentFees] = useState([]);
   const [exams, setExams] = useState([]);
   const [notices, setNotices] = useState([]);
@@ -86,6 +87,7 @@ export default function Dashboard() {
           noticeRes,
           feeRes,
           attRes,
+          teachAttRes,
         ] = await Promise.allSettled([
           fetch(`${API}/api/students`, { headers: authHeaders() }),
           fetch(`${API}/api/teachers`, { headers: authHeaders() }),
@@ -95,6 +97,9 @@ export default function Dashboard() {
           fetch(`${API}/api/notices`, { headers: authHeaders() }),
           fetch(`${API}/api/fee`, { headers: authHeaders() }),
           fetch(`${API}/api/attendance/today-summary`, {
+            headers: authHeaders(),
+          }),
+          fetch(`${API}/api/attendance/staff/today-summary`, {
             headers: authHeaders(),
           }),
         ]);
@@ -114,6 +119,7 @@ export default function Dashboard() {
           noticeData,
           feeData,
           attData,
+          teachAttData,
         ] = await Promise.all([
           toJson(studRes),
           toJson(teachRes),
@@ -123,6 +129,7 @@ export default function Dashboard() {
           toJson(noticeRes),
           toJson(feeRes),
           toJson(attRes), // ✅ attRes fix
+          toJson(teachAttRes),
         ]);
 
         setStats({
@@ -203,6 +210,18 @@ export default function Dashboard() {
         } else {
           setAttendance(null);
         }
+
+        if (teachAttData?.data) {
+          setTeacherAttendance({
+            present: teachAttData.data.present,
+            absent: teachAttData.data.absent,
+            leave: teachAttData.data.leave,
+            late: teachAttData.data.late,
+            date: teachAttData.data.date,
+          });
+        } else {
+          setTeacherAttendance(null);
+        }
       } catch (err) {
         console.error("Dashboard fetch error:", err);
         toast.error("Dashboard data load nahi ho saka: " + err.message);
@@ -239,6 +258,16 @@ export default function Dashboard() {
     : 0;
   const attPct = attTotal
     ? ((attendance.present / attTotal) * 100).toFixed(1)
+    : "—";
+
+  const teacherAttTotal = teacherAttendance
+    ? teacherAttendance.present +
+      teacherAttendance.absent +
+      teacherAttendance.leave +
+      teacherAttendance.late
+    : 0;
+  const teacherAttPct = teacherAttTotal
+    ? ((teacherAttendance.present / teacherAttTotal) * 100).toFixed(1)
     : "—";
 
   const feeStatusColor = (s) =>
@@ -693,7 +722,7 @@ export default function Dashboard() {
               <div className="flex justify-between items-center pb-3 border-b border-slate-100/60">
                 <h3 className="text-xs font-bold text-slate-800 flex items-center gap-2">
                   <span className="w-2 h-2 bg-emerald-500 rounded-full" />
-                  Today's Attendance Status
+                  Student Attendance Status
                 </h3>
                 <span className="text-[10px] text-emerald-650 bg-emerald-50 px-2 py-0.5 rounded font-extrabold uppercase">
                   {attendance?.date
@@ -705,7 +734,7 @@ export default function Dashboard() {
                 </span>
               </div>
 
-              {attendance ? (
+              {attendance && attTotal > 0 ? (
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-6 min-h-[160px]">
                   {/* Left Side: Donut Chart */}
                   <div className="w-[120px] h-[120px] shrink-0 relative flex items-center justify-center">
@@ -769,7 +798,95 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <p className="text-xs text-slate-400 text-center py-6">
-                  No attendance data for today
+                  No student attendance recorded for this date
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Teacher Attendance */}
+          {(isAdmin || assignedPages.includes("attendance")) && (
+            <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-3.5 space-y-2.5">
+              <div className="flex justify-between items-center pb-3 border-b border-slate-100/60">
+                <h3 className="text-xs font-bold text-slate-800 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-indigo-500 rounded-full" />
+                  Teacher Attendance Status
+                </h3>
+                <span className="text-[10px] text-indigo-650 bg-indigo-50 px-2 py-0.5 rounded font-extrabold uppercase">
+                  {teacherAttendance?.date
+                    ? new Date(teacherAttendance.date).toLocaleDateString("en-PK", {
+                        day: "numeric",
+                        month: "short",
+                      })
+                    : "Daily Summary"}
+                </span>
+              </div>
+
+              {teacherAttendance && teacherAttTotal > 0 ? (
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-6 min-h-[160px]">
+                  {/* Left Side: Donut Chart */}
+                  <div className="w-[120px] h-[120px] shrink-0 relative flex items-center justify-center">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={[
+                            { name: "Present", value: teacherAttendance.present, color: "#326080" },
+                            { name: "Absent", value: teacherAttendance.absent, color: "#805232" },
+                            { name: "Leave", value: teacherAttendance.leave, color: "#B5D2E6" },
+                            { name: "Late", value: teacherAttendance.late, color: "#4e7e9f" },
+                          ].filter(d => d.value > 0)}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={38}
+                          outerRadius={50}
+                          paddingAngle={2}
+                          dataKey="value"
+                          animationDuration={1200}
+                        >
+                          {[
+                            { name: "Present", value: teacherAttendance.present, color: "#326080" },
+                            { name: "Absent", value: teacherAttendance.absent, color: "#805232" },
+                            { name: "Leave", value: teacherAttendance.leave, color: "#B5D2E6" },
+                            { name: "Late", value: teacherAttendance.late, color: "#4e7e9f" },
+                          ].filter(d => d.value > 0).map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                          ))}
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+
+                    {/* Center Text inside Donut */}
+                    <div className="absolute text-center">
+                      <span className="block text-base font-bold text-slate-800 leading-none">
+                        {teacherAttPct !== "—" ? `${teacherAttPct}%` : "—%"}
+                      </span>
+                      <span className="text-[7px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">
+                        Rate
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Right Side: Details Grid */}
+                  <div className="flex-1 w-full grid grid-cols-2 gap-2">
+                    {[
+                      { label: "Present", val: teacherAttendance.present, color: "text-emerald-700 bg-emerald-50/50 border-emerald-100/50 hover:bg-emerald-50", badge: "bg-emerald-500" },
+                      { label: "Absent", val: teacherAttendance.absent, color: "text-rose-700 bg-rose-50/50 border-rose-100/50 hover:bg-rose-50", badge: "bg-rose-500" },
+                      { label: "Leave", val: teacherAttendance.leave, color: "text-amber-700 bg-amber-50/50 border-amber-100/50 hover:bg-amber-50", badge: "bg-amber-500" },
+                      { label: "Late", val: teacherAttendance.late, color: "text-blue-700 bg-blue-50/50 border-blue-100/50 hover:bg-blue-50", badge: "bg-blue-500" },
+                    ].map((a) => (
+                      <div key={a.label} className={`p-2 border rounded-md flex flex-col justify-center transition duration-150 ${a.color}`}>
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${a.badge}`} />
+                          <span className="text-[10px] font-bold truncate opacity-80">{a.label}</span>
+                        </div>
+                        <span className="text-sm font-bold mt-1 leading-none text-slate-850">{a.val}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-slate-400 text-center py-6">
+                  No teacher attendance recorded for this date
                 </p>
               )}
             </div>

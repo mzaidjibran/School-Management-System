@@ -269,30 +269,52 @@ export const getTodayAttendanceSummary = async (request, response) => {
     let records = await Attendance.find(attendanceQuery);
     let summaryDate = today;
 
-    // Fallback: If no records for today, fetch the most recent day's records
-    if (records.length === 0) {
-      const searchCriteria = { student: { $in: studentIds } };
-      if (request.headers["x-branch-id"]) searchCriteria.branch = request.headers["x-branch-id"];
-      
-      if (request.user && request.user.role === "teacher") {
-        searchCriteria.schoolSection = request.user.gender === "female" ? "girls" : "boys";
-      } else if (request.headers["x-section"]) {
-        searchCriteria.schoolSection = request.headers["x-section"];
-      }
+    const summary = {
+      total:   records.length,
+      present: records.filter((r) => r.status === "present").length,
+      absent:  records.filter((r) => r.status === "absent").length,
+      late:    records.filter((r) => r.status === "late").length,
+      leave:   records.filter((r) => r.status === "leave").length,
+      date:    summaryDate
+    };
 
-      const latestRecord = await Attendance.findOne(searchCriteria).sort({ date: -1 });
+    response.status(200).json({
+      success: true,
+      error: false,
+      data: summary,
+    });
+  } catch (error) {
+    response.status(500).json({ success: false, error: true, message: error.message });
+  }
+};
 
-      if (latestRecord) {
-        summaryDate = latestRecord.date;
-        const startLatest = new Date(summaryDate);
-        startLatest.setUTCHours(0, 0, 0, 0);
-        const endLatest = new Date(summaryDate);
-        endLatest.setUTCHours(23, 59, 59, 999);
+// ─── Get Today's Staff (Teacher) Attendance Summary (Dashboard ke liye) ───────────
+export const getTodayTeacherAttendanceSummary = async (request, response) => {
+  try {
+    // Standardize to PKT (UTC+5) to find the correct local calendar day
+    const today = new Date(Date.now() + 5 * 60 * 60 * 1000);
+    const year = today.getUTCFullYear();
+    const month = today.getUTCMonth();
+    const dayVal = today.getUTCDate();
 
-        attendanceQuery.date = { $gte: startLatest, $lte: endLatest };
-        records = await Attendance.find(attendanceQuery);
-      }
-    }
+    const start = new Date(Date.UTC(year, month, dayVal, 0, 0, 0, 0));
+    const end = new Date(Date.UTC(year, month, dayVal, 23, 59, 59, 999));
+
+    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+    const teacherQuery = { userId: ownerId };
+    if (request.headers["x-branch-id"]) teacherQuery.branch = request.headers["x-branch-id"];
+
+    const teachersList = await Teacher.find(teacherQuery);
+    const teacherIds = teachersList.map((t) => t._id);
+
+    const attendanceQuery = {
+      teacher: { $in: teacherIds },
+      date: { $gte: start, $lte: end },
+    };
+    if (request.headers["x-branch-id"]) attendanceQuery.branch = request.headers["x-branch-id"];
+
+    let records = await StaffAttendance.find(attendanceQuery);
+    let summaryDate = today;
 
     const summary = {
       total:   records.length,
@@ -312,6 +334,7 @@ export const getTodayAttendanceSummary = async (request, response) => {
     response.status(500).json({ success: false, error: true, message: error.message });
   }
 };
+
 
 // ─── Mark Staff (Teacher) Attendance ──────────────────────────────
 export const markStaffAttendance = async (request, response) => {
