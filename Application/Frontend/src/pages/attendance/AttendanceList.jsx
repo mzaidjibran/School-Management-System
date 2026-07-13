@@ -315,7 +315,7 @@ export default function AttendanceList() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto space-y-3">
         {/* Breadcrumb */}
         <nav className="flex mb-5 text-sm text-slate-500">
           <span className="hover:text-indigo-600 cursor-pointer">Dashboard</span>
@@ -324,7 +324,7 @@ export default function AttendanceList() {
         </nav>
 
         {/* Header */}
-        <div className="flex flex-wrap justify-between items-start gap-3 mb-7">
+        <div className="flex flex-wrap justify-between items-start gap-3">
           <div>
             <h1 className="text-2xl font-bold text-slate-800">Attendance Records</h1>
             <p className="text-slate-500 text-sm mt-0.5">Class aur date select karke records dekho</p>
@@ -343,7 +343,7 @@ export default function AttendanceList() {
         </div>
 
         {/* Class + Date selector */}
-        <div className="bg-white rounded-md shadow-sm border border-slate-100 p-4 mb-6">
+        <div className="bg-white rounded-md shadow-sm border border-slate-100 p-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-medium text-slate-500 mb-1.5">Select Section</label>
@@ -388,7 +388,7 @@ export default function AttendanceList() {
 
         {/* Stats */}
         {records.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
             {[
               { label: "Total",      value: records.length, color: "text-slate-800",   bg: "bg-indigo-100"  },
               { label: "Present",    value: presentCount,   color: "text-emerald-600", bg: "bg-emerald-100" },
@@ -408,7 +408,7 @@ export default function AttendanceList() {
         )}
 
         {/* Filters */}
-        <div className="bg-white rounded-md shadow-sm border border-slate-100 px-4 py-3 mb-5">
+        <div className="bg-white rounded-md shadow-sm border border-slate-100 px-4 py-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 items-center">
             <div className="relative">
               <FaSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs" />

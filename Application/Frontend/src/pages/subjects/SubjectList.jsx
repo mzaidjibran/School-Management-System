@@ -600,7 +600,7 @@ export default function Subjects() {
   ];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
 
       {/* ── Header ── */}
       <div className="flex flex-wrap justify-between items-start gap-3">

@@ -789,7 +789,7 @@ const handleSave = (updatedClass) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto space-y-3">
         {/* Breadcrumb */}
         <nav className="flex mb-6 text-sm text-slate-500">
           <span className="hover:text-indigo-600 cursor-pointer">
@@ -800,7 +800,7 @@ const handleSave = (updatedClass) => {
         </nav>
 
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
           <div>
             <h1 className="text-2xl font-bold text-slate-800">
               Class Management
@@ -812,7 +812,7 @@ const handleSave = (updatedClass) => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             {
               label: "Total Classes",
@@ -879,7 +879,7 @@ const handleSave = (updatedClass) => {
         </div>
 
         {/* Search + Filters + Exports — all in one box */}
-        <div className="bg-white rounded-md shadow-sm border border-slate-100 p-4 mb-6">
+        <div className="bg-white rounded-md shadow-sm border border-slate-100 p-4">
           <div className="flex flex-wrap gap-3 items-center">
             {/* Search */}
             <div className="relative flex-1 min-w-[220px]">

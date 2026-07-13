@@ -289,7 +289,7 @@ export default function CreateTimetable() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
       <style>{printStyles}</style>
 
       {/* ── Header ── */}

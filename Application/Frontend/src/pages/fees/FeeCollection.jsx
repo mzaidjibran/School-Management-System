@@ -307,7 +307,7 @@ export default function CollectFee() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Header */}
       <div>
         <p className="text-xs text-slate-400 mb-1">Dashboard / Collect Fee</p>

@@ -282,7 +282,7 @@ export default function NoticeBoard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto space-y-3">
         {/* Breadcrumb */}
         <nav className="flex mb-5 text-sm text-slate-500">
           <span className="hover:text-indigo-600 cursor-pointer" onClick={() => navigate("/")}>
@@ -293,7 +293,7 @@ export default function NoticeBoard() {
         </nav>
 
         {/* Header */}
-        <div className="flex flex-wrap justify-between items-start gap-3 mb-7">
+        <div className="flex flex-wrap justify-between items-start gap-3">
           <div>
             <h1 className="text-2xl font-bold text-slate-800">Notice Board</h1>
             <p className="text-slate-500 text-sm mt-0.5">School announcements and notices</p>
@@ -315,7 +315,7 @@ export default function NoticeBoard() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {statCards.map((c) => (
             <div
               key={c.label}
@@ -333,7 +333,7 @@ export default function NoticeBoard() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-md shadow-sm border border-slate-100 px-4 py-3 mb-5">
+        <div className="bg-white rounded-md shadow-sm border border-slate-100 px-4 py-3">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 items-center">
             <div className="relative">
               <FaSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs" />

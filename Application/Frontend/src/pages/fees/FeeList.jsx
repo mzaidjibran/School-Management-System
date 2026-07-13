@@ -766,7 +766,7 @@ export default function FeeRecords() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs text-slate-400 mb-1">Dashboard / Fee Records</p>
