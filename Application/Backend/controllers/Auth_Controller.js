@@ -49,6 +49,22 @@ export const SignUp = async (request, response) => {
   }
 };
 
+const getSafeUserWithSchool = async (user) => {
+  if (!user) return null;
+  const safeUser = toSafeUser(user);
+  if (user.role === "teacher" && user.createdBy) {
+    const admin = await User_Model.findById(user.createdBy);
+    if (admin) {
+      safeUser.schoolName = admin.schoolName || "";
+      safeUser.schoolLogo = admin.schoolLogo ? (admin.schoolLogo.startsWith("/image/") ? admin.schoolLogo : `/image/${admin.schoolLogo.split(/[\\/]/).pop()}`) : "";
+    }
+  } else if (user.role === "admin") {
+    safeUser.schoolName = user.schoolName || "";
+    safeUser.schoolLogo = user.schoolLogo ? (user.schoolLogo.startsWith("/image/") ? user.schoolLogo : `/image/${user.schoolLogo.split(/[\\/]/).pop()}`) : "";
+  }
+  return safeUser;
+};
+
 // ── Sign In ───────────────────────────────────────────────────────────────────
 export const SignIn = async (request, response) => {
   try {
@@ -65,11 +81,13 @@ export const SignIn = async (request, response) => {
     const refreshToken = generateRefreshToken(user._id);
     await saveRefreshToken(user._id, refreshToken);
 
+    const safeUser = await getSafeUserWithSchool(user);
+
     return response.status(200).json({
       success: true,
       error: false,
       message: `Welcome ${user.Name}!`,
-      data: { user: toSafeUser(user), accessToken, refreshToken },
+      data: { user: safeUser, accessToken, refreshToken },
     });
   } catch (error) {
     response.status(500).json({ success: false, error: true, message: error.message });
@@ -136,7 +154,8 @@ export const GetCurrentUser = async (request, response) => {
     if (!user)
       return response.status(404).json({ success: false, error: true, message: "User not found!" });
 
-    return response.status(200).json({ success: true, error: false, data: toSafeUser(user) });
+    const safeUser = await getSafeUserWithSchool(user);
+    return response.status(200).json({ success: true, error: false, data: safeUser });
   } catch (error) {
     response.status(500).json({ success: false, error: true, message: error.message });
   }
@@ -155,11 +174,52 @@ export const UpdateMyProfile = async (request, response) => {
     if (!updated)
       return response.status(404).json({ success: false, error: true, message: "User not found!" });
 
+    const safeUser = await getSafeUserWithSchool(updated);
     return response.status(200).json({
       success: true,
       error: false,
       message: "Profile updated successfully.",
-      data: toSafeUser(updated),
+      data: safeUser,
+    });
+  } catch (error) {
+    response.status(500).json({ success: false, error: true, message: error.message });
+  }
+};
+
+// ── Update School Settings ──────────────────────────────────────────────────
+export const UpdateSchoolSettings = async (request, response) => {
+  try {
+    const user = await User_Model.findById(request.userId);
+    if (!user) {
+      return response.status(404).json({ success: false, error: true, message: "User not found!" });
+    }
+
+    if (user.role !== "admin") {
+      return response.status(403).json({
+        success: false,
+        error: true,
+        message: "Only admins are allowed to update school settings.",
+      });
+    }
+
+    const { schoolName } = request.body;
+    const updateData = {};
+    if (schoolName !== undefined) {
+      updateData.schoolName = schoolName.trim();
+    }
+
+    if (request.file) {
+      updateData.schoolLogo = `/image/${request.file.filename}`;
+    }
+
+    const updated = await User_Model.findByIdAndUpdate(request.userId, updateData, { new: true });
+    const safeUser = await getSafeUserWithSchool(updated);
+
+    return response.status(200).json({
+      success: true,
+      error: false,
+      message: "School settings updated successfully.",
+      data: safeUser,
     });
   } catch (error) {
     response.status(500).json({ success: false, error: true, message: error.message });

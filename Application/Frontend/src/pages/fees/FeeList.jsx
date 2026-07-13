@@ -11,6 +11,7 @@ import { getAllFees, updateFee, payFee, createFee } from "../../api/Fee_Api.js";
 import { getAllClasses } from "../../Api/Class_Api.js";
 import { getAllStudents } from "../../Api/Student_Api.js";
 import toast from "react-hot-toast";
+import { useAuth } from "../../pages/auth/useAuth.js";
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
@@ -245,6 +246,9 @@ const FeeRecordModal = ({ record, mode, onClose, onSave }) => {
 // ---------- Fee Slip Modal ----------
 const FeeSlipModal = ({ record, onClose }) => {
   const printRef = useRef();
+  const { schoolName, schoolLogo } = useAuth();
+  const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
+
   if (!record) return null;
 
   const studentName = record.student ? `${record.student.firstName} ${record.student.lastName}` : "—";
@@ -253,7 +257,7 @@ const FeeSlipModal = ({ record, onClose }) => {
 
   const handlePrint = () => {
     const printWindow = window.open("", "_blank");
-    printWindow.document.write(`<html><head><title>Fee Slip</title><style>body{font-family:Arial,sans-serif;padding:40px;}</style></head><body>${printRef.current.innerHTML}</body></html>`);
+    printWindow.document.write(`<html><head><title>Fee Slip</title><style>body{font-family:Arial,sans-serif;padding:40px;}img{border-radius:50%;width:56px;height:56px;object-fit:cover;margin:0 auto 8px;display:block;}</style></head><body>${printRef.current.innerHTML}</body></html>`);
     printWindow.document.close();
     printWindow.print();
   };
@@ -271,8 +275,14 @@ const FeeSlipModal = ({ record, onClose }) => {
         </div>
         <div className="overflow-y-auto flex-1 p-6" ref={printRef}>
           <div className="text-center border-b border-slate-100 pb-4 mb-4">
-            <div className="w-14 h-14 mx-auto bg-indigo-600 rounded-full flex items-center justify-center text-white text-xl font-bold mb-2">P</div>
-            <h2 className="text-lg font-bold text-slate-800">Punjab Public High School</h2>
+            {schoolLogo ? (
+              <img src={`${API_BASE}${schoolLogo}`} alt="School Logo" className="w-14 h-14 mx-auto rounded-full object-cover mb-2" />
+            ) : (
+              <div className="w-14 h-14 mx-auto bg-indigo-600 rounded-full flex items-center justify-center text-white text-xl font-bold mb-2">
+                {(schoolName || "P")[0].toUpperCase()}
+              </div>
+            )}
+            <h2 className="text-lg font-bold text-slate-800">{schoolName || "Punjab Public High School"}</h2>
             <p className="text-xs text-slate-400">123 Main Boulevard, Lahore | Ph: +92 42 1234567</p>
           </div>
           <div className="grid grid-cols-2 gap-2 mb-4 text-sm">

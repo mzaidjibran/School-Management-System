@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
+import { useAuth } from "../../pages/auth/useAuth.js";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const { schoolName, schoolLogo } = useAuth();
+  const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
   return (
     <footer className="w-full border-t border-slate-200 bg-white/90 backdrop-blur-md mt-auto">
@@ -11,12 +14,18 @@ export default function Footer() {
           
           {/* Left: School branding */}
           <div className="flex flex-col sm:flex-row items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-lg flex items-center justify-center shadow-md">
-              <span className="text-white text-sm font-bold font-serif">P</span>
+            <div className="w-9 h-9 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-lg flex items-center justify-center shadow-md overflow-hidden">
+              {schoolLogo ? (
+                <img src={`${API_BASE}${schoolLogo}`} alt="School Logo" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-white text-sm font-bold font-serif">
+                  {(schoolName || "P")[0].toUpperCase()}
+                </span>
+              )}
             </div>
             <div className="flex flex-col items-center sm:items-start">
               <p className="text-sm font-bold text-slate-800 tracking-wide">
-                Punjab Public High School
+                {schoolName || "Punjab Public High School"}
               </p>
               <p className="text-xs text-slate-400 mt-0.5">
                 Empowering Minds Since 1985

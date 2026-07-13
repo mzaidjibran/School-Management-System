@@ -90,5 +90,21 @@ export const useAuth = () => {
         return [];
       }
     })(),
+    schoolName: (() => {
+      try {
+        const u = localStorage.getItem("user");
+        return u ? JSON.parse(u).schoolName || "" : "";
+      } catch {
+        return "";
+      }
+    })(),
+    schoolLogo: (() => {
+      try {
+        const u = localStorage.getItem("user");
+        return u ? JSON.parse(u).schoolLogo || "" : "";
+      } catch {
+        return "";
+      }
+    })(),
   };
 };

@@ -3,6 +3,7 @@ import { FaSearch, FaMoneyBillWave, FaPrint, FaSave } from "react-icons/fa";
 import { getStudentFees, payFee, createFee } from "../../api/Fee_Api.js";
 import { getHeaders } from "../../Api/Api_Helper.js";
 import toast from "react-hot-toast";
+import { useAuth } from "../../pages/auth/useAuth.js";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
@@ -59,11 +60,12 @@ const Select = ({ label, name, options = [], value, onChange, required }) => (
 
 // ---------- Receipt Modal ----------
 const ReceiptModal = ({ receiptData, onClose }) => {
+  const { schoolName, schoolLogo } = useAuth();
   if (!receiptData) return null;
   const handlePrint = () => {
     const printWindow = window.open("", "_blank");
     printWindow.document.write(
-      `<html><head><title>Receipt</title><style>body{font-family:Arial,sans-serif;padding:40px;}</style></head><body>${document.getElementById("receipt-content").innerHTML}</body></html>`
+      `<html><head><title>Receipt</title><style>body{font-family:Arial,sans-serif;padding:40px;}img{border-radius:50%;width:56px;height:56px;object-fit:cover;margin:0 auto 8px;display:block;}</style></head><body>${document.getElementById("receipt-content").innerHTML}</body></html>`
     );
     printWindow.document.close();
     printWindow.print();
@@ -81,8 +83,14 @@ const ReceiptModal = ({ receiptData, onClose }) => {
         </div>
         <div className="overflow-y-auto flex-1 p-6" id="receipt-content">
           <div className="text-center border-b border-slate-100 pb-4 mb-4">
-            <div className="w-14 h-14 mx-auto bg-indigo-600 rounded-full flex items-center justify-center text-white text-xl font-bold mb-2">P</div>
-            <h2 className="text-lg font-bold text-slate-800">Punjab Public High School</h2>
+            {schoolLogo ? (
+              <img src={`${API_BASE}${schoolLogo}`} alt="School Logo" className="w-14 h-14 mx-auto rounded-full object-cover mb-2" />
+            ) : (
+              <div className="w-14 h-14 mx-auto bg-indigo-600 rounded-full flex items-center justify-center text-white text-xl font-bold mb-2">
+                {(schoolName || "P")[0].toUpperCase()}
+              </div>
+            )}
+            <h2 className="text-lg font-bold text-slate-800">{schoolName || "Punjab Public High School"}</h2>
             <p className="text-xs text-slate-400">123 Main Boulevard, Lahore | Ph: +92 42 1234567</p>
           </div>
           <div className="grid grid-cols-2 gap-2 mb-5 text-sm">

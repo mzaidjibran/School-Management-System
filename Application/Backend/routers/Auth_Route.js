@@ -10,6 +10,7 @@ import {
   VerifyOtp,
   ResetPassword,
   GetPrincipals,
+  UpdateSchoolSettings,
 } from "../controllers/Auth_Controller.js";
 import { protect, authorize } from "../middleware/Auth_Middleware.js";
 import { upload } from "../middleware/Upload_Middleware.js";
@@ -28,6 +29,7 @@ router.get("/principals",       GetPrincipals);
 
 // ── Protected Routes (login zaruri) ──────────────────────────────
 router.put ("/me",              protect, upload.single("profileImage"), UpdateMyProfile);
+router.put ("/school-settings",  protect, upload.single("schoolLogo"),   UpdateSchoolSettings);
 router.get("/me", protect, GetCurrentUser);
 
 export default router;

@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../../pages/auth/useAuth.js";
-import { logOut, updateMyProfile } from "../../Api/Auth_Api.js";
+import { logOut, updateMyProfile, updateSchoolSettings } from "../../Api/Auth_Api.js";
 import {
   LogOut as LogOutIcon,
   LayoutDashboard,
@@ -42,7 +42,7 @@ export default function ProHeader() {
   const navigate = useNavigate();
 
   // Real auth data
-  const { userName, userEmail, userRole, userImage, isAdmin, isTeacher, assignedPages } = useAuth();
+  const { userName, userEmail, userRole, userImage, isAdmin, isTeacher, assignedPages, schoolName, schoolLogo } = useAuth();
 
   const visibleNavItems = navItems.filter((item) => {
     if (isAdmin) return true;
@@ -145,6 +145,60 @@ export default function ProHeader() {
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef(null);
 
+  // School settings states
+  const [schoolSettingsModalOpen, setSchoolSettingsModalOpen] = useState(false);
+  const [newSchoolName, setNewSchoolName] = useState(schoolName || "");
+  const [selectedLogoFile, setSelectedLogoFile] = useState(null);
+  const [previewLogo, setPreviewLogo] = useState("");
+  const [savingSchoolSettings, setSavingSchoolSettings] = useState(false);
+  const logoInputRef = useRef(null);
+
+  // Sync school settings state when modal opens
+  useEffect(() => {
+    if (schoolSettingsModalOpen) {
+      setNewSchoolName(schoolName || "");
+      setPreviewLogo(schoolLogo ? `${API_BASE}${schoolLogo}` : "");
+      setSelectedLogoFile(null);
+    }
+  }, [schoolSettingsModalOpen, schoolName, schoolLogo]);
+
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedLogoFile(file);
+      setPreviewLogo(URL.createObjectURL(file));
+    }
+  };
+
+  const handleSaveSchoolSettings = async (e) => {
+    e.preventDefault();
+    if (!newSchoolName.trim()) return toast.error("School name is required");
+
+    setSavingSchoolSettings(true);
+    try {
+      const formData = new FormData();
+      formData.append("schoolName", newSchoolName.trim());
+      if (selectedLogoFile) {
+        formData.append("schoolLogo", selectedLogoFile);
+      }
+
+      const res = await updateSchoolSettings(formData);
+      if (res.success && res.data) {
+        localStorage.setItem("user", JSON.stringify(res.data));
+        window.dispatchEvent(new Event("auth-changed"));
+        toast.success("School settings updated successfully!");
+        setSchoolSettingsModalOpen(false);
+      } else {
+        toast.error(res.message || "Failed to update school settings");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || "An error occurred while updating school settings");
+    } finally {
+      setSavingSchoolSettings(false);
+    }
+  };
+
   const [activeBranchName, setActiveBranchName] = useState(localStorage.getItem("activeBranchName") || "");
   const [activeSection, setActiveSection] = useState(localStorage.getItem("activeSection") || "");
 
@@ -236,12 +290,19 @@ export default function ProHeader() {
 
           {/* Logo & School Name */}
           <div className="flex items-center gap-2 shrink-0">
-            <div className="w-9 h-9 xl:w-10 xl:h-10 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-md flex items-center justify-center shadow-md shrink-0">
-              <span className="text-white text-base xl:text-lg font-bold">S</span>
+            <div className="w-9 h-9 xl:w-10 xl:h-10 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-md flex items-center justify-center shadow-md shrink-0 overflow-hidden">
+              {schoolLogo ? (
+                <img src={`${API_BASE}${schoolLogo}`} alt="School Logo" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-white text-base xl:text-lg font-bold">
+                  {(schoolName || "S")[0].toUpperCase()}
+                </span>
+              )}
             </div>
             <div className="flex flex-col select-none hidden md:flex">
-              <span className="text-[10px] xl:text-xs 2xl:text-sm font-bold text-slate-800 font-serif leading-none tracking-tight">Punjab Public</span>
-              <span className="text-[8px] xl:text-[9px] 2xl:text-[10px] font-bold text-indigo-600 tracking-widest uppercase mt-0.5">High School</span>
+              <span className="text-xs xl:text-sm font-bold text-slate-800 leading-tight">
+                {schoolName || "Punjab Public High School"}
+              </span>
             </div>
           </div>
 
@@ -367,6 +428,20 @@ export default function ProHeader() {
                       <User size={14} className="text-slate-400" /> Edit Profile
                     </button>
                   </div>
+
+                  {isAdmin && (
+                    <div className="p-1 border-t border-slate-100">
+                      <button
+                        onClick={() => {
+                          setSchoolSettingsModalOpen(true);
+                          setUserDropdownOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-md transition flex items-center gap-1.5 cursor-pointer font-semibold"
+                      >
+                        <School size={14} className="text-slate-400" /> School Settings
+                      </button>
+                    </div>
+                  )}
                   {isAdmin && (
                     <div className="p-1">
                       <button
@@ -698,6 +773,103 @@ export default function ProHeader() {
                 )}
               </button>
             </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* School Settings Modal */}
+      {schoolSettingsModalOpen && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md bg-white rounded-md border border-slate-100 shadow-2xl p-6 overflow-hidden animate-scaleIn">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <h2 className="text-lg font-black text-slate-800 flex items-center gap-2">
+                <School size={20} className="text-indigo-600" /> School Settings
+              </h2>
+              <button
+                onClick={() => setSchoolSettingsModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-50 rounded-md transition"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveSchoolSettings} className="mt-6 space-y-5">
+              {/* School Logo Upload */}
+              <div className="flex flex-col items-center gap-3">
+                <div className="relative group w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-md ring-2 ring-slate-100 hover:ring-indigo-300 transition duration-300">
+                  {previewLogo ? (
+                    <img
+                      src={previewLogo}
+                      alt="Logo Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-indigo-600 to-blue-600 flex items-center justify-center text-white text-3xl font-bold">
+                      {(newSchoolName || "S")[0]?.toUpperCase()}
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => logoInputRef.current?.click()}
+                    className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center text-[10px] text-white font-bold cursor-pointer gap-1"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span>Change Logo</span>
+                  </button>
+                </div>
+                <input
+                  type="file"
+                  ref={logoInputRef}
+                  onChange={handleLogoChange}
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                />
+                <p className="text-[10px] text-slate-400 font-semibold">JPG, PNG, or WEBP. Max 2MB.</p>
+              </div>
+
+              {/* School Name Input */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">School Name</label>
+                <input
+                  type="text"
+                  value={newSchoolName}
+                  onChange={(e) => setNewSchoolName(e.target.value)}
+                  className="w-full px-3.5 py-2 text-sm bg-slate-50/50 border border-slate-200 rounded-md focus:border-indigo-500 focus:bg-white transition outline-none font-semibold text-slate-800"
+                  required
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2.5 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setSchoolSettingsModalOpen(false)}
+                  className="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 rounded-md text-xs font-bold text-slate-600 transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingSchoolSettings}
+                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-bold shadow-md shadow-indigo-600/10 transition cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  {savingSchoolSettings ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save Settings"
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>,
         document.body

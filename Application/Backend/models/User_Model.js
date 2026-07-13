@@ -27,10 +27,18 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
-   createdBy: {
+    createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       default: null,
+    },
+    schoolName: {
+      type: String,
+      default: "",
+    },
+    schoolLogo: {
+      type: String,
+      default: "",
     },
 
     // Forgot password OTP fields (active OTP ke waqt set hote hain)

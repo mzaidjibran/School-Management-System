@@ -44,7 +44,7 @@ const authHeaders = () => {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { userName, isAdmin, assignedPages } = useAuth();
+  const { userName, isAdmin, assignedPages, schoolName } = useAuth();
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [greeting, setGreeting] = useState("");
@@ -441,7 +441,7 @@ export default function Dashboard() {
       <div className="bg-white rounded-md border border-slate-100/80 shadow-sm p-3.5 mb-3 flex flex-col gap-0.5">
         <div>
           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider text-indigo-600 bg-indigo-50 uppercase">
-            Punjab Public High School
+            {schoolName || "Punjab Public High School"}
           </span>
           <h1 className="text-lg md:text-xl font-bold text-slate-800 mt-1.5 leading-tight">
             {greeting}, {userName || "Admin"}

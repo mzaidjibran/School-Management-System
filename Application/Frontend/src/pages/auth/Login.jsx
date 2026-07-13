@@ -206,6 +206,11 @@ export default function Login() {
     setSpotlight({ x: e.clientX, y: e.clientY });
   }
 
+  const matchedPrincipal = principalsList.find(p => p.email && p.email.toLowerCase().trim() === form.email.toLowerCase().trim());
+  const displaySchoolName = matchedPrincipal?.schoolName || (principalsList[0]?.schoolName) || "Punjab Public High School";
+  const displaySchoolLogo = matchedPrincipal?.schoolLogo || (principalsList[0]?.schoolLogo) || "";
+  const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
+
   return (
     <div className="signin-container" onMouseMove={handleContainerMouseMove}>
       {/* Interactive Cursor Spotlight Glow */}
@@ -257,12 +262,16 @@ export default function Login() {
           <div className="signin-logo">
             <div className="logo-ring">
               <div className="logo-orbit-dot"></div>
-              <div className="logo-inner">
-                <School className="logo-icon" size={24} />
+              <div className="logo-inner" style={{ overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {displaySchoolLogo ? (
+                  <img src={`${API_BASE}${displaySchoolLogo}`} alt="School Logo" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
+                ) : (
+                  <School className="logo-icon" size={24} />
+                )}
               </div>
             </div>
           </div>
-          <h2 className="header-title">Punjab Public High School</h2>
+          <h2 className="header-title">{displaySchoolName}</h2>
           <p className="header-subtitle">School Management System</p>
           <div className="badge-row">
             <span className="header-badge">Education</span>

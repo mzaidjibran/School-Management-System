@@ -207,3 +207,21 @@ export const getPrincipals = async () => {
   if (!response.ok) throw new Error(data.message || "Failed to load principals");
   return data.data;
 };
+
+// ── Update School Settings ──────────────────────────────────────────────────
+export const updateSchoolSettings = async (data) => {
+  const isFormData = data instanceof FormData;
+  const response = await fetch(`${API_BASE}/api/auth/school-settings`, {
+    method: "PUT",
+    headers: isFormData
+      ? { Authorization: `Bearer ${localStorage.getItem("accessToken")}` }
+      : {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+    body: isFormData ? data : JSON.stringify(data),
+  });
+  const responseData = await response.json();
+  if (!response.ok) throw new Error(responseData.message || "School settings update failed");
+  return responseData;
+};

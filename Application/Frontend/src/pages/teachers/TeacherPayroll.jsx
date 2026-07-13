@@ -3,10 +3,12 @@ import { CreditCard, Search, Wallet, CheckCircle, Clock, FileText, Loader2, Aler
 import { getAllTeachers } from "../../api/Teacher_Api.js";
 import { getHeaders } from "../../api/Api_Helper.js";
 import toast from "react-hot-toast";
+import { useAuth } from "../../pages/auth/useAuth.js";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
 export default function TeacherPayroll() {
+  const { schoolName } = useAuth();
   const [teachers, setTeachers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
@@ -266,7 +268,7 @@ export default function TeacherPayroll() {
         <body>
           <div class="slip-card">
             <div class="header">
-              <h1>Punjab Public High School</h1>
+              <h1>${schoolName || "Punjab Public High School"}</h1>
               <p>Salary Pay Slip — ${record.month}</p>
             </div>
             <div class="details-row">
