@@ -299,15 +299,15 @@ export default function ProHeader() {
                 </span>
               )}
             </div>
-            <div className="flex flex-col select-none hidden md:flex">
-              <span className="text-xs xl:text-sm font-bold text-slate-800 leading-tight">
+            <div className="flex flex-col select-none hidden sm:flex max-w-[100px] md:max-w-[140px] lg:max-w-[180px] xl:max-w-[240px] shrink-0">
+              <span className="text-xs xl:text-sm font-black text-slate-800 leading-none truncate" title={schoolName || "Punjab Public High School"}>
                 {schoolName || "Punjab Public High School"}
               </span>
             </div>
           </div>
 
           {/* Desktop Nav */}
-          <div className="hidden lg:flex flex-1 justify-center overflow-x-auto scrollbar-none px-1 xl:px-2">
+          <div className="hidden xl:flex flex-1 justify-center overflow-x-auto scrollbar-none px-1 xl:px-2">
             <nav className="flex items-center gap-0.5 xl:gap-1.5 2xl:gap-2">
               {visibleNavItems.map((item) => (
                 <NavLink

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import {
@@ -74,6 +74,10 @@ export default function Login() {
       toast.error(err.message || "Failed to load principals list");
     }
   }
+
+  useEffect(() => {
+    loadPrincipals();
+  }, []);
 
   async function handleDevLoginSubmit(e) {
     e.preventDefault();
