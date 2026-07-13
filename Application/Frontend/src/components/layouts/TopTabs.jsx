@@ -8,7 +8,7 @@ import { NavLink } from "react-router-dom";
  */
 export default function TopHeader({ tabs = [] }) {
   return (
-    <div className="top-tabs-container bg-white rounded-md border border-slate-100/80 shadow-sm p-3 mb-6">
+    <div className="top-tabs-container bg-white rounded-md border border-slate-100/80 shadow-sm p-3 mb-3">
       <div className="w-full">
         {/* Horizontal scroll container – scrollbar hidden for clean mobile layout */}
         <div className="flex flex-wrap gap-2 overflow-x-auto scrollbar-none">

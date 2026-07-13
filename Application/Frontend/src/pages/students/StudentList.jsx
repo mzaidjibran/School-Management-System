@@ -844,9 +844,9 @@ export default function StudentList() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <StatsCard label="Total Students" value={totalStudents} bgColor="bg-indigo-100" iconColor="text-indigo-600" icon="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
         <StatsCard label="New This Month" value={newThisMonth} bgColor="bg-emerald-100" iconColor="text-emerald-600" icon="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         <StatsCard label="Classes" value={uniqueClasses.length} bgColor="bg-blue-100" iconColor="text-blue-600" icon="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />

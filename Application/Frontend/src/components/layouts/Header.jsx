@@ -288,9 +288,9 @@ export default function ProHeader() {
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-2 xl:gap-4">
 
-          {/* Logo & School Name */}
+          {/* Logo */}
           <div className="flex items-center gap-2 shrink-0">
-            <div className="w-9 h-9 xl:w-10 xl:h-10 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-md flex items-center justify-center shadow-md shrink-0 overflow-hidden">
+            <div className="w-9 h-9 xl:w-10 xl:h-10 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-full flex items-center justify-center shadow-md shrink-0 overflow-hidden">
               {schoolLogo ? (
                 <img src={`${API_BASE}${schoolLogo}`} alt="School Logo" className="w-full h-full object-cover" />
               ) : (
@@ -298,11 +298,6 @@ export default function ProHeader() {
                   {(schoolName || "S")[0].toUpperCase()}
                 </span>
               )}
-            </div>
-            <div className="flex flex-col select-none hidden sm:flex max-w-[100px] md:max-w-[140px] lg:max-w-[180px] xl:max-w-[240px] shrink-0">
-              <span className="text-xs xl:text-sm font-black text-slate-800 leading-none truncate" title={schoolName || "Punjab Public High School"}>
-                {schoolName || "Punjab Public High School"}
-              </span>
             </div>
           </div>
 
@@ -341,25 +336,14 @@ export default function ProHeader() {
           {/* Right Side */}
           <div className="flex items-center gap-2 xl:gap-3 shrink-0">
 
-            {/* Active Branch & Section Badge */}
             {!isTeacher && (
-              <div 
+              <button 
                 onClick={() => window.dispatchEvent(new Event("open-branch-modal"))}
-                className="flex items-center gap-1 xl:gap-2 px-1.5 py-1 xl:px-3 xl:py-1.5 bg-indigo-50/60 hover:bg-indigo-50 border border-indigo-100/60 rounded-md cursor-pointer select-none transition-all group shrink-0"
-                title="Click to Switch Branch or Section"
+                className="w-9 h-9 xl:w-10 xl:h-10 rounded-full bg-indigo-50/60 hover:bg-indigo-50 border border-indigo-100/60 text-indigo-650 flex items-center justify-center cursor-pointer select-none transition-all hover:scale-105 active:scale-95 shadow-sm shrink-0"
+                title={`Switch Branch/Section (Current: ${activeBranchName || "None"} - ${activeSection ? activeSection + " Section" : "None"})`}
               >
-                <div className="hidden md:flex flex-col text-right">
-                  <span className="text-[9px] xl:text-[10px] 2xl:text-[11px] font-semibold text-indigo-700 leading-tight truncate max-w-[70px] xl:max-w-[100px] 2xl:max-w-[140px]">
-                    {activeBranchName || "Select Branch"}
-                  </span>
-                  <span className="text-[7px] xl:text-[8px] 2xl:text-[9px] font-bold text-indigo-500 capitalize leading-none">
-                    {activeSection ? `${activeSection} Section` : "Select Section"}
-                  </span>
-                </div>
-                <div className="w-6 h-6 xl:w-7 xl:h-7 rounded-md bg-indigo-600/10 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
-                  <School size={13} />
-                </div>
-              </div>
+                <School size={16} />
+              </button>
             )}
 
             {/* Notification Bell */}
