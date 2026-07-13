@@ -339,7 +339,7 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave, teachers }) => {
         {/* Content */}
         <div className="overflow-y-auto flex-1 px-6 py-5">
           <form onSubmit={handleSubmit} id="class-form">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FloatingInput
                 label="Class Name"
                 name="className"
@@ -407,7 +407,7 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave, teachers }) => {
                 onChange={handleChange}
                 disabled={isViewOnly}
               />
-              <div className="col-span-2">
+              <div className="col-span-1 md:col-span-2">
                 <label className="block text-xs font-medium text-slate-500 mb-1.5">
                   Description
                 </label>
@@ -935,15 +935,15 @@ const handleSave = (updatedClass) => {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-md shadow-sm border border-slate-100 overflow-hidden">
+        {/* Desktop Table View */}
+        <div className="hidden md:block bg-white rounded-md shadow-sm border border-slate-100 overflow-hidden">
           <div className="overflow-x-auto">
             {loading ? (
               <TableSkeleton />
             ) : filtered.length === 0 ? (
               <EmptyState />
             ) : (
-              <table className="w-full">
+              <table className="w-full min-w-[900px]">
                 <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
                     {[
@@ -1029,6 +1029,55 @@ const handleSave = (updatedClass) => {
               </table>
             )}
           </div>
+        </div>
+
+        {/* Mobile Card List View */}
+        <div className="block md:hidden space-y-2.5">
+          {loading ? (
+            <div className="p-10 text-center text-slate-500 bg-white rounded-md border border-slate-100 text-sm animate-pulse">Loading classes...</div>
+          ) : filtered.length === 0 ? (
+            <div className="p-10 text-center text-slate-500 bg-white rounded-md border border-slate-100 text-sm">No classes found</div>
+          ) : (
+            filtered.map((cls) => (
+              <div key={cls._id} className="bg-white p-3 border border-slate-100 shadow-sm flex flex-col gap-2 rounded-md">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-800">{cls.name}</h3>
+                    <p className="text-xs text-slate-500">Section {cls.section} • {cls.shift} Shift</p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => openModal(cls, "view")}
+                      className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-md transition"
+                      title="View"
+                    >
+                      <FaEye size={14} />
+                    </button>
+                    <button
+                      onClick={() => openModal(cls, "edit")}
+                      className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-md transition"
+                      title="Edit"
+                    >
+                      <FaEdit size={14} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(cls)}
+                      className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-md transition"
+                      title="Delete"
+                    >
+                      <FaTrash size={14} />
+                    </button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 pt-2 border-t border-slate-50 text-[11px] text-slate-500">
+                  <div><span className="text-slate-400">Teacher:</span> <strong className="text-slate-700 font-medium">{cls.classTeacher ? (cls.classTeacher.name || `${cls.classTeacher.firstName || ""} ${cls.classTeacher.lastName || ""}`.trim()) : "—"}</strong></div>
+                  <div><span className="text-slate-400">Room No:</span> <strong className="text-slate-700 font-medium">{cls.room || "—"}</strong></div>
+                  <div><span className="text-slate-400">Capacity:</span> <strong className="text-slate-700 font-medium">{cls.capacity}</strong></div>
+                  <div><span className="text-slate-400">Status:</span> <strong className={`font-medium ${cls.isActive ? "text-emerald-600" : "text-slate-500"}`}>{cls.isActive ? "Active" : "Inactive"}</strong></div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 

@@ -97,12 +97,12 @@ export default function MarksEntry() {
 
   return (
     <div className="min-h-screen bg-slate-50 py-6 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-5xl mx-auto space-y-3">
         <nav className="flex text-xs text-slate-400 mb-4 gap-1">
           <span>Dashboard</span><span>/</span>
           <span className="text-indigo-600">Marks Entry</span>
         </nav>
-        <div className="flex items-center gap-3 mb-5">
+        <div className="flex items-center gap-3">
           <div className="p-2.5 bg-indigo-100 rounded-md"><FaSave className="w-5 h-5 text-indigo-600" /></div>
           <div>
             <h1 className="text-lg font-bold text-slate-800">Marks Entry</h1>
@@ -111,7 +111,7 @@ export default function MarksEntry() {
         </div>
 
         {/* Exam selector */}
-        <div className="bg-white rounded-md border border-slate-100 shadow-sm px-4 py-3 mb-4">
+        <div className="bg-white rounded-md border border-slate-100 shadow-sm px-4 py-3">
           <label className="block text-xs font-medium text-slate-500 mb-1.5">Select Exam</label>
           <select value={selectedExam} onChange={(e) => setSelectedExam(e.target.value)} className={selectClass + " w-full"}>
             <option value="">-- Select Exam --</option>
@@ -132,7 +132,7 @@ export default function MarksEntry() {
 
         {/* Stats */}
         {selectedExam && !loading && students.length > 0 && (
-          <div className="grid grid-cols-3 gap-3 mb-4">
+          <div className="grid grid-cols-3 gap-3">
             {[
               { icon:<FaUsers />, label:"Total Students", val:students.length, color:"text-indigo-600", bg:"bg-indigo-50" },
               { icon:<FaCheckCircle />, label:"Marks Entered", val:marksEntered, color:"text-emerald-600", bg:"bg-emerald-50" },

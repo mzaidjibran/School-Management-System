@@ -236,7 +236,7 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
     const isDate = type === "date";
     const hasValue = !!formData[name];
     return (
-      <div className={colSpan ? "col-span-2" : ""}>
+      <div className={colSpan ? "col-span-1 md:col-span-2" : ""}>
         <div className="relative">
           <input
             type={type} name={name} id={name} value={formData[name] || ""} onChange={handleChange}
@@ -325,7 +325,7 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
 
         <div className="flex flex-1 overflow-hidden">
           {/* LEFT SIDEBAR */}
-          <div className="w-48 flex-shrink-0 bg-slate-50 border-r border-slate-100 flex flex-col items-center py-6 px-4 gap-4">
+          <div className="hidden md:flex w-48 flex-shrink-0 bg-slate-50 border-r border-slate-100 flex-col items-center py-6 px-4 gap-4">
             <div className="relative">
               <div className="w-20 h-20 rounded-full overflow-hidden ring-4 ring-white shadow-md bg-slate-200">
                 {imagePreview ? (
@@ -400,9 +400,43 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
               <form onSubmit={handleSubmit} id="teacher-form">
                 {activeTab === "personal" && (
                   <div className="space-y-5">
+                    {/* Mobile Profile Photo (only on mobile) */}
+                    <div className="flex md:hidden items-center gap-4 mb-4 pb-4 border-b border-slate-100">
+                      <div className="relative">
+                        <div className="w-16 h-16 rounded-full overflow-hidden bg-slate-200 ring-2 ring-indigo-100">
+                          {imagePreview ? (
+                            <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-slate-300">
+                              <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                        {imagePreview && !isViewOnly && (
+                          <button type="button" onClick={() => { setProfileImage(null); setImagePreview(null); }}
+                            className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 shadow">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                      {!isViewOnly && (
+                        <div>
+                          <label className="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-md text-xs font-medium transition">
+                            Upload Photo
+                            <input type="file" accept="image/jpeg,image/png" onChange={handleImageUpload} className="hidden" />
+                          </label>
+                          {imageError && <p className="text-red-400 text-[11px] mt-1">{imageError}</p>}
+                          <p className="text-xs text-slate-400 mt-1">JPG/PNG, max 2MB</p>
+                        </div>
+                      )}
+                    </div>
                     <div>
                       <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2.5">Personal</p>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <FI label="Full Name" name="fullName" required />
                         <FS label="Gender" name="gender" options={["Male", "Female", "Other"]} required />
                         <FI label="Date of Birth" name="dateOfBirth" type="date" />
@@ -413,7 +447,7 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
                     </div>
                     <div>
                       <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2.5">Contact</p>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <FI label="Phone" name="phone" type="tel" required />
                         <FI label="Alternate Phone" name="alternatePhone" type="tel" />
                         <FI label="Email" name="email" type="email" required />
@@ -427,7 +461,7 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
                 {activeTab === "academic" && (
                   <div>
                     <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2.5">Academic</p>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <FI label="Subject" name="subject" required />
                       <FI label="Qualification" name="qualification" required />
                       <FI label="Specialization" name="specialization" />
@@ -441,7 +475,7 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
                   <div className="space-y-5">
                     <div>
                       <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2.5">Employment</p>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <FI label="Employee ID" name="employeeId" required />
                         <FI label="Joining Date" name="joiningDate" type="date" required />
                         <FI label="Experience (years)" name="experience" type="number" />
@@ -454,7 +488,7 @@ const TeacherFormModal = ({ isOpen, onClose, teacher, mode, onSave }) => {
                     </div>
                     <div>
                       <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2.5">Emergency Contact</p>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <FI label="Contact Name" name="emergencyName" />
                         <FI label="Contact Phone" name="emergencyPhone" type="tel" />
                       </div>
@@ -803,14 +837,14 @@ export default function TeacherDataTable() {
       cell: (row) => <Avatar src={getProfileImageUrl(row.profileImage)} name={row.fullName || row.name} />,
       width: "80px",
     },
-    { name: "Name", selector: (row) => row.fullName || row.name || "", sortable: true, grow: 2 },
-    { name: "Subject", selector: (row) => row.subject || "—", sortable: true },
-    { name: "Phone", selector: (row) => row.phone || "—", sortable: true },
-    { name: "Email", selector: (row) => row.email || "—", sortable: true, grow: 2 },
-    { name: "Qualification", selector: (row) => row.qualification || "—", sortable: true },
-    { name: "Experience", selector: (row) => row.experience ? `${row.experience} yrs` : "—", sortable: true },
-    { name: "Joining Date", selector: (row) => row.joiningDate ? row.joiningDate.split("T")[0] : "—", sortable: true },
-    { name: "Status", cell: (row) => <StatusBadge status={row.status} />, sortable: true },
+    { name: "Name", selector: (row) => row.fullName || row.name || "", sortable: true, grow: 2, minWidth: "150px" },
+    { name: "Subject", selector: (row) => row.subject || "—", sortable: true, minWidth: "110px" },
+    { name: "Phone", selector: (row) => row.phone || "—", sortable: true, minWidth: "120px" },
+    { name: "Email", selector: (row) => row.email || "—", sortable: true, grow: 2, minWidth: "180px" },
+    { name: "Qualification", selector: (row) => row.qualification || "—", sortable: true, minWidth: "130px" },
+    { name: "Experience", selector: (row) => row.experience ? `${row.experience} yrs` : "—", sortable: true, minWidth: "100px" },
+    { name: "Joining Date", selector: (row) => row.joiningDate ? row.joiningDate.split("T")[0] : "—", sortable: true, minWidth: "120px" },
+    { name: "Status", cell: (row) => <StatusBadge status={row.status} />, sortable: true, minWidth: "100px" },
     {
       name: "Actions",
       cell: (row) => (
@@ -879,24 +913,59 @@ export default function TeacherDataTable() {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-md shadow-sm border border-slate-100 overflow-hidden">
-        <DataTable
-          columns={columns}
-          data={filteredTeachers}
-          progressPending={loading}
-          pagination
-          paginationPerPage={10}
-          paginationRowsPerPageOptions={[10, 20, 30]}
-          selectableRows
-          onSelectedRowsChange={({ selectedRows }) => setSelectedRows(selectedRows)}
-          responsive
-          customStyles={customStyles}
-          progressComponent={<div className="p-10 text-center text-slate-500 text-sm">Loading teachers...</div>}
-          noDataComponent={<div className="p-10 text-center text-slate-500 text-sm">No teachers found</div>}
-          highlightOnHover
-          pointerOnHover
-        />
+      {/* Desktop Table View */}
+      <div className="hidden md:block bg-white rounded-md shadow-sm border border-slate-100 overflow-hidden">
+        <div className="w-full overflow-x-auto">
+          <DataTable
+            columns={columns}
+            data={filteredTeachers}
+            progressPending={loading}
+            pagination
+            paginationPerPage={10}
+            paginationRowsPerPageOptions={[10, 20, 30]}
+            selectableRows
+            onSelectedRowsChange={({ selectedRows }) => setSelectedRows(selectedRows)}
+            responsive
+            customStyles={customStyles}
+            progressComponent={<div className="p-10 text-center text-slate-500 text-sm">Loading teachers...</div>}
+            noDataComponent={<div className="p-10 text-center text-slate-500 text-sm">No teachers found</div>}
+            highlightOnHover
+            pointerOnHover
+          />
+        </div>
+      </div>
+
+      {/* Mobile Card List View */}
+      <div className="block md:hidden space-y-2.5">
+        {loading ? (
+          <div className="p-10 text-center text-slate-500 bg-white rounded-md border border-slate-100 text-sm animate-pulse">Loading teachers...</div>
+        ) : filteredTeachers.length === 0 ? (
+          <div className="p-10 text-center text-slate-500 bg-white rounded-md border border-slate-100 text-sm">No teachers found</div>
+        ) : (
+          filteredTeachers.map((teacher) => (
+            <div key={teacher.id || teacher._id} className="bg-white p-3 border border-slate-100 shadow-sm flex flex-col gap-2 rounded-md">
+              <div className="flex items-center gap-2">
+                <Avatar src={getProfileImageUrl(teacher.profileImage)} name={teacher.fullName || teacher.name} />
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-bold text-slate-800 truncate">{teacher.fullName || teacher.name}</h3>
+                  <p className="text-xs text-slate-500">{teacher.subject || "No Subject"} • <span className="capitalize">{teacher.status || "—"}</span></p>
+                </div>
+                <ActionButtons
+                  row={teacher}
+                  onView={() => openModal(teacher, "view")}
+                  onEdit={() => openModal(teacher, "edit")}
+                  onDelete={() => handleDeleteClick(teacher)}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1 pt-2 border-t border-slate-50 text-[11px] text-slate-500">
+                <div><span className="text-slate-400">Qual:</span> <strong className="text-slate-700 font-medium">{teacher.qualification || "—"}</strong></div>
+                <div><span className="text-slate-400">Exp:</span> <strong className="text-slate-700 font-medium">{teacher.experience ? `${teacher.experience} yrs` : "—"}</strong></div>
+                <div className="col-span-2"><span className="text-slate-400">Email:</span> <strong className="text-slate-700 font-medium truncate block">{teacher.email || "—"}</strong></div>
+                <div className="col-span-2"><span className="text-slate-400">Phone:</span> <strong className="text-slate-700 font-medium">{teacher.phone || "—"}</strong></div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       {/* Edit / View Modal */}

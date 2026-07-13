@@ -822,13 +822,13 @@ export default function StudentList() {
 
   const columns = [
     { name: "Photo", selector: (row) => row.picture, cell: (row) => <Avatar src={row.picture} name={row.name} />, width: "80px" },
-    { name: "Name", selector: (row) => row.name, sortable: true, grow: 2 },
-    { name: "Class", selector: (row) => row.class, sortable: true },
-    { name: "Roll No", selector: (row) => row.rollNumber, sortable: true },
-    { name: "Section", selector: (row) => row.section, sortable: true },
-    { name: "Phone", selector: (row) => row.phone, sortable: true },
-    { name: "Email", selector: (row) => row.email, sortable: true, grow: 2 },
-    { name: "Father Name", selector: (row) => row.fatherName, sortable: true },
+    { name: "Name", selector: (row) => row.name, sortable: true, grow: 2, minWidth: "150px" },
+    { name: "Class", selector: (row) => row.class, sortable: true, minWidth: "100px" },
+    { name: "Roll No", selector: (row) => row.rollNumber, sortable: true, minWidth: "100px" },
+    { name: "Section", selector: (row) => row.section, sortable: true, minWidth: "100px" },
+    { name: "Phone", selector: (row) => row.phone, sortable: true, minWidth: "120px" },
+    { name: "Email", selector: (row) => row.email, sortable: true, grow: 2, minWidth: "185px" },
+    { name: "Father Name", selector: (row) => row.fatherName, sortable: true, minWidth: "130px" },
     {
       name: "Actions",
       cell: (row) => (

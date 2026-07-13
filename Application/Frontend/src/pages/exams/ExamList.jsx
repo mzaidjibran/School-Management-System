@@ -240,8 +240,8 @@ export default function ExamList() {
 
   return (
     <div className="min-h-screen bg-slate-50 py-6 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-5">
+      <div className="max-w-7xl mx-auto space-y-3">
+        <div className="flex justify-between items-center">
           <div>
             <nav className="flex text-xs text-slate-400 mb-1 gap-1">
               <span>Dashboard</span><span>/</span>
@@ -258,7 +258,7 @@ export default function ExamList() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
             { label:"Total Exams", value:stats.total, icon:<FaCalendarCheck />, color:"text-indigo-600", bg:"bg-indigo-50" },
             { label:"Scheduled",   value:stats.scheduled, icon:<FaClock />, color:"text-blue-600", bg:"bg-blue-50" },
@@ -276,7 +276,7 @@ export default function ExamList() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-md border border-slate-100 shadow-sm px-4 py-3 mb-4">
+        <div className="bg-white rounded-md border border-slate-100 shadow-sm px-4 py-3">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div className="relative">
               <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-xs" />
