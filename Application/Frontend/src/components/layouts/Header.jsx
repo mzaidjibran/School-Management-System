@@ -18,6 +18,7 @@ import {
   Megaphone,
   User,
   Lock,
+  MessageSquare,
 } from "lucide-react";
 
 const navItems = [
@@ -152,6 +153,9 @@ export default function ProHeader() {
   const [previewLogo, setPreviewLogo] = useState("");
   const [savingSchoolSettings, setSavingSchoolSettings] = useState(false);
   const logoInputRef = useRef(null);
+
+  // WhatsApp Simulator state
+  const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
 
   // Sync school settings state when modal opens
   useEffect(() => {
@@ -436,6 +440,19 @@ export default function ProHeader() {
                         className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-md transition flex items-center gap-1.5 cursor-pointer font-semibold text-indigo-600 bg-indigo-50/50 hover:bg-indigo-50"
                       >
                         <Lock size={14} className="text-indigo-500" /> Teacher Permissions
+                      </button>
+                    </div>
+                  )}
+                  {isAdmin && (
+                    <div className="p-1">
+                      <button
+                        onClick={() => {
+                          setWhatsappModalOpen(true);
+                          setUserDropdownOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-md transition flex items-center gap-1.5 cursor-pointer font-semibold text-emerald-600 bg-emerald-50/50 hover:bg-emerald-50"
+                      >
+                        <MessageSquare size={14} className="text-emerald-500" /> WhatsApp Simulator
                       </button>
                     </div>
                   )}
@@ -858,6 +875,300 @@ export default function ProHeader() {
         </div>,
         document.body
       )}
+
+      {whatsappModalOpen && createPortal(
+        <WhatsAppSimulatorModal isOpen={whatsappModalOpen} onClose={() => setWhatsappModalOpen(false)} />,
+        document.body
+      )}
     </header>
   );
 }
+
+// ---------- WhatsApp Simulator Modal ----------
+const WhatsAppSimulatorModal = ({ isOpen, onClose }) => {
+  const [activeTab, setActiveTab] = useState("verify");
+  const [verifyToken, setVerifyToken] = useState("school_verify_token_123");
+  const [verifyChallenge, setVerifyChallenge] = useState("test_challenge_string");
+  const [verifyStatus, setVerifyStatus] = useState(null);
+  const [verifying, setVerifying] = useState(false);
+
+  const [phone, setPhone] = useState("923001234567");
+  const [senderName, setSenderName] = useState("Ali (Parent)");
+  const [messageBody, setMessageBody] = useState("Fee status");
+  const [messageStatus, setMessageStatus] = useState(null);
+  const [sending, setSending] = useState(false);
+
+  const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
+
+  const handleTestVerify = async () => {
+    setVerifying(true);
+    setVerifyStatus(null);
+    try {
+      const url = `${API_BASE}/api/whatsapp/webhook?hub.mode=subscribe&hub.challenge=${encodeURIComponent(
+        verifyChallenge
+      )}&hub.verify_token=${encodeURIComponent(verifyToken)}`;
+
+      const res = await fetch(url, { method: "GET" });
+      const text = await res.text();
+
+      if (res.ok && text === verifyChallenge) {
+        setVerifyStatus({
+          success: true,
+          message: `Webhook verified! Meta challenge correctly echoed: "${text}"`,
+        });
+      } else {
+        setVerifyStatus({
+          success: false,
+          message: `Verification failed. Status: ${res.status}. Expected challenge "${verifyChallenge}" but received: "${text}"`,
+        });
+      }
+    } catch (err) {
+      setVerifyStatus({
+        success: false,
+        message: `Error sending verify request: ${err.message}`,
+      });
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    setSending(true);
+    setMessageStatus(null);
+    try {
+      const payload = {
+        object: "whatsapp_business_account",
+        entry: [
+          {
+            id: "10984920239401",
+            changes: [
+              {
+                value: {
+                  messaging_product: "whatsapp",
+                  metadata: {
+                    display_phone_number: "16505553333",
+                    phone_number_id: "2948293849102"
+                  },
+                  contacts: [
+                    {
+                      profile: { name: senderName },
+                      wa_id: phone
+                    }
+                  ],
+                  messages: [
+                    {
+                      from: phone,
+                      id: "wamid.HBgLOTIzMDAxMjM0NTY3FQIAERgSRjVDNUNEM0M0QzZDQzZDQzMAA=",
+                      timestamp: Math.floor(Date.now() / 1000).toString(),
+                      text: { body: messageBody },
+                      type: "text"
+                    }
+                  ]
+                },
+                field: "messages"
+              }
+            ]
+          }
+        ]
+      };
+
+      const res = await fetch(`${API_BASE}/api/whatsapp/webhook`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const text = await res.text();
+      if (res.ok) {
+        setMessageStatus({
+          success: true,
+          message: `Message sent successfully! Backend returned code ${res.status}: "${text}". Check your backend node console to see the printed message!`,
+        });
+      } else {
+        setMessageStatus({
+          success: false,
+          message: `Failed to deliver message. Backend returned status ${res.status}: "${text}"`,
+        });
+      }
+    } catch (err) {
+      setMessageStatus({
+        success: false,
+        message: `Error simulating message: ${err.message}`,
+      });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-md shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+              💬
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-slate-800">WhatsApp Bot Webhook Simulator</h2>
+              <p className="text-[10px] text-slate-400">Test backend message reception and verification</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Tab Selection */}
+        <div className="flex border-b border-slate-100 px-6 pt-2.5 gap-1 bg-slate-50/50">
+          <button
+            onClick={() => setActiveTab("verify")}
+            className={`px-4 py-2 text-xs font-semibold border-b-2 transition ${
+              activeTab === "verify"
+                ? "border-indigo-500 text-indigo-600"
+                : "border-transparent text-slate-400 hover:text-slate-600"
+            }`}
+          >
+            1. Verification GET
+          </button>
+          <button
+            onClick={() => setActiveTab("message")}
+            className={`px-4 py-2 text-xs font-semibold border-b-2 transition ${
+              activeTab === "message"
+                ? "border-indigo-500 text-indigo-600"
+                : "border-transparent text-slate-400 hover:text-slate-600"
+            }`}
+          >
+            2. Simulate Parent POST
+          </button>
+        </div>
+
+        {/* Scrollable Content */}
+        <div className="p-6 overflow-y-auto flex-1 space-y-4">
+          {activeTab === "verify" && (
+            <div className="space-y-4">
+              <div className="bg-slate-50 border border-slate-100 rounded-md p-3.5 text-xs text-slate-500 leading-relaxed">
+                <strong>Meta Webhook verification check:</strong> Send a simulated Webhook activation check to ensure the backend validates verify tokens properly and echoes the correct challenge string.
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Verify Token</label>
+                  <input
+                    type="text"
+                    value={verifyToken}
+                    onChange={(e) => setVerifyToken(e.target.value)}
+                    className="w-full px-3 py-2 text-xs border border-slate-200 rounded outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 bg-white"
+                    placeholder="Enter verify token"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Challenge String</label>
+                  <input
+                    type="text"
+                    value={verifyChallenge}
+                    onChange={(e) => setVerifyChallenge(e.target.value)}
+                    className="w-full px-3 py-2 text-xs border border-slate-200 rounded outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 bg-white"
+                    placeholder="Challenge string"
+                  />
+                </div>
+
+                <button
+                  onClick={handleTestVerify}
+                  disabled={verifying}
+                  className="w-full py-2 bg-indigo-600 text-white rounded text-xs font-bold hover:bg-indigo-700 transition disabled:opacity-50"
+                >
+                  {verifying ? "Testing verification..." : "Send Verification GET Request"}
+                </button>
+
+                {verifyStatus && (
+                  <div
+                    className={`p-3 rounded text-xs border ${
+                      verifyStatus.success
+                        ? "bg-emerald-50 border-emerald-100 text-emerald-700"
+                        : "bg-rose-50 border-rose-100 text-rose-700"
+                    }`}
+                  >
+                    <strong>{verifyStatus.success ? "Success" : "Failed"}:</strong> {verifyStatus.message}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === "message" && (
+            <div className="space-y-4">
+              <div className="bg-slate-50 border border-slate-100 rounded-md p-3.5 text-xs text-slate-500 leading-relaxed">
+                <strong>Simulate Message payload:</strong> Send a mock Meta WhatsApp JSON payload containing a parent message to check how the backend extracts and processes it.
+              </div>
+
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Sender Name</label>
+                    <input
+                      type="text"
+                      value={senderName}
+                      onChange={(e) => setSenderName(e.target.value)}
+                      className="w-full px-3 py-2 text-xs border border-slate-200 rounded outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 bg-white"
+                      placeholder="e.g. Imran"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Phone Number</label>
+                    <input
+                      type="text"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full px-3 py-2 text-xs border border-slate-200 rounded outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 bg-white"
+                      placeholder="e.g. 923001234567"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Message Text</label>
+                  <input
+                    type="text"
+                    value={messageBody}
+                    onChange={(e) => setMessageBody(e.target.value)}
+                    className="w-full px-3 py-2 text-xs border border-slate-200 rounded outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 bg-white"
+                    placeholder="e.g. Fee status"
+                  />
+                </div>
+
+                <button
+                  onClick={handleSendMessage}
+                  disabled={sending}
+                  className="w-full py-2 bg-emerald-600 text-white rounded text-xs font-bold hover:bg-emerald-700 transition disabled:opacity-50"
+                >
+                  {sending ? "Delivering message..." : "Deliver Simulated Message (POST)"}
+                </button>
+
+                {messageStatus && (
+                  <div
+                    className={`p-3 rounded text-xs border ${
+                      messageStatus.success
+                        ? "bg-emerald-50 border-emerald-100 text-emerald-700"
+                        : "bg-rose-50 border-rose-100 text-rose-700"
+                    }`}
+                  >
+                    {messageStatus.message}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="bg-slate-50 px-6 py-3 border-t border-slate-100 text-[10px] text-slate-400 text-center">
+          Backend Webhook URL: <code className="bg-slate-200 text-slate-700 px-1 rounded">/api/whatsapp/webhook</code>
+        </div>
+      </div>
+    </div>
+  );
+};

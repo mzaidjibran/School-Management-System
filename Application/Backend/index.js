@@ -18,6 +18,7 @@ import subjectRoutes from "./routers/Subject_Routes.js";
 import timetableRoutes from "./routers/Timetable_Routes.js";
 import branchRoutes from "./routers/Branch_Route.js";
 import payrollRoutes from "./routers/Payroll_Route.js";
+import whatsappRoutes from "./routers/whatsapp_routes.js";
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -64,6 +65,7 @@ app.use("/api/subjects", subjectRoutes);
 app.use("/api/timetable", timetableRoutes);
 app.use("/api/branches", branchRoutes);
 app.use("/api/payroll", payrollRoutes);
+app.use("/api/whatsapp", whatsappRoutes);
 
 app.get("/api/test", (req, res) => {
   res.json({ message: "API working successfully" });
