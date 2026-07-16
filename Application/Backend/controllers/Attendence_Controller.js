@@ -1,4 +1,5 @@
 import { Attendance } from "../models/Attendence_Model.js";
+import { createNotificationHelper } from "./Notification_Controller.js";
 import { Student } from "../models/Student_Model.js";
 import { Class } from "../models/Class_Model.js";
 import { StaffAttendance } from "../models/Staff_Attendence_Model.js";
@@ -47,6 +48,20 @@ export const markAttendance = async (request, response) => {
         inserted.push(doc);
       } catch (e) {
         console.log("Skip:", e.message);
+      }
+    }
+
+    if (inserted.length > 0) {
+      try {
+        const cls = await Class.findById(records[0].class);
+        const className = cls ? `${cls.name} (Section ${cls.section || "N/A"})` : "Class";
+        await createNotificationHelper(
+          "Attendance Marked",
+          `Attendance marked for ${inserted.length} students of Class ${className}.`,
+          "attendance"
+        );
+      } catch (err) {
+        console.error("Attendance Notification error:", err);
       }
     }
 

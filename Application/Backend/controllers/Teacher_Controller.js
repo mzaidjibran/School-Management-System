@@ -1,4 +1,5 @@
 import Teacher from "../models/Teacher_Model.js";
+import { createNotificationHelper } from "./Notification_Controller.js";
 import User_Model from "../models/User_Model.js";
 import path from "path";
 import bcrypt from "bcrypt";
@@ -65,6 +66,11 @@ export const createTeacher = async (request, response) => {
     teacherData.schoolSection = teacherData.schoolSection || request.headers["x-section"];
 
     const teacher = await Teacher.create(teacherData);
+    await createNotificationHelper(
+      "New Teacher Onboarded",
+      `${teacherData.name || "A new teacher"} has been successfully onboarded with email ${teacherData.email}.`,
+      "teacher"
+    );
 
     // Create corresponding login User account
     const existingUser = await User_Model.findOne({ email: teacherData.email.toLowerCase().trim() });

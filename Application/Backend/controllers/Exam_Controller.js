@@ -1,4 +1,5 @@
 import { Exam, Result } from "../models/Exam_Model.js";
+import { createNotificationHelper } from "./Notification_Controller.js";
 import mongoose from "mongoose";
 
 // ─── EXAMS ────────────────────────────────────────────────────────────────────
@@ -54,6 +55,11 @@ export const createExam = async (req, res) => {
 
     const exam = new Exam(examData);
     await exam.save();
+    await createNotificationHelper(
+      "New Exam Scheduled",
+      `Exam "${exam.title}" of type ${exam.examType || "test"} has been scheduled.`,
+      "exam"
+    );
     
     const query = { _id: exam._id, createdBy: req.userId };
     if (req.headers["x-branch-id"]) query.branch = req.headers["x-branch-id"];

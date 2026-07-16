@@ -1,4 +1,5 @@
 import {Class} from "../models/Class_Model.js";
+import { createNotificationHelper } from "./Notification_Controller.js";
 
 // ─── Create Class ─────────────────────────────────────────────────
 export const createClass = async (request, response) => {
@@ -7,6 +8,11 @@ export const createClass = async (request, response) => {
     if (request.headers["x-branch-id"]) request.body.branch = request.headers["x-branch-id"];
     request.body.schoolSection = request.body.schoolSection || request.headers["x-section"];
     const newClass = await Class.create(request.body);
+    await createNotificationHelper(
+      "New Class Created",
+      `Class "${newClass.name}" (Section ${newClass.section || "N/A"}) has been created successfully.`,
+      "class"
+    );
 
     response.status(201).json({
       success: true,

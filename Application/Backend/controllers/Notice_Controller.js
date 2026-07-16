@@ -1,4 +1,5 @@
 import Notice from "../models/Notice_Model.js";
+import { createNotificationHelper } from "./Notification_Controller.js";
 
 export const getAllNotices = async (req, res) => {
   try {
@@ -49,6 +50,11 @@ export const createNotice = async (req, res) => {
     if (req.headers["x-section"]) req.body.schoolSection = req.headers["x-section"];
     const notice = new Notice({ ...req.body});
     await notice.save();
+    await createNotificationHelper(
+      "New Notice Circular",
+      `Notice "${notice.title}" has been published for ${notice.targetAudience || "everyone"}.`,
+      "notice"
+    );
     const populated = await Notice.findById(notice._id).populate("createdBy", "Name");
     res.status(201).json({ success: true, message: "Notice created", notice: populated });
   } catch (err) {

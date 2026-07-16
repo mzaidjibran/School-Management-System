@@ -1,4 +1,5 @@
 import { Student } from "../models/Student_Model.js";
+import { createNotificationHelper } from "./Notification_Controller.js";
 import path from "path";
 
 function escapeRegExp(value) {
@@ -100,6 +101,11 @@ export const createStudent = async (request, response) => {
     }
 
     const student = await Student.create(studentData);
+    await createNotificationHelper(
+      "New Student Registered",
+      `${studentData.firstName} ${studentData.lastName || ""} was admitted under admission number ${studentData.admissionNumber}.`,
+      "student"
+    );
     const populated = await Student.findById(student._id).populate(
       "currentClass",
     );
