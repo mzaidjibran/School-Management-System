@@ -1,4 +1,5 @@
 import { Fee } from "../models/Fee_Model.js";
+import { createNotificationHelper } from "./Notification_Controller.js";
 
 // ─── Helper: Receipt Number Generate Karo ────────────────────────
 function generateReceiptNumber() {
@@ -16,6 +17,11 @@ export const createFee = async (request, response) => {
     if (request.headers["x-branch-id"]) request.body.branch = request.headers["x-branch-id"];
     if (request.headers["x-section"]) request.body.schoolSection = request.headers["x-section"];
     const fee = await Fee.create(request.body);
+    await createNotificationHelper(
+      "Fee Invoice Created",
+      `New Fee Invoice of Rs. ${fee.amount} generated for student.`,
+      "fee"
+    );
 
     response.status(201).json({
       success: true,
@@ -185,6 +191,11 @@ export const payFee = async (request, response) => {
     }
 
     await fee.save();
+    await createNotificationHelper(
+      "Fee Payment Received",
+      `Payment of Rs. ${payingAmount} received for Student Fee (Status: ${fee.status.toUpperCase()}).`,
+      "fee"
+    );
 
     response.status(200).json({
       success: true,

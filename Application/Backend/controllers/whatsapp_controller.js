@@ -1,4 +1,5 @@
 // WhatsApp Controller
+import { createNotificationHelper } from "./Notification_Controller.js";
 
 // Meta verification for Webhook
 export const verifyWebhook = (req, res) => {
@@ -26,7 +27,7 @@ export const verifyWebhook = (req, res) => {
 };
 
 // Process incoming WhatsApp messages
-export const receiveMessage = (req, res) => {
+export const receiveMessage = async (req, res) => {
   try {
     const body = req.body;
 
@@ -46,6 +47,11 @@ export const receiveMessage = (req, res) => {
         const senderName = changeValue.contacts?.[0]?.profile?.name || "Parent";
 
         console.log(`[WhatsApp Message] From: ${senderName} (${from}) | Message: "${text}"`);
+        await createNotificationHelper(
+          "WhatsApp Message Received",
+          `Message from ${senderName} (${from}): "${text}"`,
+          "whatsapp"
+        );
       }
       return res.status(200).send("EVENT_RECEIVED");
     } else {

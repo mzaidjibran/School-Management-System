@@ -41,6 +41,99 @@ export default function ProHeader() {
   const userDropdownRef  = useRef(null);
   const notifDropdownRef = useRef(null);
   const navigate = useNavigate();
+  const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
+
+  // Notification states
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/notifications`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const list = data.data || [];
+        setNotifications(list);
+        setUnreadCount(list.filter((n) => !n.read).length);
+      }
+    } catch (err) {
+      console.error("Error loading notifications:", err);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/notifications/read-all`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+      if (res.ok) {
+        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+        setUnreadCount(0);
+        toast.success("All notifications marked as read!");
+      }
+    } catch (err) {
+      console.error("Error marking read:", err);
+    }
+  };
+
+  const formatTimeAgo = (dateStr) => {
+    const date = new Date(dateStr);
+    const seconds = Math.floor((new Date() - date) / 1000);
+    if (seconds < 60) return "Just now";
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  };
+
+  const getNotifIcon = (type) => {
+    switch (type) {
+      case "student": return "🎓";
+      case "teacher": return "👤";
+      case "class": return "🏫";
+      case "attendance": return "📅";
+      case "fee": return "💰";
+      case "exam": return "📝";
+      case "notice": return "📢";
+      case "whatsapp": return "💬";
+      default: return "⚙️";
+    }
+  };
+
+  const getNotifBadgeColor = (type) => {
+    switch (type) {
+      case "student": return "bg-emerald-50 text-emerald-600 border border-emerald-100";
+      case "teacher": return "bg-indigo-50 text-indigo-600 border border-indigo-100";
+      case "class": return "bg-sky-50 text-sky-600 border border-sky-100";
+      case "attendance": return "bg-teal-50 text-teal-600 border border-teal-100";
+      case "fee": return "bg-amber-50 text-amber-600 border border-amber-100";
+      case "exam": return "bg-rose-50 text-rose-600 border border-rose-100";
+      case "notice": return "bg-red-50 text-red-600 border border-red-100";
+      case "whatsapp": return "bg-emerald-50 text-emerald-600 border border-emerald-100";
+      default: return "bg-slate-50 text-slate-600 border border-slate-100";
+    }
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      fetchNotifications();
+      const interval = setInterval(fetchNotifications, 15000);
+      return () => clearInterval(interval);
+    }
+  }, []);
 
   // Real auth data
   const { userName, userEmail, userRole, userImage, isAdmin, isTeacher, assignedPages, schoolName, schoolLogo } = useAuth();
@@ -283,7 +376,6 @@ export default function ProHeader() {
   }
 
   // Avatar URL — real custom upload or UI Avatars fallback
-  const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
   const avatarUrl = userImage
     ? `${API_BASE}${userImage}`
     : `https://ui-avatars.com/api/?name=${encodeURIComponent(userName || "U")}&background=4f46e5&color=fff&bold=true&size=40`;
@@ -361,16 +453,68 @@ export default function ProHeader() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                     d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                 </svg>
-                <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-red-500 text-[9px] font-bold text-white flex items-center justify-center ring-2 ring-white shadow-sm animate-pulse">
+                    {unreadCount}
+                  </span>
+                )}
               </button>
 
               {notifDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-xl border border-slate-100 py-2 z-50">
-                  <div className="px-4 py-2 border-b border-slate-100">
-                    <h3 className="font-semibold text-slate-700">Notifications</h3>
+                <div className="fixed md:absolute top-16 md:top-auto left-4 right-4 md:left-auto md:right-0 mt-2 md:w-80 bg-white rounded-md shadow-2xl md:shadow-xl border border-slate-100 py-2 z-50 flex flex-col max-h-[450px]">
+                  <div className="px-4 py-2.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <div className="flex items-center gap-1.5">
+                      <h3 className="font-bold text-xs text-slate-800">Notifications</h3>
+                      {unreadCount > 0 && (
+                        <span className="bg-indigo-100 text-indigo-700 font-extrabold text-[9px] px-1.5 py-0.5 rounded-full shrink-0">
+                          {unreadCount} new
+                        </span>
+                      )}
+                    </div>
+                    {unreadCount > 0 && (
+                      <button
+                        onClick={handleMarkAllAsRead}
+                        className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 transition cursor-pointer"
+                      >
+                        Mark all as read
+                      </button>
+                    )}
                   </div>
-                  <div className="px-4 py-6 text-center text-slate-400 text-sm">
-                    No notifications yet
+                  <div className="overflow-y-auto divide-y divide-slate-50 max-h-[350px]">
+                    {notifications.length > 0 ? (
+                      notifications.map((notif) => (
+                        <div
+                          key={notif._id}
+                          className={`p-3 flex items-start gap-3 transition-colors ${
+                            !notif.read ? "bg-indigo-50/20" : "hover:bg-slate-50"
+                          }`}
+                        >
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0 ${getNotifBadgeColor(notif.type)}`}>
+                            {getNotifIcon(notif.type)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex justify-between items-start gap-1">
+                              <p className={`text-xs font-bold truncate ${!notif.read ? "text-slate-800" : "text-slate-700"}`}>
+                                {notif.title}
+                              </p>
+                              <span className="text-[9px] text-slate-400 font-medium shrink-0">
+                                {formatTimeAgo(notif.createdAt)}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-500 mt-0.5 leading-normal break-words font-medium">
+                              {notif.message}
+                            </p>
+                          </div>
+                          {!notif.read && (
+                            <span className="w-1.5 h-1.5 bg-blue-600 rounded-full shrink-0 mt-1.5" />
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="px-4 py-8 text-center text-slate-400 text-xs font-medium">
+                        No notifications yet
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
