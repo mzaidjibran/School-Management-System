@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, Save, ArrowRight, Info, RefreshCw, Calendar, Search } from "lucide-react";
 import { getHeaders } from "../../api/Api_Helper.js";
 import { getAllTeachers } from "../../api/Teacher_Api.js";
-import { getStaffAttendance } from "../../api/Attendence_Api.js";
+import { getStaffAttendance } from "../../api/Attendance_Api.js";
 import toast from "react-hot-toast";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";

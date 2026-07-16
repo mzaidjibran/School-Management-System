@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Users, Calendar, ClipboardCheck, AlertCircle, Save, Loader2 } from "lucide-react";
 import { getAllTeachers } from "../../api/Teacher_Api.js";
-import { getStaffAttendance, markStaffAttendance } from "../../api/Attendence_Api.js";
+import { getStaffAttendance, markStaffAttendance } from "../../api/Attendance_Api.js";
 import toast from "react-hot-toast";
 
 // Radio buttons styled with Marina active brand colors

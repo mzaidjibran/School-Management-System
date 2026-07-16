@@ -3,7 +3,7 @@ import { UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, Save, ArrowR
 import { getHeaders } from "../../api/Api_Helper.js";
 import { getAllClasses } from "../../api/Class_Api.js";
 import { getAllStudents } from "../../api/Student_Api.js";
-import { getAttendanceByClassAndDate } from "../../api/Attendence_Api.js";
+import { getAttendanceByClassAndDate } from "../../api/Attendance_Api.js";
 import toast from "react-hot-toast";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";

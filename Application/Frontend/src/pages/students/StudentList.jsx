@@ -547,9 +547,20 @@ export default function StudentList() {
   const uniqueClasses = [...new Set(students.map((s) => s.class).filter(Boolean))];
 
   const exportCSV = () => {
-    const headers = ["Name", "Class", "Roll No", "Section", "Phone", "Email", "Father Name", "Admission Date"];
-    const rows = filteredStudents.map((s) => [s.name, s.class, s.rollNumber, s.section, s.phone, s.email, s.fatherName, s.admissionDate]);
-    saveAs(new Blob([[headers, ...rows].map((r) => r.join(",")).join("\n")], { type: "text/csv;charset=utf-8;" }), "students.csv");
+    const headers = ["Name", "Class", "Roll No", "Section", "Phone", "Email", "Father Name", "Biometric ID", "Admission Date"];
+    const rows = filteredStudents.map((s) => [
+      s.name || "",
+      s.class || "",
+      s.rollNumber || "",
+      s.section || "",
+      s.phone || "",
+      s.email || "",
+      s.fatherName || "",
+      s.biometricId || "",
+      s.admissionDate || "",
+    ]);
+    const csvContent = [headers.join(","), ...rows.map(r => r.map(val => `"${String(val || '').replace(/"/g, '""')}"`).join(","))].join("\n");
+    saveAs(new Blob([csvContent], { type: "text/csv;charset=utf-8;" }), "students.csv");
   };
 
   const exportExcel = () => {
@@ -620,7 +631,7 @@ export default function StudentList() {
       "firstName", "lastName", "gender", "dateOfBirth", "email", "phone",
       "address", "city", "fatherName", "motherName", "parentPhone", "rollNumber", "section", "schoolSection",
       "admissionDate", "className", "cnic", "bloodGroup", "religion",
-      "nationality", "previousSchool", "medicalInfo", "emergencyName", "emergencyPhone"
+      "nationality", "previousSchool", "medicalInfo", "emergencyName", "emergencyPhone", "biometricId"
     ];
     const rows = students.map((s) => {
       const nameParts = (s.name || "").trim().split(/\s+/);
@@ -650,10 +661,11 @@ export default function StudentList() {
         s.previousSchool || "",
         s.medicalInfo || "",
         s.emergencyName || "",
-        s.emergencyPhone || ""
+        s.emergencyPhone || "",
+        s.biometricId || ""
       ];
     });
-    const csvContent = [headers.join(","), ...rows.map(r => r.map(val => `"${String(val).replace(/"/g, '""')}"`).join(","))].join("\n");
+    const csvContent = [headers.join(","), ...rows.map(r => r.map(val => `"${String(val || '').replace(/"/g, '""')}"`).join(","))].join("\n");
     saveAs(new Blob([csvContent], { type: "text/csv;charset=utf-8;" }), "students_backup.csv");
     toast.success("Students backup downloaded successfully!");
   };

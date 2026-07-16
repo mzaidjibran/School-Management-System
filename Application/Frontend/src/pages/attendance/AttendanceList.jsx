@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
-import { FaSearch, FaFileCsv, FaFileExcel, FaFilePdf } from "react-icons/fa";
+import { FaSearch, FaFileCsv, FaFileExcel, FaFilePdf, FaTrash } from "react-icons/fa";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveAs } from "file-saver";
 import { getAllClasses } from "../../api/Class_Api.js";
-import { getAttendanceByClassAndDate, markAttendance } from "../../api/Attendence_Api.js";
+import { getAttendanceByClassAndDate, markAttendance, deleteAttendance } from "../../api/Attendance_Api.js";
 import { getAllStudents } from "../../api/Student_Api.js";
+import { confirmToast } from "../../utils/toastHelpers.jsx";
 import toast from "react-hot-toast";
 
 // ---------- Skeleton ----------
@@ -165,6 +166,7 @@ export default function AttendanceList() {
       new Blob([[headers, ...rows].map((r) => r.join(",")).join("\n")], { type: "text/csv" }),
       "attendance.csv"
     );
+    toast.success("Attendance CSV downloaded successfully!");
   };
 
   const parseCSV = (text) => {
@@ -248,26 +250,45 @@ export default function AttendanceList() {
         const markPayload = [];
         for (const row of parsed) {
           try {
-            const matchedClass = classesList.find(c => c.name.toLowerCase() === (row.className || "").toLowerCase());
-            const matchedStudent = studentsList.find(s => s.rollNumber === row.rollNumber);
+            // Case-insensitive key lookup helper
+            const getVal = (r, ...keys) => {
+              for (const k of keys) {
+                if (r[k] !== undefined) return r[k];
+                const foundKey = Object.keys(r).find(
+                  (rk) => rk.trim().toLowerCase() === k.toLowerCase()
+                );
+                if (foundKey) return r[foundKey];
+              }
+              return "";
+            };
+
+            const rollNo = getVal(row, "rollNumber", "roll number", "roll no", "rollNo");
+            const className = getVal(row, "className", "class name", "class");
+            const date = getVal(row, "date");
+            const schoolSection = getVal(row, "schoolSection", "school section", "section");
+            const status = getVal(row, "status");
+            const remarks = getVal(row, "remarks", "remark");
+
+            const matchedClass = className ? classesList.find(c => c.name.toLowerCase() === className.toLowerCase()) : null;
+            const matchedStudent = studentsList.find(s => s.rollNumber === rollNo);
             if (!matchedStudent) {
-              console.warn(`Student with roll number ${row.rollNumber} not found.`);
+              console.warn(`Student with roll number ${rollNo} not found.`);
               failCount++;
               continue;
             }
-             markPayload.push({
+            markPayload.push({
               student: matchedStudent._id,
-              class: matchedClass ? matchedClass._id : matchedStudent.class?._id || matchedStudent.class,
-              date: row.date || getLocalDateString(),
-              section: (row.schoolSection || "girls").toLowerCase(),
-              status: (row.status || "present").toLowerCase(),
-              remarks: row.remarks || "",
+              class: matchedClass ? matchedClass._id : selectedClass || matchedStudent.class?._id || matchedStudent.class,
+              date: date || selectedDate || getLocalDateString(),
+              section: (schoolSection || selectedSection || "girls").toLowerCase(),
+              status: (status || "present").toLowerCase(),
+              remarks: remarks || "",
               lateMinutes: 0
             });
             successCount++;
           } catch (err) {
             console.error("Failed to map attendance CSV row:", row, err);
-            toast.error(`Roll# ${row.rollNumber}: ${err.message}`);
+            toast.error(`Failed mapping row: ${err.message}`);
             failCount++;
           }
         }
@@ -298,6 +319,7 @@ export default function AttendanceList() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Attendance");
     XLSX.writeFile(wb, "attendance.xlsx");
+    toast.success("Attendance Excel downloaded successfully!");
   };
   const exportPDF = () => {
     const doc = new jsPDF();
@@ -309,6 +331,27 @@ export default function AttendanceList() {
       headStyles: { fillColor: [79, 70, 229] },
     });
     doc.save("attendance.pdf");
+    toast.success("Attendance PDF downloaded successfully!");
+  };
+
+  const handleDelete = (id) => {
+    confirmToast(
+      "Are you sure you want to delete this attendance record?",
+      async () => {
+        try {
+          await deleteAttendance(id);
+          toast.success("Attendance record deleted successfully!");
+          if (selectedClass && selectedDate && selectedSection) {
+            const result = await getAttendanceByClassAndDate(selectedClass, selectedDate, selectedSection);
+            setRecords(result.data || []);
+          }
+        } catch (e) {
+          console.error(e);
+          toast.error("Failed to delete attendance record: " + e.message);
+        }
+      },
+      { confirmText: "Delete", confirmClass: "bg-rose-600 hover:bg-rose-700 shadow-rose-600/10 text-white" }
+    );
   };
 
   const inputCls = "h-8 text-xs border border-slate-200 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full";
@@ -449,7 +492,7 @@ export default function AttendanceList() {
                 <table className="w-full text-sm">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      {["#", "Roll No", "Student Name", "Date", "Status", "Remarks"].map((h) => (
+                      {["#", "Roll No", "Student Name", "Date", "Status", "Remarks", "Actions"].map((h) => (
                         <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-slate-600 whitespace-nowrap uppercase">
                           {h}
                         </th>
@@ -472,6 +515,15 @@ export default function AttendanceList() {
                         </td>
                         <td className="py-2.5 px-4 text-slate-400 italic">
                           {record.remarks || "—"}
+                        </td>
+                        <td className="py-2.5 px-4">
+                          <button
+                            onClick={() => handleDelete(record._id)}
+                            className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-md transition duration-150"
+                            title="Delete Attendance"
+                          >
+                            <FaTrash className="text-xs" />
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -499,7 +551,16 @@ export default function AttendanceList() {
                             </span>
                           </div>
                         </div>
-                        <StatusBadge status={record.status} />
+                        <div className="flex items-center gap-2">
+                          <StatusBadge status={record.status} />
+                          <button
+                            onClick={() => handleDelete(record._id)}
+                            className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-md transition duration-150 border border-transparent hover:border-rose-100"
+                            title="Delete Attendance"
+                          >
+                            <FaTrash className="text-xs" />
+                          </button>
+                        </div>
                       </div>
                       
                       <div className="flex justify-between items-center text-[11px] text-slate-500 border-t border-slate-50 pt-2.5">

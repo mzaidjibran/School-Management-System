@@ -4,6 +4,7 @@ import {
   getAttendanceByClassAndDate,
   getAttendanceByStudent,
   updateAttendance,
+  deleteAttendance,
   getTodayAttendanceSummary,
   markStaffAttendance,
   getStaffAttendance,
@@ -32,6 +33,7 @@ router.get("/",getAttendanceByClassAndDate);                  // GET    /api/att
 router.get("/today-summary", getTodayAttendanceSummary);      // GET    /api/attendance/today-summary
 router.get("/student/:studentId",getAttendanceByStudent);     // GET    /api/attendance/student/:studentId
 router.put("/:id",updateAttendance);                          // PUT    /api/attendance/:id
+router.delete("/:id", deleteAttendance);                      // DELETE /api/attendance/:id
 router.post("/student/biometric-parse", parseStudentBiometricLogs); // POST /api/attendance/student/biometric-parse
 router.post("/student/biometric-save", markStudentBiometricAttendance); // POST /api/attendance/student/biometric-save
 

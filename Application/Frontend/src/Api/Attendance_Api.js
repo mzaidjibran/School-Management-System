@@ -51,6 +51,17 @@ export const updateAttendance = async (id, data) => {
   return response.json();
 };
 
+// ─── Delete Attendance ────────────────────────────────────────────
+export const deleteAttendance = async (id) => {
+  const response = await fetch(`${API_BASE}/api/attendance/${id}`, {
+    method: "DELETE",
+    headers: getHeaders(),
+  });
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || `Delete attendance failed: ${response.status}`);
+  return result;
+};
+
 // ─── Mark Staff Attendance ────────────────────────────────────────
 export const markStaffAttendance = async (records, date) => {
   const response = await fetch(`${API_BASE}/api/attendance/staff`, {

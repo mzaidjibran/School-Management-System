@@ -579,21 +579,24 @@ export default function ClassList() {
       "Capacity",
       "Room No",
       "Shift",
+      "Description",
       "Status",
     ];
     const rows = filtered.map((c) => [
-      c.name,
-      c.section,
-      c.academicYear,
-      c.classTeacher ? `${c.classTeacher.firstName} ${c.classTeacher.lastName}` : "Not Assigned",
-      c.capacity,
-      c.room,
-      c.shift,
+      c.name || "",
+      c.section || "",
+      c.academicYear || "",
+      c.classTeacher ? `${c.classTeacher.firstName || ""} ${c.classTeacher.lastName || ""}`.trim() : "Not Assigned",
+      c.capacity || "40",
+      c.room || "",
+      c.shift || "Morning",
+      c.description || "",
       c.isActive ? "Active" : "Inactive",
     ]);
+    const csvContent = [headers.join(","), ...rows.map(r => r.map(val => `"${String(val || '').replace(/"/g, '""')}"`).join(","))].join("\n");
     saveAs(
-      new Blob([[headers, ...rows].map((r) => r.join(",")).join("\n")], {
-        type: "text/csv",
+      new Blob([csvContent], {
+        type: "text/csv;charset=utf-8;",
       }),
       "classes.csv",
     );
@@ -704,6 +707,7 @@ export default function ClassList() {
               capacity: Number(getVal(row, "capacity")) || 40,
               room: getVal(row, "room", "room no", "room number", "roomNo"),
               shift: getVal(row, "shift") || "Morning",
+              description: getVal(row, "description", "desc"),
               isActive: isActive,
             };
             if (matchedTeacher) {

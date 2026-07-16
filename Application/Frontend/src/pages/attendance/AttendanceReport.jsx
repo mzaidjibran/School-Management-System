@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
 import { getAllStudents } from "../../api/Student_Api.js";
-import { getAttendanceByStudent } from "../../api/Attendence_Api.js";
+import { getAttendanceByStudent } from "../../api/Attendance_Api.js";
 import { getAllClasses } from "../../api/Class_Api.js";
 import toast from "react-hot-toast";
 import {

@@ -732,3 +732,42 @@ export const markStudentBiometricAttendance = async (request, response) => {
     });
   }
 };
+
+// ─── Delete Attendance Record ──────────────────────────────────────
+export const deleteAttendance = async (request, response) => {
+  try {
+    const record = await Attendance.findById(request.params.id);
+    if (!record) {
+      return response.status(404).json({
+        success: false,
+        error: true,
+        message: "Attendance record not found",
+      });
+    }
+
+    // Owner check: Verify student exists and belongs to this user/admin
+    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+    const studentExists = await Student.findOne({ _id: record.student, createdBy: ownerId });
+    if (!studentExists) {
+      return response.status(403).json({
+        success: false,
+        error: true,
+        message: "Aapko is record ki access nahi hai",
+      });
+    }
+
+    await Attendance.findByIdAndDelete(request.params.id);
+
+    response.status(200).json({
+      success: true,
+      error: false,
+      message: "Attendance record deleted successfully",
+    });
+  } catch (error) {
+    response.status(500).json({
+      success: false,
+      error: true,
+      message: error.message,
+    });
+  }
+};

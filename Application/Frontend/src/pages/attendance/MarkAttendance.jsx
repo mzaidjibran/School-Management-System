@@ -7,7 +7,7 @@ import {
   FaSave,
 } from "react-icons/fa";
 import { getAllClasses } from "../../api/Class_Api.js";
-import { markAttendance } from "../../api/Attendence_Api.js";
+import { markAttendance } from "../../api/Attendance_Api.js";
 import toast from "react-hot-toast";
 
 // ─── Student fetch by classId ─────────────────────────────────────
