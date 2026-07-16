@@ -648,11 +648,39 @@ export default function TeacherDataTable() {
 
   // ─── Export ───────────────────────────────────────────────────
   const exportCSV = () => {
-    const headers = ["Name", "Subject", "Phone", "Email", "Qualification", "Experience", "Joining Date", "Status"];
+    const headers = [
+      "Employee ID", "Name", "Gender", "Email", "Phone", "Alternate Phone", "CNIC", "Date of Birth",
+      "Blood Group", "Marital Status", "Joining Date", "Qualification", "Experience", "Subject",
+      "Salary", "Biometric ID", "Employment Status", "Address", "Notes", "Emergency Contact Name",
+      "Emergency Contact Phone", "Section", "Status"
+    ];
     const rows = filteredTeachers.map((t) => [
-      t.fullName || t.name, t.subject, t.phone, t.email, t.qualification, t.experience, t.joiningDate?.split("T")[0], formatStatus(t.status),
+      t.employeeId || "",
+      t.fullName || t.name || "",
+      t.gender || "",
+      t.email || "",
+      t.phone || "",
+      t.alternatePhone || "",
+      t.cnic || "",
+      t.dateOfBirth ? t.dateOfBirth.split("T")[0] : "",
+      t.bloodGroup || "",
+      t.maritalStatus || "",
+      t.joiningDate ? t.joiningDate.split("T")[0] : "",
+      t.qualification || "",
+      t.experience || "",
+      t.subject || "",
+      t.salary ? String(t.salary) : "0",
+      t.biometricId || "",
+      t.employmentStatus || "",
+      t.address || "",
+      t.notes || "",
+      t.emergencyName || t.emergencyContact?.name || "",
+      t.emergencyPhone || t.emergencyContact?.phone || "",
+      t.schoolSection || "",
+      t.status || "active",
     ]);
-    saveAs(new Blob([[headers, ...rows].map((r) => r.join(",")).join("\n")], { type: "text/csv;charset=utf-8;" }), "teachers.csv");
+    const csvContent = [headers.join(","), ...rows.map(r => r.map(val => `"${String(val || '').replace(/"/g, '""')}"`).join(","))].join("\n");
+    saveAs(new Blob([csvContent], { type: "text/csv;charset=utf-8;" }), "teachers.csv");
   };
 
   const exportExcel = () => {
@@ -724,25 +752,37 @@ export default function TeacherDataTable() {
 
   const handleBackupData = () => {
     const headers = [
-      "firstName", "lastName", "gender", "email", "phone", "qualification",
-      "experience", "subject", "salary", "address", "joiningDate", "status", "schoolSection"
+      "Employee ID", "Name", "Gender", "Email", "Phone", "Alternate Phone", "CNIC", "Date of Birth",
+      "Blood Group", "Marital Status", "Joining Date", "Qualification", "Experience", "Subject",
+      "Salary", "Biometric ID", "Employment Status", "Address", "Notes", "Emergency Contact Name",
+      "Emergency Contact Phone", "Section", "Status"
     ];
     const rows = teachers.map((t) => [
-      t.firstName || t.name?.split(" ")[0] || "",
-      t.lastName || t.name?.split(" ").slice(1).join(" ") || "",
+      t.employeeId || "",
+      t.fullName || t.name || "",
       t.gender || "",
       t.email || "",
       t.phone || "",
+      t.alternatePhone || "",
+      t.cnic || "",
+      t.dateOfBirth ? t.dateOfBirth.split("T")[0] : "",
+      t.bloodGroup || "",
+      t.maritalStatus || "",
+      t.joiningDate ? t.joiningDate.split("T")[0] : "",
       t.qualification || "",
       t.experience || "",
       t.subject || "",
-      t.salary || "",
+      t.salary ? String(t.salary) : "0",
+      t.biometricId || "",
+      t.employmentStatus || "",
       t.address || "",
-      t.joiningDate ? t.joiningDate.split("T")[0] : "",
+      t.notes || "",
+      t.emergencyName || t.emergencyContact?.name || "",
+      t.emergencyPhone || t.emergencyContact?.phone || "",
+      t.schoolSection || "",
       t.status || "active",
-      t.schoolSection || ""
     ]);
-    const csvContent = [headers.join(","), ...rows.map(r => r.map(val => `"${String(val).replace(/"/g, '""')}"`).join(","))].join("\n");
+    const csvContent = [headers.join(","), ...rows.map(r => r.map(val => `"${String(val || '').replace(/"/g, '""')}"`).join(","))].join("\n");
     saveAs(new Blob([csvContent], { type: "text/csv;charset=utf-8;" }), "teachers_backup.csv");
     toast.success("Teachers backup downloaded successfully!");
   };
@@ -764,25 +804,67 @@ export default function TeacherDataTable() {
         const loadingToastId = toast.loading("Uploading teachers...");
         for (const row of parsed) {
           try {
+            // Case-insensitive key lookup helper
+            const getVal = (r, ...keys) => {
+              for (const k of keys) {
+                if (r[k] !== undefined) return r[k];
+                const foundKey = Object.keys(r).find(
+                  (rk) => rk.trim().toLowerCase() === k.toLowerCase()
+                );
+                if (foundKey) return r[foundKey];
+              }
+              return "";
+            };
+
+            const fullName = getVal(row, "name", "full name", "fullName", "teacher name", "teacherName");
+            let firstName = getVal(row, "firstName", "first name", "first_name");
+            let lastName = getVal(row, "lastName", "last name", "last_name");
+
+            if (!firstName && fullName) {
+              const parts = fullName.trim().split(/\s+/);
+              firstName = parts[0] || "";
+              lastName = parts.slice(1).join(" ") || "";
+            }
+
+            // Fallback default names to prevent validation crash
+            if (!firstName) firstName = "Teacher";
+            if (!lastName) lastName = `Uploaded-${Math.floor(100 + Math.random() * 900)}`;
+
+            // employeeId must not be empty! Generate one if not provided.
+            const employeeId = getVal(row, "employeeId", "employee ID", "employee_id", "ID", "id") || 
+              `EMP-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
             const fd = new FormData();
-            fd.append("firstName", row.firstName || "");
-            fd.append("lastName", row.lastName || "");
-            fd.append("gender", (row.gender || "male").toLowerCase());
-            fd.append("email", row.email || "");
-            fd.append("phone", row.phone || "");
-            fd.append("qualification", row.qualification || "");
-            fd.append("experience", row.experience || "");
-            fd.append("subject", row.subject || "");
-            fd.append("salary", row.salary || "");
-            fd.append("address", row.address || "");
-            fd.append("joiningDate", row.joiningDate || new Date().toISOString().split("T")[0]);
-            fd.append("status", (row.status || "active").toLowerCase());
-            fd.append("schoolSection", (row.schoolSection || localStorage.getItem("activeSection") || "girls").toLowerCase());
+            fd.append("fullName", fullName || `${firstName} ${lastName}`.trim());
+            fd.append("employeeId", employeeId);
+            fd.append("gender", (getVal(row, "gender") || "male").toLowerCase());
+            fd.append("email", getVal(row, "email"));
+            fd.append("phone", getVal(row, "phone"));
+            fd.append("alternatePhone", getVal(row, "alternatePhone", "alternate phone", "alternate_phone"));
+            fd.append("cnic", getVal(row, "cnic"));
+            fd.append("dateOfBirth", getVal(row, "dateOfBirth", "date of birth", "dob", "date_of_birth"));
+            fd.append("bloodGroup", getVal(row, "bloodGroup", "blood group", "blood_group"));
+            fd.append("maritalStatus", getVal(row, "maritalStatus", "marital status", "marital_status"));
+            fd.append("joiningDate", getVal(row, "joiningDate", "joining date", "joining_date") || new Date().toISOString().split("T")[0]);
+            fd.append("qualification", getVal(row, "qualification"));
+            fd.append("experience", getVal(row, "experience"));
+            fd.append("subject", getVal(row, "subject"));
+            fd.append("salary", getVal(row, "salary") || "0");
+            fd.append("biometricId", getVal(row, "biometricId", "biometric ID", "biometric_id", "biometric"));
+            fd.append("employmentStatus", getVal(row, "employmentStatus", "employment status", "employment_status", "employment"));
+            fd.append("address", getVal(row, "address"));
+            fd.append("notes", getVal(row, "notes"));
+            fd.append("emergencyName", getVal(row, "emergencyName", "emergency contact name", "emergency_name", "emergency contact", "emergencyContact.name"));
+            fd.append("emergencyPhone", getVal(row, "emergencyPhone", "emergency contact phone", "emergency_phone", "emergency contact number", "emergencyContact.phone"));
+            fd.append("status", (getVal(row, "status") || "active").toLowerCase());
+            fd.append("schoolSection", (getVal(row, "schoolSection", "school section", "school_section") || localStorage.getItem("activeSection") || "girls").toLowerCase());
+
             await createTeacher(fd);
             successCount++;
           } catch (err) {
             console.error("Failed to create teacher from CSV row:", row, err);
-            toast.error(`Row "${row.firstName} ${row.lastName}": ${err.message}`);
+            const teacherName = row.Name || row.name || row.fullName || "Teacher";
+            toast.error(`Row "${teacherName}": ${err.message}`);
             failCount++;
           }
         }

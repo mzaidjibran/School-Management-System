@@ -676,18 +676,35 @@ export default function ClassList() {
         const loadingToastId = toast.loading("Uploading classes...");
         for (const row of parsed) {
           try {
+            // Case-insensitive key lookup helper
+            const getVal = (r, ...keys) => {
+              for (const k of keys) {
+                if (r[k] !== undefined) return r[k];
+                const foundKey = Object.keys(r).find(rk => rk.trim().toLowerCase() === k.toLowerCase());
+                if (foundKey) return r[foundKey];
+              }
+              return "";
+            };
+
+            const classNameVal = getVal(row, "name", "class", "className", "class name");
+            const teacherNameVal = getVal(row, "teacherName", "teacher", "classTeacher", "class teacher", "teacherName");
+
             const matchedTeacher = teachersList.find(t => {
               const fullName = `${t.firstName || ""} ${t.lastName || ""}`.trim().toLowerCase();
-              return fullName === (row.teacherName || "").toLowerCase();
+              return fullName === teacherNameVal.toLowerCase() || (t.name || "").toLowerCase() === teacherNameVal.toLowerCase();
             });
+
+            const statusVal = getVal(row, "status", "isActive", "active");
+            const isActive = statusVal ? (statusVal.toLowerCase() === "active" || statusVal.toLowerCase() === "true" || statusVal === "1") : true;
+
             const payload = {
-              name: row.name || "",
-              section: row.section || "",
-              academicYear: row.academicYear || new Date().getFullYear().toString(),
-              capacity: Number(row.capacity) || 40,
-              room: row.room || "",
-              shift: row.shift || "Morning",
-              isActive: row.isActive !== undefined ? (row.isActive.toLowerCase() === "true" || row.isActive === "1") : true,
+              name: classNameVal,
+              section: getVal(row, "section"),
+              academicYear: getVal(row, "academicYear", "academic year", "year") || new Date().getFullYear().toString(),
+              capacity: Number(getVal(row, "capacity")) || 40,
+              room: getVal(row, "room", "room no", "room number", "roomNo"),
+              shift: getVal(row, "shift") || "Morning",
+              isActive: isActive,
             };
             if (matchedTeacher) {
               payload.classTeacher = matchedTeacher._id;
@@ -696,7 +713,8 @@ export default function ClassList() {
             successCount++;
           } catch (err) {
             console.error("Failed to create class from CSV row:", row, err);
-            toast.error(`Row "${row.name}": ${err.message}`);
+            const className = row.Class || row.name || row.className || "Class";
+            toast.error(`Row "${className}": ${err.message}`);
             failCount++;
           }
         }

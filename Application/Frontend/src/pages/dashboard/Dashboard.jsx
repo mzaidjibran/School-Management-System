@@ -151,7 +151,7 @@ export default function Dashboard() {
         const fetchedNotices = noticeData?.notices || noticeData?.data || [];
         setNotices(fetchedNotices.slice(0, 3));
         
-        const fetchedFees = feeData?.data || [];
+        const fetchedFees = (feeData?.data || []).filter((f) => f.student);
         setRecentFees(fetchedFees.slice(0, 4));
 
         // Group & sum real fees by month for charts
@@ -172,7 +172,7 @@ export default function Dashboard() {
             if (!groupedFees[label]) {
               groupedFees[label] = 0;
             }
-            groupedFees[label] += fee.amount || 0;
+            groupedFees[label] += fee.paidAmount || 0;
           });
           
           const formattedFees = Object.entries(groupedFees)
