@@ -515,7 +515,9 @@ export default function Subjects() {
     const rows = subjects.map((s) => [
       s.code || "",
       s.name || "",
-      Array.isArray(s.class) ? s.class.map((c) => c.name || c).join("; ") : s.class?.name || "",
+      Array.isArray(s.class) 
+        ? s.class.map((c) => (typeof c === "object" ? c?.name : c) || "").filter(Boolean).join("; ") 
+        : (typeof s.class === "object" ? s.class?.name : s.class) || "",
       s.type || "theory",
       s.teacher?.name || `${s.teacher?.firstName || ""} ${s.teacher?.lastName || ""}`.trim() || "",
       s.creditHours || 0,
@@ -523,7 +525,7 @@ export default function Subjects() {
     ]);
     const csv = [headers.join(","), ...rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","))].join("\n");
     saveAs(new Blob([csv], { type: "text/csv;charset=utf-8;" }), "subjects_backup.csv");
-    toast.success("Backup downloaded!");
+    toast.success("Backup downloaded successfully!");
   };
 
   const parseCSV = (text) => {
@@ -550,37 +552,80 @@ export default function Subjects() {
       try {
         const parsed = parseCSV(evt.target.result);
         if (parsed.length === 0) { toast.error("CSV is empty"); return; }
-        const [classesRes, teachersRes] = await Promise.all([getAllClasses(), getAllTeachers()]);
+        const [classesRes, teachersRes] = await Promise.all([
+          getAllClasses({ section: "all" }),
+          getAllTeachers()
+        ]);
         const classesList = classesRes.data || [];
         const teachersList = teachersRes.data || [];
         let successCount = 0, failCount = 0;
         const tid = toast.loading("Uploading subjects…");
         for (const row of parsed) {
           try {
-            const matchedClass = classesList.find(c => c.name.toLowerCase() === (row.className || "").toLowerCase());
+            // Case-insensitive key lookup helper
+            const getVal = (r, ...keys) => {
+              for (const k of keys) {
+                if (r[k] !== undefined) return r[k];
+                const foundKey = Object.keys(r).find(
+                  (rk) => rk.trim().toLowerCase() === k.toLowerCase()
+                );
+                if (foundKey) return r[foundKey];
+              }
+              return "";
+            };
+
+            const code = getVal(row, "code");
+            const name = getVal(row, "name", "subject name", "subjectName");
+            const classNameVal = getVal(row, "className", "class name", "class");
+            const type = getVal(row, "type");
+            const teacherNameVal = getVal(row, "teacherName", "teacher name", "teacher");
+            const creditHours = getVal(row, "creditHours", "credit hours");
+            const status = getVal(row, "status");
+
+            if (!name) {
+              console.warn("Skipping row: subject name is required.");
+              failCount++;
+              continue;
+            }
+
+            // Split by semicolon or comma to support multiple classes
+            const classNames = classNameVal ? classNameVal.split(/[;,]/).map(c => c.trim()).filter(Boolean) : [];
+            const matchedClassIds = [];
+            for (const cn of classNames) {
+              const found = classesList.find(c => c.name.toLowerCase() === cn.toLowerCase());
+              if (found) {
+                matchedClassIds.push(found._id);
+              } else {
+                console.warn(`Class named "${cn}" not found.`);
+              }
+            }
+
             const matchedTeacher = teachersList.find(t => {
               const full = `${t.firstName || ""} ${t.lastName || ""}`.trim().toLowerCase();
-              return full === (row.teacherName || "").toLowerCase() || (t.name || "").toLowerCase() === (row.teacherName || "").toLowerCase();
+              return full === teacherNameVal.toLowerCase() || (t.name || "").toLowerCase() === teacherNameVal.toLowerCase();
             });
+
             const payload = {
-              code: row.code || "",
-              name: row.name || "",
-              type: (row.type || "theory").toLowerCase(),
-              creditHours: Number(row.creditHours) || 3,
-              status: (row.status || "active").toLowerCase(),
+              code: code || "",
+              name: name || "",
+              type: (type || "theory").toLowerCase(),
+              creditHours: Number(creditHours) || 3,
+              status: (status || "active").toLowerCase(),
             };
-            if (matchedClass) payload.class = matchedClass._id;
+            if (matchedClassIds.length > 0) payload.class = matchedClassIds;
             if (matchedTeacher) payload.teacher = matchedTeacher._id;
+
             await addSubject(payload);
             successCount++;
           } catch (err) {
-            toast.error(`"${row.name}": ${err.message}`);
+            const subjectName = getVal(row, "name", "subject name", "subjectName") || "Unknown";
+            toast.error(`"${subjectName}": ${err.message}`);
             failCount++;
           }
         }
         toast.dismiss(tid);
-        if (successCount > 0) { toast.success(`${successCount} subjects uploaded!`); fetchSubjects(); }
-        if (failCount > 0) toast.error(`${failCount} rows failed.`);
+        if (successCount > 0) { toast.success(`${successCount} subjects uploaded successfully!`); fetchSubjects(); }
+        if (failCount > 0) toast.error(`${failCount} rows failed. Check console.`);
       } catch (err) {
         toast.error("CSV parse error: " + err.message);
       } finally {
