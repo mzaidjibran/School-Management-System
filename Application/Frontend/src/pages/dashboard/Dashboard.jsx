@@ -224,7 +224,7 @@ export default function Dashboard() {
         }
       } catch (err) {
         console.error("Dashboard fetch error:", err);
-        toast.error("Dashboard data load nahi ho saka: " + err.message);
+        toast.error("Failed to load dashboard data: " + err.message);
       } finally {
         setLoading(false);
       }

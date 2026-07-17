@@ -199,7 +199,7 @@ export default function TimetableList() {
   }, [searchClass, classFilter, timetables]);
 
   const handleDuplicate = async (tt) => {
-    if (!tt.timetableData.length) { toast.error("Is class ka koi timetable nahi hai duplicate karne ke liye."); return; }
+    if (!tt.timetableData.length) { toast.error("This class does not have a timetable to duplicate."); return; }
     try {
       await Promise.all(tt.timetableData.map((entry) => createOrUpdateTimetable({ class: tt._id, day: entry.day, session: entry.session, periods: entry.periods })));
       toast.success("Timetable duplicated!");
@@ -211,10 +211,10 @@ export default function TimetableList() {
 
   const handleDelete = (tt) => {
     if (!tt.timetableData || tt.timetableData.length === 0) {
-      toast.error("Is class ka koi timetable set nahi hai jise delete kiya ja sake.");
+      toast.error("No timetable is set for this class to delete.");
       return;
     }
-    confirmToast("Is class ka sara timetable delete karen?", async () => {
+    confirmToast("Are you sure you want to delete the entire timetable for this class?", async () => {
       try {
         await Promise.all(tt.timetableData.map((entry) => deleteTimetable(entry._id)));
         toast.success("Timetable deleted.");

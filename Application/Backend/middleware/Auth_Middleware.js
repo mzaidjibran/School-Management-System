@@ -32,7 +32,7 @@ export const protect = async (request, response, next) => {
       return response.status(401).json({
         success: false,
         error: true,
-        message: "User nahi mila. Dobara login karein",
+        message: "User not found. Please login again",
       });
     }
 

@@ -198,8 +198,8 @@ export default function AddClass() {
       else navigate(-1);
     } catch (error) {
       setLoading(false);
-      toast.error(error.message || "Class create nahi ho saki");
-      setApiError(error.message || "Class create nahi ho saki");
+      toast.error(error.message || "Failed to create class");
+      setApiError(error.message || "Failed to create class");
     }
   };
 

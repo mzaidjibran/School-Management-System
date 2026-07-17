@@ -130,11 +130,11 @@ export default function MarkAttendance() {
   // ── Save ──────────────────────────────────────────────────────
   const handleSave = async () => {
     if (!selectedClass) {
-      toast.error("Pehle class select karo");
+      toast.error("Please select a class first");
       return;
     }
     if (students.length === 0) {
-      toast.error("Is class mein koi student nahi");
+      toast.error("There are no students in this class");
       return;
     }
     setSaving(true);
@@ -152,7 +152,7 @@ export default function MarkAttendance() {
       await markAttendance(records);
       toast.success("Attendance saved successfully!");
     } catch (e) {
-      toast.error(e.message || "Attendance save nahi ho saki");
+      toast.error(e.message || "Failed to save attendance");
     } finally {
       setSaving(false);
     }
@@ -261,8 +261,8 @@ export default function MarkAttendance() {
               </div>
             ) : students.length === 0 ? (
               <div className="p-10 text-center text-slate-400">
-                <p className="text-base font-medium">Is class mein koi student nahi mila</p>
-                <p className="text-sm mt-1">Pehle students ko is class mein assign karo</p>
+                <p className="text-base font-medium">No students found in this class</p>
+                <p className="text-sm mt-1">Please assign students to this class first</p>
               </div>
             ) : (
               <>

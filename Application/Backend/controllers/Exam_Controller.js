@@ -161,7 +161,7 @@ export const getExamResults = async (req, res) => {
   try {
     const examExists = await Exam.findOne({ _id: req.params.examId, createdBy: req.userId });
     if (!examExists) {
-      return res.status(403).json({ success: false, error: true, message: "Aapko is exam ki access nahi hai" });
+      return res.status(403).json({ success: false, error: true, message: "You do not have access to this exam" });
     }
 
     const results = await Result.find({ exam: req.params.examId })
@@ -188,7 +188,7 @@ export const getStudentResults = async (req, res) => {
   try {
     const student = await mongoose.model("Student").findOne({ _id: req.params.studentId, createdBy: req.userId });
     if (!student) {
-      return res.status(403).json({ success: false, error: true, message: "Aapko is student ki access nahi hai" });
+      return res.status(403).json({ success: false, error: true, message: "You do not have access to this student" });
     }
 
     const results = await Result.find({ student: req.params.studentId })

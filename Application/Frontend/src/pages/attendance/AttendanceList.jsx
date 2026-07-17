@@ -482,9 +482,9 @@ export default function AttendanceList() {
           {loading ? (
             <TableSkeleton />
           ) : !selectedClass ? (
-            <EmptyState message="Pehle class aur date select karo" />
+            <EmptyState message="Please select a class and date first" />
           ) : paginatedData.length === 0 ? (
-            <EmptyState message="Is date ke liye koi record nahi mila" />
+            <EmptyState message="No records found for this date" />
           ) : (
             <>
               {/* Desktop View Table */}

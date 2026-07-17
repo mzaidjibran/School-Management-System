@@ -130,8 +130,8 @@ export default function AddExam() {
       else navigate("/exams");
     } catch (err) {
       setLoading(false);
-      toast.error(err.message || "Exam create nahi ho saka");
-      setApiError(err.message || "Exam create nahi ho saka");
+      toast.error(err.message || "Failed to create exam");
+      setApiError(err.message || "Failed to create exam");
     }
   };
 

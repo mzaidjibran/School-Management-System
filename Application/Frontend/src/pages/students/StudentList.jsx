@@ -515,7 +515,7 @@ export default function StudentList() {
       setFilteredStudents(list);
     } catch (err) {
       console.error("Fetch error:", err);
-      toast.error("Students load nahi ho sake: " + err.message);
+      toast.error("Failed to load students: " + err.message);
     } finally {
       setLoading(false);
     }

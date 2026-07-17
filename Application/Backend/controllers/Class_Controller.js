@@ -95,7 +95,7 @@ export const getSingleClass = async (request, response) => {
       return response.status(404).json({
         success: false,
         error: true,
-        message: "Class nahi mili",
+        message: "Class not found",
       });
     }
 
@@ -131,7 +131,7 @@ export const updateClass = async (request, response) => {
       return response.status(404).json({
         success: false,
         error: true,
-        message: "Class nahi mili",
+        message: "Class not found",
       });
     }
 
@@ -162,7 +162,7 @@ export const deleteClass = async (request, response) => {
       return response.status(404).json({
         success: false,
         error: true,
-        message: "Class nahi mili",
+        message: "Class not found",
       });
     }
 

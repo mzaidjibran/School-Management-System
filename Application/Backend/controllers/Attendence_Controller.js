@@ -100,7 +100,7 @@ export const getAttendanceByClassAndDate = async (request, response) => {
       return response.status(403).json({
         success: false,
         error: true,
-        message: "Aapko is class ki access nahi hai",
+        message: "You do not have access to this class",
       });
     }
 
@@ -157,7 +157,7 @@ export const getAttendanceByStudent = async (request, response) => {
       return response.status(403).json({
         success: false,
         error: true,
-        message: "Aapko is student ki access nahi hai",
+        message: "You do not have access to this student",
       });
     }
 
@@ -220,7 +220,7 @@ export const updateAttendance = async (request, response) => {
       return response.status(403).json({
         success: false,
         error: true,
-        message: "Aapko is record ki access nahi hai",
+        message: "You do not have access to this record",
       });
     }
 
@@ -482,7 +482,7 @@ export const updateStaffAttendanceRecord = async (request, response) => {
       return response.status(403).json({
         success: false,
         error: true,
-        message: "Aapko is record ki access nahi hai",
+        message: "You do not have access to this record",
       });
     }
 
@@ -752,7 +752,7 @@ export const deleteAttendance = async (request, response) => {
       return response.status(403).json({
         success: false,
         error: true,
-        message: "Aapko is record ki access nahi hai",
+        message: "You do not have access to this record",
       });
     }
 

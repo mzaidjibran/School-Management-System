@@ -75,7 +75,7 @@ const EditModal = ({ exam, classes, onClose, onSave }) => {
       onClose();
     } catch (error) {
       toast.error(error.message || "Update failed.");
-      setErr(error.message || "Update fail ho gaya");
+      setErr(error.message || "Update failed");
     } finally {
       setSaving(false);
     }

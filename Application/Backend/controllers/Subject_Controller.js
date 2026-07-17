@@ -70,7 +70,7 @@ export const addSubject = async (req, res) => {
       return res.status(409).json({
         success: false,
         error: true,
-        message: "Yeh subject code already exist karta hai",
+        message: "This subject code already exists",
       });
     }
     res.status(400).json({ success: false, error: true, message: err.message });

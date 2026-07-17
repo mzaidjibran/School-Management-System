@@ -246,7 +246,7 @@ export default function CreateTimetable() {
   const handleSave = async () => {
     if (!form.classId) { toast.error("Please select a class"); return; }
     const entries = gridToBackend(timetable, slots, form.classId, form.academicYear);
-    if (entries.length === 0) { toast.error("Koi bhi subject assign nahi kiya"); return; }
+    if (entries.length === 0) { toast.error("No subjects assigned"); return; }
     setLoading(true);
     try {
       await Promise.all(entries.map((entry) => createOrUpdateTimetable(entry)));

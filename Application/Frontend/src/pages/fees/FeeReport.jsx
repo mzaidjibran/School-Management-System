@@ -60,7 +60,7 @@ export default function FeeReports() {
         setAllFees(allRes.data || []);
         setPendingFees(pendingRes.data || []);
       } catch (err) {
-        setError("Data load karne mein error aayi: " + err.message);
+        setError("An error occurred while loading data: " + err.message);
       } finally {
         setLoading(false);
       }
@@ -293,7 +293,7 @@ export default function FeeReports() {
         <div className="bg-white rounded shadow-sm border border-slate-100 p-5">
           <p className="text-sm font-semibold text-slate-700 mb-4">Fee Type Wise Collection</p>
           {feeTypeData.length === 0 ? (
-            <p className="text-slate-400 text-sm">Koi paid fee record nahi mila.</p>
+            <p className="text-slate-400 text-sm">No paid fee records found.</p>
           ) : (
             <div className="space-y-3">
               {feeTypeData.map((d) => (
@@ -317,7 +317,7 @@ export default function FeeReports() {
           Students With Overdue Dues
         </p>
         {overdueStudents.length === 0 ? (
-          <p className="text-slate-400 text-sm">Koi overdue student nahi.</p>
+          <p className="text-slate-400 text-sm">No overdue students found.</p>
         ) : (
           <>
             {/* Desktop View Table */}

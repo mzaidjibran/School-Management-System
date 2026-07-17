@@ -147,7 +147,7 @@ const FeeRecordModal = ({ record, mode, onClose, onSave }) => {
       onClose();
     } catch (err) {
       toast.error(err.message || "Update failed.");
-      setError(err.message || "Update karne mein error aayi.");
+      setError(err.message || "An error occurred while updating.");
     } finally {
       setIsSaving(false);
     }
@@ -554,8 +554,8 @@ export default function FeeRecords() {
       setRecords(res.data || []);
       setFiltered(res.data || []);
     } catch (err) {
-      toast.error("Fees load karne mein error aayi: " + err.message);
-      setError("Fees load karne mein error aayi: " + err.message);
+      toast.error("An error occurred while loading fees: " + err.message);
+      setError("An error occurred while loading fees: " + err.message);
     } finally {
       setLoading(false);
     }

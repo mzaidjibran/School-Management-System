@@ -35,7 +35,7 @@ export const safeFetch = async (url, options = {}) => {
     return response;
   } catch (err) {
     if (err.name === "TypeError" && err.message === "Failed to fetch") {
-      throw new Error("Server se connection nahi ho raha. Check karein ke backend chal raha hai aur internet connected hai.");
+      throw new Error("Could not connect to server. Please check if backend is running and internet is connected.");
     }
     throw err;
   }

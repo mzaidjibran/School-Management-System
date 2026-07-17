@@ -212,7 +212,7 @@ export default function CollectFee() {
         }
       }
     } catch (err) {
-      setError("Server se connect nahi ho saka. Backend check karo.");
+      setError("Could not connect to server. Please verify backend.");
     } finally {
       setSearching(false);
     }
@@ -299,8 +299,8 @@ export default function CollectFee() {
       const feesJson = await getStudentFees(selectedStudent._id);
       setStudentFees(feesJson.data || []);
     } catch (err) {
-      toast.error(err.message || "Fee collect karne mein error aayi.");
-      setError(err.message || "Fee collect karne mein error aayi.");
+      toast.error(err.message || "An error occurred while collecting fee.");
+      setError(err.message || "An error occurred while collecting fee.");
     } finally {
       setSubmitting(false);
     }

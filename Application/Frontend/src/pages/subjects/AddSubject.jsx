@@ -232,7 +232,7 @@ export default function AddSubject() {
       if (addAnother) resetForm();
       else navigate("/subjects");
     } catch (err) {
-      toast.error(err.message || "Subject create karne mein error aayi.");
+      toast.error(err.message || "An error occurred while creating subject.");
     } finally {
       setLoading(false);
     }

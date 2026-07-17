@@ -72,8 +72,8 @@ export default function MarksEntry() {
   const handleReset = () => setMarksData((prev) => prev.map((m) => ({ ...m, obtainedMarks: 0 })));
 
   const handleSave = async () => {
-    if (!selectedExam) { setApiError("Pehle exam select karo"); return; }
-    if (students.length === 0) { setApiError("Koi student nahi mila"); return; }
+    if (!selectedExam) { setApiError("Please select an exam first"); return; }
+    if (students.length === 0) { setApiError("No students found"); return; }
     setSaving(true);
     setApiError("");
     try {
@@ -86,7 +86,7 @@ export default function MarksEntry() {
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
-      setApiError(err.message || "Marks save nahi ho sake");
+      setApiError(err.message || "Failed to save marks");
     } finally {
       setSaving(false);
     }
@@ -156,7 +156,7 @@ export default function MarksEntry() {
               <div className="p-8 text-center text-sm text-slate-400">Loading students...</div>
             ) : students.length === 0 ? (
               <div className="p-8 text-center text-sm text-slate-400">
-                Is class mein koi student nahi mila
+                No students found in this class
               </div>
             ) : (
               <>

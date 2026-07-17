@@ -298,7 +298,7 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave, teachers }) => {
     } catch (error) {
       toast.error(error.message || "Update failed.");
       setIsSaving(false);
-      setErrors((prev) => ({ ...prev, submit: error.message || "Update fail ho gaya" }));
+      setErrors((prev) => ({ ...prev, submit: error.message || "Update failed" }));
     }
   };
 

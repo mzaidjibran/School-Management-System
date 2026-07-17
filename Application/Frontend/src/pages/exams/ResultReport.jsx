@@ -226,9 +226,9 @@ export default function ResultReport() {
               {loading ? (
                 <tr><td colSpan={8} className="px-5 py-12 text-center text-slate-400 text-sm">Loading results...</td></tr>
               ) : !selectedExam ? (
-                <tr><td colSpan={8} className="px-5 py-12 text-center text-slate-400 text-sm">Pehle exam select karo</td></tr>
+                <tr><td colSpan={8} className="px-5 py-12 text-center text-slate-400 text-sm">Please select an exam first</td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={8} className="px-5 py-12 text-center text-slate-400 text-sm">Koi result nahi mila — pehle marks enter karo</td></tr>
+                <tr><td colSpan={8} className="px-5 py-12 text-center text-slate-400 text-sm">No results found — please enter marks first</td></tr>
               ) : filtered.map((r) => {
                 const pct   = examObj ? ((r.obtainedMarks / examObj.totalMarks)*100).toFixed(1) : 0;
                 const grade = r.grade || calculateGrade(parseFloat(pct));
