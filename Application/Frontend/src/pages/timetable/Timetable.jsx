@@ -210,6 +210,10 @@ export default function TimetableList() {
   };
 
   const handleDelete = (tt) => {
+    if (!tt.timetableData || tt.timetableData.length === 0) {
+      toast.error("Is class ka koi timetable set nahi hai jise delete kiya ja sake.");
+      return;
+    }
     confirmToast("Is class ka sara timetable delete karen?", async () => {
       try {
         await Promise.all(tt.timetableData.map((entry) => deleteTimetable(entry._id)));
@@ -338,8 +342,8 @@ export default function TimetableList() {
                           <button onClick={() => navigate(`/timetable/${tt._id}`)} title="Edit" className="p-1.5 text-amber-500 hover:bg-amber-50 rounded-md transition-colors"><FaEdit className="text-sm" /></button>
                           <button onClick={() => handleDuplicate(tt)} title="Duplicate" className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors"><FaCopy className="text-sm" /></button>
                           <button onClick={() => handlePrint(tt)} title="Print" className="p-1.5 text-slate-500 hover:bg-slate-100 rounded-md transition-colors"><FaPrint className="text-sm" /></button>
-                          <button onClick={() => handleDelete(tt)} title="Delete" disabled={tt.timetableData.length === 0}
-                            className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-md transition-colors disabled:opacity-30"><FaTrash className="text-sm" /></button>
+                          <button onClick={() => handleDelete(tt)} title="Delete"
+                            className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-md transition-colors"><FaTrash className="text-sm" /></button>
                         </div>
                       </td>
                     </tr>
@@ -395,8 +399,8 @@ export default function TimetableList() {
                       <button onClick={() => navigate(`/timetable/${tt._id}`)} className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-md transition"><FaEdit /> Edit</button>
                       <button onClick={() => handleDuplicate(tt)} className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-md transition"><FaCopy /> Copy</button>
                       <button onClick={() => handlePrint(tt)} className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-md transition"><FaPrint /> Print</button>
-                      <button onClick={() => handleDelete(tt)} disabled={tt.timetableData.length === 0}
-                        className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-md transition disabled:opacity-30"><FaTrash /> Del</button>
+                      <button onClick={() => handleDelete(tt)}
+                        className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-md transition"><FaTrash /> Del</button>
                     </div>
                   </div>
                 );
