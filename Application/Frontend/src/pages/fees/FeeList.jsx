@@ -1,15 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import {
   FaSearch, FaEye, FaMoneyBillWave, FaPrint, FaEdit,
-  FaFileCsv, FaFileExcel, FaFilePdf,
+  FaFileCsv, FaFileExcel, FaFilePdf, FaTrash
 } from "react-icons/fa";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveAs } from "file-saver";
-import { getAllFees, updateFee, payFee, createFee } from "../../api/Fee_Api.js";
+import { getAllFees, updateFee, payFee, createFee, deleteFee } from "../../api/Fee_Api.js";
 import { getAllClasses } from "../../Api/Class_Api.js";
 import { getAllStudents } from "../../Api/Student_Api.js";
+import { confirmToast } from "../../utils/toastHelpers.jsx";
 import toast from "react-hot-toast";
 import { useAuth } from "../../pages/auth/useAuth.js";
 
@@ -765,6 +766,22 @@ export default function FeeRecords() {
     doc.save("fee_records.pdf");
   };
 
+  const handleDelete = (id) => {
+    confirmToast(
+      "Are you sure you want to delete this fee record?",
+      async () => {
+        try {
+          await deleteFee(id);
+          toast.success("Fee record deleted successfully!");
+          fetchFees();
+        } catch (err) {
+          toast.error(err.message || "Failed to delete fee record");
+        }
+      },
+      { confirmText: "Delete", confirmClass: "bg-rose-600 hover:bg-rose-700 shadow-rose-600/10 text-white" }
+    );
+  };
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -864,6 +881,7 @@ export default function FeeRecords() {
                             <button onClick={() => setViewRecord(r)} className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-md transition" title="View"><FaEye className="w-3.5 h-3.5" /></button>
                             <button onClick={() => setSelectedRecord(r)} className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-md transition" title="Print Slip"><FaPrint className="w-3.5 h-3.5" /></button>
                             <button onClick={() => setEditRecord(r)} className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-md transition" title="Edit"><FaEdit className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => handleDelete(r._id)} className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-md transition" title="Delete"><FaTrash className="w-3.5 h-3.5" /></button>
                           </div>
                         </td>
                       </tr>
@@ -920,6 +938,7 @@ export default function FeeRecords() {
                         <button onClick={() => setViewRecord(r)} className="p-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded transition" title="View"><FaEye className="w-3.5 h-3.5" /></button>
                         <button onClick={() => setSelectedRecord(r)} className="p-2 text-slate-600 bg-slate-50 hover:bg-slate-100 rounded transition" title="Print Slip"><FaPrint className="w-3.5 h-3.5" /></button>
                         <button onClick={() => setEditRecord(r)} className="p-2 text-amber-600 bg-amber-50 hover:bg-amber-100 rounded transition" title="Edit"><FaEdit className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => handleDelete(r._id)} className="p-2 text-rose-600 bg-rose-50 hover:bg-rose-100 rounded transition" title="Delete"><FaTrash className="w-3.5 h-3.5" /></button>
                       </div>
                     </div>
                   </div>
