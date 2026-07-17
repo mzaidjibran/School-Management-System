@@ -160,7 +160,8 @@ export default function MarksEntry() {
               </div>
             ) : (
               <>
-                <div className="overflow-x-auto">
+                {/* Desktop View Table */}
+                <div className="hidden md:block overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-100">
@@ -198,6 +199,54 @@ export default function MarksEntry() {
                       })}
                     </tbody>
                   </table>
+                </div>
+
+                {/* Mobile View Cards */}
+                <div className="block md:hidden p-4 space-y-3 bg-slate-50/50">
+                  {students.map((s, idx) => {
+                    const m = marksData.find((x) => x.studentId === s._id) || { obtainedMarks: 0 };
+                    const pct = ((m.obtainedMarks / totalMarks) * 100).toFixed(1);
+                    const grade = calculateGrade(parseFloat(pct));
+                    const colors = ["bg-indigo-50 text-indigo-700", "bg-purple-50 text-purple-700", "bg-emerald-50 text-emerald-700", "bg-amber-50 text-amber-700"];
+                    const avatarColor = colors[idx % colors.length];
+
+                    return (
+                      <div key={s._id} className="bg-white p-4 rounded-md border border-slate-100 shadow-sm flex flex-col gap-3">
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-center gap-2.5">
+                            <div className={`w-8 h-8 rounded-full ${avatarColor} font-bold text-xs flex items-center justify-center`}>
+                              {s.firstName?.charAt(0) || "S"}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-slate-800 text-sm">{s.firstName} {s.lastName}</p>
+                              <p className="text-[10px] text-slate-400">Roll No: {s.rollNumber || "—"}</p>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-mono text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">#{idx + 1}</span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 bg-slate-50 p-2.5 rounded border border-slate-100 text-xs">
+                          <div className="flex flex-col justify-center">
+                            <label className="text-[9px] text-slate-400 font-bold uppercase mb-1">Obtained Marks</label>
+                            <div className="flex items-center gap-1.5">
+                              <input type="number" value={m.obtainedMarks}
+                                onChange={(e) => handleMarksChange(s._id, e.target.value)}
+                                className="w-16 px-2 py-1 text-sm border border-slate-200 rounded-md outline-none bg-white focus:ring-1 focus:ring-indigo-400"
+                                min="0" max={totalMarks} />
+                              <span className="text-slate-400">/ {totalMarks}</span>
+                            </div>
+                          </div>
+                          <div className="flex flex-col justify-center">
+                            <p className="text-[9px] text-slate-400 font-bold uppercase">Result</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${pctColor(parseFloat(pct))}`}>{pct}%</span>
+                              <span className="font-bold text-slate-700 text-xs">{grade}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
                 {apiError && <div className="mx-4 my-2 px-3 py-2 bg-rose-50 border border-rose-200 rounded-md text-rose-600 text-xs">{apiError}</div>}
                 <div className="flex justify-end gap-2 px-4 py-3 border-t border-slate-100">

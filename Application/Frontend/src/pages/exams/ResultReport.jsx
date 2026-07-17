@@ -213,7 +213,8 @@ export default function ResultReport() {
           </span>
           <span className="bg-indigo-50 text-indigo-600 text-xs font-semibold px-3 py-1 rounded-full">{filtered.length} records</span>
         </div>
-        <div className="overflow-x-auto">
+        {/* Desktop View Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
@@ -275,6 +276,66 @@ export default function ResultReport() {
               })}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile View Cards */}
+        <div className="block md:hidden p-4 space-y-3 bg-slate-50/50">
+          {loading ? (
+            <div className="p-8 text-center text-sm text-slate-400">Loading results...</div>
+          ) : !selectedExam ? (
+            <div className="p-8 text-center text-sm text-slate-400">Please select an exam first</div>
+          ) : filtered.length === 0 ? (
+            <div className="p-8 text-center text-sm text-slate-400">No results found — please enter marks first</div>
+          ) : (
+            filtered.map((r, idx) => {
+              const pct   = examObj ? ((r.obtainedMarks / examObj.totalMarks)*100).toFixed(1) : 0;
+              const grade = r.grade || calculateGrade(parseFloat(pct));
+              const colors = ["bg-indigo-100 text-indigo-700", "bg-purple-100 text-purple-700", "bg-emerald-100 text-emerald-700", "bg-amber-100 text-amber-700"];
+              const avatarColor = colors[idx % colors.length];
+
+              return (
+                <div key={r._id} className="bg-white p-4 rounded-md border border-slate-100 shadow-sm flex flex-col gap-3">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-2.5">
+                      <div className={`w-8 h-8 rounded-full ${avatarColor} font-bold text-xs flex items-center justify-center`}>
+                        {r.student?.firstName?.charAt(0) || "S"}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-800 text-sm">{r.student?.firstName} {r.student?.lastName}</p>
+                        <p className="text-[10px] text-slate-400">Roll No: {r.student?.rollNumber || "—"}</p>
+                      </div>
+                    </div>
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold
+                      ${r.status === "pass" ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}>
+                      {r.status === "pass" ? "Pass" : "Fail"}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded border border-slate-100 text-xs">
+                    <div>
+                      <p className="text-[9px] text-slate-400 font-bold uppercase">Marks</p>
+                      <p className="font-semibold text-slate-700 mt-0.5">{r.obtainedMarks} / {examObj?.totalMarks || "—"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] text-slate-400 font-bold uppercase">Percentage</p>
+                      <p className="font-semibold text-slate-700 mt-0.5">{pct}%</p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] text-slate-400 font-bold uppercase">Grade</p>
+                      <span className={`inline-block px-1.5 py-0.2 rounded text-[10px] font-bold text-white ${gradeColor(grade)}`}>{grade}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-2 border-t border-slate-50">
+                    <button onClick={() => setSelectedResult(r)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 rounded-md transition">
+                      <FaEye className="w-3 h-3" /> View Detail
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
         {!loading && filtered.length > 0 && (
           <div className="px-5 py-3.5 border-t border-slate-100 bg-slate-50 flex justify-between text-xs text-slate-400">

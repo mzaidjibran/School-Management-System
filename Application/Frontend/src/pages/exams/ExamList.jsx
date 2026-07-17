@@ -241,7 +241,7 @@ export default function ExamList() {
   return (
     <div className="min-h-screen bg-slate-50 py-6 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-3">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div>
             <nav className="flex text-xs text-slate-400 mb-1 gap-1">
               <span>Dashboard</span><span>/</span>
@@ -250,7 +250,7 @@ export default function ExamList() {
             <h1 className="text-xl font-bold text-slate-800">Exam Schedule</h1>
             <p className="text-xs text-slate-500 mt-0.5">Manage all school exams, schedules, and results</p>
           </div>
-          <div className="flex gap-1.5">
+          <div className="flex flex-wrap gap-1.5">
             <button onClick={exportCSV}   className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-medium transition"><FaFileCsv className="text-emerald-600" /> CSV</button>
             <button onClick={exportExcel} className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-green-50 border border-green-200 text-green-700 hover:bg-green-100 text-xs font-medium transition"><FaFileExcel className="text-green-600" /> Excel</button>
             <button onClick={exportPDF}   className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 text-xs font-medium transition"><FaFilePdf className="text-rose-600" /> PDF</button>
@@ -300,7 +300,8 @@ export default function ExamList() {
 
         {/* Table */}
         <div className="bg-white rounded-md border border-slate-100 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Desktop View Table */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-100">
@@ -333,6 +334,65 @@ export default function ExamList() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile View Cards */}
+          <div className="block md:hidden p-4 space-y-3 bg-slate-50/50">
+            {loading ? (
+              <TableSkeleton />
+            ) : paginatedData.length === 0 ? (
+              <EmptyState />
+            ) : (
+              paginatedData.map((exam, idx) => {
+                const colors = ["bg-indigo-100 text-indigo-700", "bg-purple-100 text-purple-700", "bg-emerald-100 text-emerald-700", "bg-amber-100 text-amber-700"];
+                const avatarColor = colors[idx % colors.length];
+                return (
+                  <div key={exam._id} className="bg-white p-4 rounded-md border border-slate-100 shadow-sm flex flex-col gap-3 transition duration-200 hover:shadow-md hover:border-indigo-100">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-full ${avatarColor} font-bold text-xs flex items-center justify-center`}>
+                          {exam.name?.charAt(0) || "E"}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-800 text-sm">{exam.name}</p>
+                          <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md font-mono border border-slate-200/40">
+                            Class: {exam.class?.name || "—"} {exam.class?.section ? `— ${exam.class.section}` : ""}
+                          </span>
+                        </div>
+                      </div>
+                      <StatusBadge status={exam.status} />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2 bg-slate-50 p-2.5 rounded border border-slate-100/80 text-xs">
+                      <div>
+                        <p className="text-[9.5px] text-slate-400 font-bold uppercase">Subject</p>
+                        <p className="font-semibold text-slate-700 mt-0.5">{exam.subject}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9.5px] text-slate-400 font-bold uppercase">Type</p>
+                        <p className="font-semibold text-slate-700 mt-0.5">{EXAM_TYPE_LABELS[exam.examType] || exam.examType}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9.5px] text-slate-400 font-bold uppercase">Date</p>
+                        <p className="font-semibold text-slate-700 mt-0.5">{exam.examDate ? new Date(exam.examDate).toLocaleDateString() : "—"}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9.5px] text-slate-400 font-bold uppercase">Total Marks</p>
+                        <p className="font-semibold text-slate-700 mt-0.5">{exam.totalMarks}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center text-[11px] text-slate-500 border-t border-slate-50 pt-2.5">
+                      <span>Venue: <strong className="text-slate-700">{exam.venue || "—"}</strong></span>
+                      <div className="flex items-center gap-1">
+                        <button onClick={() => setEditExam(exam)} className="p-2 text-amber-600 bg-amber-50 hover:bg-amber-100 rounded transition" title="Edit"><FaEdit className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => handleDelete(exam)} className="p-2 text-rose-600 bg-rose-50 hover:bg-rose-100 rounded transition" title="Delete"><FaTrash className="w-3.5 h-3.5" /></button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
           {!loading && paginatedData.length > 0 && (
             <div className="flex justify-between items-center px-4 py-3 border-t border-slate-100">
