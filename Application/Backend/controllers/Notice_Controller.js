@@ -4,12 +4,19 @@ import { createNotificationHelper } from "./Notification_Controller.js";
 export const getAllNotices = async (req, res) => {
   try {
     const { status, priority, targetAudience, page = 1, limit = 20 } = req.query;
-    const filter = { createdBy: req.userId };
+    const ownerId = req.user && req.user.role === "teacher" ? req.user.createdBy : req.userId;
+    const filter = { createdBy: ownerId };
     if (status) filter.status = status;
     if (priority) filter.priority = priority;
     if (targetAudience) filter.targetAudience = targetAudience;
     if (req.headers["x-branch-id"]) filter.branch = req.headers["x-branch-id"];
-    if (req.headers["x-section"]) filter.schoolSection = req.headers["x-section"];
+    
+    if (req.user && req.user.role === "teacher") {
+      const section = req.user.gender === "female" ? "girls" : "boys";
+      filter.schoolSection = { $in: [section, null] };
+    } else if (req.headers["x-section"]) {
+      filter.schoolSection = req.headers["x-section"];
+    }
 
     const total = await Notice.countDocuments(filter);
     const notices = await Notice.find(filter)
@@ -27,9 +34,16 @@ export const getAllNotices = async (req, res) => {
 
 export const getNoticeById = async (req, res) => {
   try {
-    const query = { _id: req.params.id, createdBy: req.userId };
+    const ownerId = req.user && req.user.role === "teacher" ? req.user.createdBy : req.userId;
+    const query = { _id: req.params.id, createdBy: ownerId };
     if (req.headers["x-branch-id"]) query.branch = req.headers["x-branch-id"];
-    if (req.headers["x-section"]) query.schoolSection = req.headers["x-section"];
+    
+    if (req.user && req.user.role === "teacher") {
+      const section = req.user.gender === "female" ? "girls" : "boys";
+      query.schoolSection = { $in: [section, null] };
+    } else if (req.headers["x-section"]) {
+      query.schoolSection = req.headers["x-section"];
+    }
 
     const notice = await Notice.findOneAndUpdate(
       query,
@@ -45,9 +59,15 @@ export const getNoticeById = async (req, res) => {
 
 export const createNotice = async (req, res) => {
   try {
-    req.body.createdBy = req.userId;
+    const ownerId = req.user && req.user.role === "teacher" ? req.user.createdBy : req.userId;
+    req.body.createdBy = ownerId;
     if (req.headers["x-branch-id"]) req.body.branch = req.headers["x-branch-id"];
-    if (req.headers["x-section"]) req.body.schoolSection = req.headers["x-section"];
+    
+    if (req.user && req.user.role === "teacher") {
+      req.body.schoolSection = req.user.gender === "female" ? "girls" : "boys";
+    } else if (req.headers["x-section"]) {
+      req.body.schoolSection = req.headers["x-section"];
+    }
     const notice = new Notice({ ...req.body});
     await notice.save();
     await createNotificationHelper(
@@ -64,9 +84,15 @@ export const createNotice = async (req, res) => {
 
 export const updateNotice = async (req, res) => {
   try {
-    const query = { _id: req.params.id, createdBy: req.userId };
+    const ownerId = req.user && req.user.role === "teacher" ? req.user.createdBy : req.userId;
+    const query = { _id: req.params.id, createdBy: ownerId };
     if (req.headers["x-branch-id"]) query.branch = req.headers["x-branch-id"];
-    if (req.headers["x-section"]) query.schoolSection = req.headers["x-section"];
+    
+    if (req.user && req.user.role === "teacher") {
+      query.schoolSection = req.user.gender === "female" ? "girls" : "boys";
+    } else if (req.headers["x-section"]) {
+      query.schoolSection = req.headers["x-section"];
+    }
 
     const notice = await Notice.findOneAndUpdate(query, req.body, {
       new: true, runValidators: true,
@@ -80,9 +106,15 @@ export const updateNotice = async (req, res) => {
 
 export const deleteNotice = async (req, res) => {
   try {
-    const query = { _id: req.params.id, createdBy: req.userId };
+    const ownerId = req.user && req.user.role === "teacher" ? req.user.createdBy : req.userId;
+    const query = { _id: req.params.id, createdBy: ownerId };
     if (req.headers["x-branch-id"]) query.branch = req.headers["x-branch-id"];
-    if (req.headers["x-section"]) query.schoolSection = req.headers["x-section"];
+    
+    if (req.user && req.user.role === "teacher") {
+      query.schoolSection = req.user.gender === "female" ? "girls" : "boys";
+    } else if (req.headers["x-section"]) {
+      query.schoolSection = req.headers["x-section"];
+    }
 
     const deleted = await Notice.findOneAndDelete(query);
     if (!deleted) return res.status(404).json({ success: false, message: "Notice not found" });
@@ -95,14 +127,21 @@ export const deleteNotice = async (req, res) => {
 export const getActiveNotices = async (req, res) => {
   try {
     const now = new Date();
+    const ownerId = req.user && req.user.role === "teacher" ? req.user.createdBy : req.userId;
     const filter = {
-      createdBy: req.userId,
+      createdBy: ownerId,
       status: "published",
       publishDate: { $lte: now },
       $or: [{ expiryDate: { $gte: now } }, { expiryDate: null }],
     };
     if (req.headers["x-branch-id"]) filter.branch = req.headers["x-branch-id"];
-    if (req.headers["x-section"]) filter.schoolSection = req.headers["x-section"];
+    
+    if (req.user && req.user.role === "teacher") {
+      const section = req.user.gender === "female" ? "girls" : "boys";
+      filter.schoolSection = { $in: [section, null] };
+    } else if (req.headers["x-section"]) {
+      filter.schoolSection = req.headers["x-section"];
+    }
 
     const notices = await Notice.find(filter).sort({ priority: 1, publishDate: -1 }).limit(10);
     res.json({ success: true, notices });

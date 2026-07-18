@@ -13,9 +13,14 @@ function generateReceiptNumber() {
 // ─── Create Fee Record ────────────────────────────────────────────
 export const createFee = async (request, response) => {
   try {
-    request.body.createdBy = request.userId;
+    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+    request.body.createdBy = ownerId;
     if (request.headers["x-branch-id"]) request.body.branch = request.headers["x-branch-id"];
-    if (request.headers["x-section"]) request.body.schoolSection = request.headers["x-section"];
+    if (request.user && request.user.role === "teacher") {
+      request.body.schoolSection = request.user.gender === "female" ? "girls" : "boys";
+    } else if (request.headers["x-section"]) {
+      request.body.schoolSection = request.headers["x-section"];
+    }
     const fee = await Fee.create(request.body);
     await createNotificationHelper(
       "Fee Invoice Created",
@@ -56,7 +61,11 @@ export const getStudentFees = async (request, response) => {
     if (status) filter.status = status;
     if (year) filter.year = Number(year);
     if (request.headers["x-branch-id"]) filter.branch = request.headers["x-branch-id"];
-    if (request.headers["x-section"]) filter.schoolSection = request.headers["x-section"];
+    if (request.user && request.user.role === "teacher") {
+      filter.schoolSection = request.user.gender === "female" ? "girls" : "boys";
+    } else if (request.headers["x-section"]) {
+      filter.schoolSection = request.headers["x-section"];
+    }
 
     const fees = await Fee.find(filter).sort({ year: -1, month: -1 });
 
@@ -89,7 +98,11 @@ export const getPendingFees = async (request, response) => {
       status: { $in: ["pending", "partial", "overdue"] },
     };
     if (request.headers["x-branch-id"]) filter.branch = request.headers["x-branch-id"];
-    if (request.headers["x-section"]) filter.schoolSection = request.headers["x-section"];
+    if (request.user && request.user.role === "teacher") {
+      filter.schoolSection = request.user.gender === "female" ? "girls" : "boys";
+    } else if (request.headers["x-section"]) {
+      filter.schoolSection = request.headers["x-section"];
+    }
 
     const fees = await Fee.find(filter)
       .populate("student", "firstName lastName rollNumber")
@@ -122,7 +135,11 @@ export const getAllFees = async (request, response) => {
     if (month) filter.month = Number(month);
     if (year) filter.year = Number(year);
     if (request.headers["x-branch-id"]) filter.branch = request.headers["x-branch-id"];
-    if (request.headers["x-section"]) filter.schoolSection = request.headers["x-section"];
+    if (request.user && request.user.role === "teacher") {
+      filter.schoolSection = request.user.gender === "female" ? "girls" : "boys";
+    } else if (request.headers["x-section"]) {
+      filter.schoolSection = request.headers["x-section"];
+    }
 
     const fees = await Fee.find(filter)
       .populate({
@@ -157,9 +174,14 @@ export const payFee = async (request, response) => {
     const { id } = request.params;
     const { payingAmount, paymentMethod } = request.body;
 
-    const query = { _id: id, createdBy: request.userId };
+    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+    const query = { _id: id, createdBy: ownerId };
     if (request.headers["x-branch-id"]) query.branch = request.headers["x-branch-id"];
-    if (request.headers["x-section"]) query.schoolSection = request.headers["x-section"];
+    if (request.user && request.user.role === "teacher") {
+      query.schoolSection = request.user.gender === "female" ? "girls" : "boys";
+    } else if (request.headers["x-section"]) {
+      query.schoolSection = request.headers["x-section"];
+    }
 
     const fee = await Fee.findOne(query);
     if (!fee) {
@@ -218,9 +240,14 @@ export const payFee = async (request, response) => {
 // ─── Update Fee Record ────────────────────────────────────────────
 export const updateFee = async (request, response) => {
   try {
-    const query = { _id: request.params.id, createdBy: request.userId };
+    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+    const query = { _id: request.params.id, createdBy: ownerId };
     if (request.headers["x-branch-id"]) query.branch = request.headers["x-branch-id"];
-    if (request.headers["x-section"]) query.schoolSection = request.headers["x-section"];
+    if (request.user && request.user.role === "teacher") {
+      query.schoolSection = request.user.gender === "female" ? "girls" : "boys";
+    } else if (request.headers["x-section"]) {
+      query.schoolSection = request.headers["x-section"];
+    }
 
     const updated = await Fee.findOneAndUpdate(
       query,
@@ -254,9 +281,14 @@ export const updateFee = async (request, response) => {
 // ─── Delete Fee Record ────────────────────────────────────────────
 export const deleteFee = async (request, response) => {
   try {
-    const query = { _id: request.params.id, createdBy: request.userId };
+    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+    const query = { _id: request.params.id, createdBy: ownerId };
     if (request.headers["x-branch-id"]) query.branch = request.headers["x-branch-id"];
-    if (request.headers["x-section"]) query.schoolSection = request.headers["x-section"];
+    if (request.user && request.user.role === "teacher") {
+      query.schoolSection = request.user.gender === "female" ? "girls" : "boys";
+    } else if (request.headers["x-section"]) {
+      query.schoolSection = request.headers["x-section"];
+    }
 
     const deleted = await Fee.findOneAndDelete(query);
 
