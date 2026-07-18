@@ -17,17 +17,17 @@ export const confirmToast = (message, onConfirm, options = {}) => {
       <div
         className={`${
           t.visible ? "animate-scaleIn" : "animate-fadeOut"
-        } max-w-xs w-80 bg-white shadow-2xl rounded-2xl border border-slate-100/80 p-4 flex flex-col gap-3.5 z-[9999]`}
+        } w-[280px] bg-white shadow-xl rounded-xl border border-slate-100/80 p-3.5 flex flex-col gap-3 z-[9999]`}
       >
         <div>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Are you sure?</p>
-          <p className="text-sm font-semibold text-slate-700 mt-1">{message}</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Are you sure?</p>
+          <p className="text-xs font-semibold text-slate-700 mt-0.5">{message}</p>
         </div>
         <div className="flex gap-2 justify-end">
           <button
             type="button"
             onClick={() => toast.dismiss(t.id)}
-            className="px-3.5 py-1.5 border border-slate-200 text-xs font-bold text-slate-500 rounded-xl hover:bg-slate-50 transition cursor-pointer"
+            className="px-3 py-1 border border-slate-200 text-[10px] font-bold text-slate-500 rounded-lg hover:bg-slate-50 transition cursor-pointer"
           >
             Cancel
           </button>
@@ -37,7 +37,7 @@ export const confirmToast = (message, onConfirm, options = {}) => {
               toast.dismiss(t.id);
               onConfirm();
             }}
-            className={`px-3.5 py-1.5 text-xs font-bold rounded-xl shadow-sm transition cursor-pointer ${confirmClass}`}
+            className={`px-3 py-1 text-[10px] font-bold rounded-lg shadow-sm transition cursor-pointer ${confirmClass}`}
           >
             {confirmText}
           </button>
