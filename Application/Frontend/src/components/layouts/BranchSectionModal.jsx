@@ -1,7 +1,19 @@
 import { useState, useEffect } from "react";
-import { getAllBranches, createBranch, deleteBranch } from "../../Api/Branch_Api";
+import {
+  getAllBranches,
+  createBranch,
+  deleteBranch,
+} from "../../Api/Branch_Api";
 import { confirmToast } from "../../utils/toastHelpers.jsx";
-import { School, Layers, CheckCircle2, Loader2, Plus, ArrowLeft, Trash2 } from "lucide-react";
+import {
+  School,
+  Layers,
+  CheckCircle2,
+  Loader2,
+  Plus,
+  ArrowLeft,
+  Trash2,
+} from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function BranchSectionModal({ isOpen, onClose }) {
@@ -61,7 +73,10 @@ export default function BranchSectionModal({ isOpen, onClose }) {
     const branchDoc = branches.find((b) => b._id === selectedBranch);
 
     localStorage.setItem("activeBranch", selectedBranch);
-    localStorage.setItem("activeBranchName", branchDoc ? branchDoc.name : "Active Branch");
+    localStorage.setItem(
+      "activeBranchName",
+      branchDoc ? branchDoc.name : "Active Branch",
+    );
     localStorage.setItem("activeSection", selectedSection);
 
     // Notify application to refresh data
@@ -106,10 +121,10 @@ export default function BranchSectionModal({ isOpen, onClose }) {
         try {
           await deleteBranch(id);
           toast.success(`Branch "${name}" deleted successfully!`);
-          
+
           setBranches((prev) => {
             const updated = prev.filter((b) => b._id !== id);
-            
+
             // If the deleted branch was selected, auto-select another one
             if (selectedBranch === id) {
               if (updated.length > 0) {
@@ -121,7 +136,6 @@ export default function BranchSectionModal({ isOpen, onClose }) {
             return updated;
           });
 
-          // If the deleted branch was the active branch in localStorage, clear it
           if (localStorage.getItem("activeBranch") === id) {
             localStorage.removeItem("activeBranch");
             localStorage.removeItem("activeBranchName");
@@ -130,7 +144,11 @@ export default function BranchSectionModal({ isOpen, onClose }) {
           toast.error(err.message || "Failed to delete branch");
         }
       },
-      { confirmText: "Delete", confirmClass: "bg-rose-600 hover:bg-rose-700 shadow-rose-600/10 text-white" }
+      {
+        confirmText: "Delete",
+        confirmClass:
+          "bg-rose-600 hover:bg-rose-700 shadow-rose-600/10 text-white",
+      },
     );
   };
 
@@ -139,7 +157,6 @@ export default function BranchSectionModal({ isOpen, onClose }) {
   return (
     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9000] flex items-center justify-center p-3 sm:p-4">
       <div className="bg-white rounded-md shadow-2xl border border-slate-100 w-full max-w-md p-4 sm:p-6 relative animate-in fade-in zoom-in duration-200 max-h-[95vh] flex flex-col">
-        
         {/* Top Header */}
         <div className="flex items-center gap-3 mb-5 shrink-0">
           <div className="p-3 bg-indigo-50 rounded-md text-indigo-600 shrink-0">
@@ -150,7 +167,9 @@ export default function BranchSectionModal({ isOpen, onClose }) {
               {showAddForm ? "Add New Campus" : "Select Branch & Section"}
             </h2>
             <p className="text-xs text-slate-400">
-              {showAddForm ? "Create a new school campus branch" : "Choose campus & gender division"}
+              {showAddForm
+                ? "Create a new school campus branch"
+                : "Choose campus & gender division"}
             </p>
           </div>
         </div>
@@ -158,11 +177,16 @@ export default function BranchSectionModal({ isOpen, onClose }) {
         {loading ? (
           <div className="py-12 flex flex-col items-center justify-center gap-3 flex-1">
             <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
-            <span className="text-sm font-medium text-slate-500">Loading branch configuration...</span>
+            <span className="text-sm font-medium text-slate-500">
+              Loading branch configuration...
+            </span>
           </div>
         ) : showAddForm ? (
           /* Add Branch Form */
-          <form onSubmit={handleCreateBranch} className="space-y-4 flex-1 flex flex-col justify-between">
+          <form
+            onSubmit={handleCreateBranch}
+            className="space-y-4 flex-1 flex flex-col justify-between"
+          >
             <div className="space-y-4">
               <div className="space-y-1.5">
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
@@ -223,8 +247,10 @@ export default function BranchSectionModal({ isOpen, onClose }) {
           </form>
         ) : (
           /* Main Select Branch/Section Form */
-          <form onSubmit={handleSubmit} className="space-y-5 flex-1 flex flex-col justify-between overflow-hidden">
-            
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-5 flex-1 flex flex-col justify-between overflow-hidden"
+          >
             {/* Branch Selector List */}
             <div className="space-y-2 flex-1 flex flex-col overflow-hidden">
               <div className="flex justify-between items-center shrink-0">
@@ -240,7 +266,7 @@ export default function BranchSectionModal({ isOpen, onClose }) {
                   Add Campus
                 </button>
               </div>
-              
+
               <div className="flex-1 overflow-y-auto pr-1 space-y-2 max-h-[170px] min-h-[100px] border border-slate-100 rounded-md p-2 bg-slate-50/50">
                 {branches.map((b) => (
                   <div
@@ -253,15 +279,21 @@ export default function BranchSectionModal({ isOpen, onClose }) {
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className={`p-1.5 rounded-md ${selectedBranch === b._id ? "bg-indigo-100 text-indigo-700" : "bg-slate-100 text-slate-500"}`}>
+                      <div
+                        className={`p-1.5 rounded-md ${selectedBranch === b._id ? "bg-indigo-100 text-indigo-700" : "bg-slate-100 text-slate-500"}`}
+                      >
                         <School className="w-4 h-4" />
                       </div>
                       <div className="flex flex-col text-left overflow-hidden">
-                        <span className="font-bold text-xs sm:text-sm truncate max-w-[150px] sm:max-w-[200px]">{b.name}</span>
-                        <span className="text-[9px] text-slate-400 font-medium">Code: {b.code}</span>
+                        <span className="font-bold text-xs sm:text-sm truncate max-w-[150px] sm:max-w-[200px]">
+                          {b.name}
+                        </span>
+                        <span className="text-[9px] text-slate-400 font-medium">
+                          Code: {b.code}
+                        </span>
                       </div>
                     </div>
-                    
+
                     <button
                       type="button"
                       onClick={(e) => {
@@ -275,7 +307,7 @@ export default function BranchSectionModal({ isOpen, onClose }) {
                     </button>
                   </div>
                 ))}
-                
+
                 {branches.length === 0 && (
                   <div className="text-center py-8 text-slate-400 text-xs sm:text-sm">
                     No branches configured. Please add a branch.
