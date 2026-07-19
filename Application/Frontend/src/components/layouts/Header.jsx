@@ -3,7 +3,11 @@ import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../../pages/auth/useAuth.js";
-import { logOut, updateMyProfile, updateSchoolSettings } from "../../Api/Auth_Api.js";
+import {
+  logOut,
+  updateMyProfile,
+  updateSchoolSettings,
+} from "../../Api/Auth_Api.js";
 import {
   LogOut as LogOutIcon,
   LayoutDashboard,
@@ -22,23 +26,27 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { name: "Dashboard",  path: "/",           icon: <LayoutDashboard size={15} /> },
-  { name: "Students",   path: "/students",   icon: <GraduationCap size={15} /> },
-  { name: "Teachers",   path: "/teachers",   icon: <Users size={15} /> },
-  { name: "Classes",    path: "/classes",    icon: <School size={15} /> },
-  { name: "Attendance", path: "/attendance", icon: <CalendarCheck size={15} /> },
-  { name: "Exams",      path: "/exams",      icon: <FileSpreadsheet size={15} /> },
-  { name: "Fees",       path: "/fees",       icon: <DollarSign size={15} /> },
-  { name: "Subjects",   path: "/subjects",   icon: <BookOpen size={15} /> },
-  { name: "Timetable",  path: "/timetable",  icon: <Clock size={15} /> },
-  { name: "Notices",    path: "/notices",    icon: <Megaphone size={15} /> },
+  { name: "Dashboard", path: "/", icon: <LayoutDashboard size={15} /> },
+  { name: "Students", path: "/students", icon: <GraduationCap size={15} /> },
+  { name: "Teachers", path: "/teachers", icon: <Users size={15} /> },
+  { name: "Classes", path: "/classes", icon: <School size={15} /> },
+  {
+    name: "Attendance",
+    path: "/attendance",
+    icon: <CalendarCheck size={15} />,
+  },
+  { name: "Exams", path: "/exams", icon: <FileSpreadsheet size={15} /> },
+  { name: "Fees", path: "/fees", icon: <DollarSign size={15} /> },
+  { name: "Subjects", path: "/subjects", icon: <BookOpen size={15} /> },
+  { name: "Timetable", path: "/timetable", icon: <Clock size={15} /> },
+  { name: "Notices", path: "/notices", icon: <Megaphone size={15} /> },
 ];
 
 export default function ProHeader() {
-  const [mobileMenuOpen,    setMobileMenuOpen]    = useState(false);
-  const [userDropdownOpen,  setUserDropdownOpen]  = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
-  const userDropdownRef  = useRef(null);
+  const userDropdownRef = useRef(null);
   const notifDropdownRef = useRef(null);
   const navigate = useNavigate();
   const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
@@ -100,29 +108,47 @@ export default function ProHeader() {
 
   const getNotifIcon = (type) => {
     switch (type) {
-      case "student": return "🎓";
-      case "teacher": return "👤";
-      case "class": return "🏫";
-      case "attendance": return "📅";
-      case "fee": return "💰";
-      case "exam": return "📝";
-      case "notice": return "📢";
-      case "whatsapp": return "💬";
-      default: return "⚙️";
+      case "student":
+        return "🎓";
+      case "teacher":
+        return "👤";
+      case "class":
+        return "🏫";
+      case "attendance":
+        return "📅";
+      case "fee":
+        return "💰";
+      case "exam":
+        return "📝";
+      case "notice":
+        return "📢";
+      case "whatsapp":
+        return "💬";
+      default:
+        return "⚙️";
     }
   };
 
   const getNotifBadgeColor = (type) => {
     switch (type) {
-      case "student": return "bg-emerald-50 text-emerald-600 border border-emerald-100";
-      case "teacher": return "bg-indigo-50 text-indigo-600 border border-indigo-100";
-      case "class": return "bg-sky-50 text-sky-600 border border-sky-100";
-      case "attendance": return "bg-teal-50 text-teal-600 border border-teal-100";
-      case "fee": return "bg-amber-50 text-amber-600 border border-amber-100";
-      case "exam": return "bg-rose-50 text-rose-600 border border-rose-100";
-      case "notice": return "bg-red-50 text-red-600 border border-red-100";
-      case "whatsapp": return "bg-emerald-50 text-emerald-600 border border-emerald-100";
-      default: return "bg-slate-50 text-slate-600 border border-slate-100";
+      case "student":
+        return "bg-emerald-50 text-emerald-600 border border-emerald-100";
+      case "teacher":
+        return "bg-indigo-50 text-indigo-600 border border-indigo-100";
+      case "class":
+        return "bg-sky-50 text-sky-600 border border-sky-100";
+      case "attendance":
+        return "bg-teal-50 text-teal-600 border border-teal-100";
+      case "fee":
+        return "bg-amber-50 text-amber-600 border border-amber-100";
+      case "exam":
+        return "bg-rose-50 text-rose-600 border border-rose-100";
+      case "notice":
+        return "bg-red-50 text-red-600 border border-red-100";
+      case "whatsapp":
+        return "bg-emerald-50 text-emerald-600 border border-emerald-100";
+      default:
+        return "bg-slate-50 text-slate-600 border border-slate-100";
     }
   };
 
@@ -136,7 +162,17 @@ export default function ProHeader() {
   }, []);
 
   // Real auth data
-  const { userName, userEmail, userRole, userImage, isAdmin, isTeacher, assignedPages, schoolName, schoolLogo } = useAuth();
+  const {
+    userName,
+    userEmail,
+    userRole,
+    userImage,
+    isAdmin,
+    isTeacher,
+    assignedPages,
+    schoolName,
+    schoolLogo,
+  } = useAuth();
 
   const visibleNavItems = navItems.filter((item) => {
     if (isAdmin) return true;
@@ -192,7 +228,7 @@ export default function ProHeader() {
 
   const handleTogglePageKey = (key) => {
     setModalAssignedPages((prev) =>
-      prev.includes(key) ? prev.filter((x) => x !== key) : [...prev, key]
+      prev.includes(key) ? prev.filter((x) => x !== key) : [...prev, key],
     );
   };
 
@@ -217,10 +253,16 @@ export default function ProHeader() {
       if (data.success) {
         setTeachersList((prev) =>
           prev.map((t) =>
-            t.email === selectedTeacher.email ? { ...t, assignedPages: modalAssignedPages, hasAccount: true } : t
-          )
+            t.email === selectedTeacher.email
+              ? { ...t, assignedPages: modalAssignedPages, hasAccount: true }
+              : t,
+          ),
         );
-        toast.success(teacherPassword ? "User account & permissions updated!" : "Permissions updated successfully!");
+        toast.success(
+          teacherPassword
+            ? "User account & permissions updated!"
+            : "Permissions updated successfully!",
+        );
         setTeacherPassword("");
       } else {
         toast.error(data.message || "Failed to update permissions");
@@ -290,14 +332,20 @@ export default function ProHeader() {
       }
     } catch (err) {
       console.error(err);
-      toast.error(err.message || "An error occurred while updating school settings");
+      toast.error(
+        err.message || "An error occurred while updating school settings",
+      );
     } finally {
       setSavingSchoolSettings(false);
     }
   };
 
-  const [activeBranchName, setActiveBranchName] = useState(localStorage.getItem("activeBranchName") || "");
-  const [activeSection, setActiveSection] = useState(localStorage.getItem("activeSection") || "");
+  const [activeBranchName, setActiveBranchName] = useState(
+    localStorage.getItem("activeBranchName") || "",
+  );
+  const [activeSection, setActiveSection] = useState(
+    localStorage.getItem("activeSection") || "",
+  );
 
   useEffect(() => {
     const handleUpdate = () => {
@@ -319,9 +367,15 @@ export default function ProHeader() {
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target))
+      if (
+        userDropdownRef.current &&
+        !userDropdownRef.current.contains(event.target)
+      )
         setUserDropdownOpen(false);
-      if (notifDropdownRef.current && !notifDropdownRef.current.contains(event.target))
+      if (
+        notifDropdownRef.current &&
+        !notifDropdownRef.current.contains(event.target)
+      )
         setNotifDropdownOpen(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -383,12 +437,15 @@ export default function ProHeader() {
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-lg border-b border-slate-200/80">
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-2 xl:gap-4">
-
           {/* Logo */}
           <div className="flex items-center gap-2 shrink-0">
             <div className="w-9 h-9 xl:w-10 xl:h-10 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-full flex items-center justify-center shadow-md shrink-0 overflow-hidden">
               {schoolLogo ? (
-                <img src={`${API_BASE}${schoolLogo}`} alt="School Logo" className="w-full h-full object-cover" />
+                <img
+                  src={`${API_BASE}${schoolLogo}`}
+                  alt="School Logo"
+                  className="w-full h-full object-cover"
+                />
               ) : (
                 <span className="text-white text-base xl:text-lg font-bold">
                   {(schoolName || "S")[0].toUpperCase()}
@@ -407,9 +464,10 @@ export default function ProHeader() {
                   end={item.path === "/"}
                   className={({ isActive }) =>
                     `relative px-1.5 py-1.5 xl:px-2.5 xl:py-2 2xl:px-3 2xl:py-2 text-[10px] xl:text-xs 2xl:text-sm font-semibold rounded-md transition-all duration-200 whitespace-nowrap
-                    ${isActive
-                      ? "text-indigo-700 bg-indigo-50/80"
-                      : "text-slate-650 hover:text-indigo-600 hover:bg-slate-100/60"
+                    ${
+                      isActive
+                        ? "text-indigo-700 bg-indigo-50/80"
+                        : "text-slate-650 hover:text-indigo-600 hover:bg-slate-100/60"
                     }`
                   }
                 >
@@ -431,10 +489,11 @@ export default function ProHeader() {
 
           {/* Right Side */}
           <div className="flex items-center gap-2 xl:gap-3 shrink-0">
-
             {!isTeacher && (
-              <button 
-                onClick={() => window.dispatchEvent(new Event("open-branch-modal"))}
+              <button
+                onClick={() =>
+                  window.dispatchEvent(new Event("open-branch-modal"))
+                }
                 className="w-9 h-9 xl:w-10 xl:h-10 rounded-full bg-indigo-50/60 hover:bg-indigo-50 border border-indigo-100/60 text-indigo-650 flex items-center justify-center cursor-pointer select-none transition-all hover:scale-105 active:scale-95 shadow-sm shrink-0"
                 title={`Switch Branch/Section (Current: ${activeBranchName || "None"} - ${activeSection ? activeSection + " Section" : "None"})`}
               >
@@ -449,9 +508,18 @@ export default function ProHeader() {
                 className="relative p-2 rounded-full text-slate-500 hover:text-indigo-600 hover:bg-slate-100 transition-all"
                 aria-label="Notifications"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                  />
                 </svg>
                 {unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-red-500 text-[9px] font-bold text-white flex items-center justify-center ring-2 ring-white shadow-sm animate-pulse">
@@ -464,7 +532,9 @@ export default function ProHeader() {
                 <div className="fixed md:absolute top-16 md:top-auto left-4 right-4 md:left-auto md:right-0 mt-2 md:w-80 bg-white rounded-md shadow-2xl md:shadow-xl border border-slate-100 py-2 z-50 flex flex-col max-h-[450px]">
                   <div className="px-4 py-2.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                     <div className="flex items-center gap-1.5">
-                      <h3 className="font-bold text-xs text-slate-800">Notifications</h3>
+                      <h3 className="font-bold text-xs text-slate-800">
+                        Notifications
+                      </h3>
                       {unreadCount > 0 && (
                         <span className="bg-indigo-100 text-indigo-700 font-extrabold text-[9px] px-1.5 py-0.5 rounded-full shrink-0">
                           {unreadCount} new
@@ -486,15 +556,21 @@ export default function ProHeader() {
                         <div
                           key={notif._id}
                           className={`p-3 flex items-start gap-3 transition-colors ${
-                            !notif.read ? "bg-indigo-50/20" : "hover:bg-slate-50"
+                            !notif.read
+                              ? "bg-indigo-50/20"
+                              : "hover:bg-slate-50"
                           }`}
                         >
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0 ${getNotifBadgeColor(notif.type)}`}>
+                          <div
+                            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0 ${getNotifBadgeColor(notif.type)}`}
+                          >
                             {getNotifIcon(notif.type)}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex justify-between items-start gap-1">
-                              <p className={`text-xs font-bold truncate ${!notif.read ? "text-slate-800" : "text-slate-700"}`}>
+                              <p
+                                className={`text-xs font-bold truncate ${!notif.read ? "text-slate-800" : "text-slate-700"}`}
+                              >
                                 {notif.title}
                               </p>
                               <span className="text-[9px] text-slate-400 font-medium shrink-0">
@@ -570,7 +646,8 @@ export default function ProHeader() {
                         }}
                         className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-md transition flex items-center gap-1.5 cursor-pointer font-semibold"
                       >
-                        <School size={14} className="text-slate-400" /> School Settings
+                        <School size={14} className="text-slate-400" /> School
+                        Settings
                       </button>
                     </div>
                   )}
@@ -583,7 +660,8 @@ export default function ProHeader() {
                         }}
                         className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-md transition flex items-center gap-1.5 cursor-pointer font-semibold text-indigo-600 bg-indigo-50/50 hover:bg-indigo-50"
                       >
-                        <Lock size={14} className="text-indigo-500" /> Teacher Permissions
+                        <Lock size={14} className="text-indigo-500" /> Teacher
+                        Permissions
                       </button>
                     </div>
                   )}
@@ -596,7 +674,8 @@ export default function ProHeader() {
                         }}
                         className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-md transition flex items-center gap-1.5 cursor-pointer font-semibold text-emerald-600 bg-emerald-50/50 hover:bg-emerald-50"
                       >
-                        <MessageSquare size={14} className="text-emerald-500" /> WhatsApp Simulator
+                        <MessageSquare size={14} className="text-emerald-500" />{" "}
+                        WhatsApp Simulator
                       </button>
                     </div>
                   )}
@@ -620,11 +699,26 @@ export default function ProHeader() {
               className="xl:hidden p-2 rounded-md text-slate-500 hover:bg-slate-100"
               aria-label="Menu"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 {mobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 )}
               </svg>
             </button>
@@ -674,365 +768,471 @@ export default function ProHeader() {
       `}</style>
 
       {/* Edit Profile Modal */}
-      {editModalOpen && createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md bg-white rounded-md border border-slate-100 shadow-2xl p-6 overflow-hidden animate-scaleIn">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <h2 className="text-lg font-black text-slate-800 flex items-center gap-2">
-                <User size={20} className="text-indigo-600" /> Edit Profile
-              </h2>
-              <button
-                onClick={() => setEditModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-50 rounded-md transition"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <form onSubmit={handleSave} className="mt-6 space-y-5">
-              {/* Profile Image Upload */}
-              <div className="flex flex-col items-center gap-3">
-                <div className="relative group w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-md ring-2 ring-slate-100 hover:ring-indigo-300 transition duration-300">
-                  <img
-                    src={previewImage || avatarUrl}
-                    alt="Profile Preview"
-                    className="w-full h-full object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center text-[10px] text-white font-bold cursor-pointer gap-1"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <span>Change Photo</span>
-                  </button>
-                </div>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  accept="image/jpeg,image/png,image/webp"
-                  className="hidden"
-                />
-                <p className="text-[10px] text-slate-400 font-semibold">JPG, PNG, or WEBP. Max 2MB.</p>
-              </div>
-
-              {/* Name Input */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Full Name</label>
-                <input
-                  type="text"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm bg-slate-50/50 border border-slate-200 rounded-md focus:border-indigo-500 focus:bg-white transition outline-none font-semibold text-slate-800"
-                  required
-                />
-              </div>
-
-              {/* Email Input (Disabled) */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Email Address</label>
-                <input
-                  type="email"
-                  value={userEmail || ""}
-                  disabled
-                  className="w-full px-3.5 py-2 text-sm bg-slate-100 border border-slate-200 rounded-md font-semibold text-slate-400 cursor-not-allowed"
-                />
-                <p className="text-[10px] text-slate-400/80 font-semibold italic">Email cannot be changed.</p>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-2.5 pt-4 border-t border-slate-100">
+      {editModalOpen &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+            <div className="w-full max-w-md bg-white rounded-md border border-slate-100 shadow-2xl p-6 overflow-hidden animate-scaleIn">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <h2 className="text-lg font-black text-slate-800 flex items-center gap-2">
+                  <User size={20} className="text-indigo-600" /> Edit Profile
+                </h2>
                 <button
-                  type="button"
                   onClick={() => setEditModalOpen(false)}
-                  className="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 rounded-md text-xs font-bold text-slate-600 transition cursor-pointer"
+                  className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-50 rounded-md transition"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-bold shadow-md shadow-indigo-600/10 transition cursor-pointer flex items-center justify-center gap-1.5"
-                >
-                  {saving ? (
-                    <>
-                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    "Save Changes"
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>,
-        document.body
-      )}
-
-      {/* Teacher Permissions Modal */}
-      {permissionsModalOpen && createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-lg bg-white rounded-md border border-slate-100 shadow-2xl p-6 overflow-hidden animate-scaleIn flex flex-col max-h-[90vh]">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4 shrink-0">
-              <h2 className="text-lg font-black text-slate-800 flex items-center gap-2">
-                <Lock size={20} className="text-indigo-600" /> Teacher Page Permissions
-              </h2>
-              <button
-                onClick={() => setPermissionsModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-50 rounded-md transition"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {permissionsLoading ? (
-              <div className="py-12 text-center text-slate-400 text-sm flex-1 flex flex-col justify-center items-center gap-2">
-                <div className="animate-spin w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full" />
-                <span>Loading teachers list...</span>
-              </div>
-            ) : teachersList.length === 0 ? (
-              <div className="py-12 text-center text-slate-400 text-sm flex-1">
-                No teachers found in the database. Please add teachers first.
-              </div>
-            ) : (
-              <div className="mt-4 flex-1 overflow-y-auto space-y-5 pr-1">
-                {/* Select Teacher */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Select Teacher</label>
-                  <select
-                    value={selectedTeacher ? selectedTeacher._id : ""}
-                    onChange={(e) => {
-                      const t = teachersList.find((x) => x._id === e.target.value);
-                      if (t) handleSelectTeacher(t);
-                    }}
-                    className="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-md outline-none focus:border-indigo-500 focus:bg-white transition font-medium text-slate-700"
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    {teachersList.map((t) => (
-                      <option key={t._id} value={t._id}>
-                        {t.name} ({t.email})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {selectedTeacher && (
-                  <>
-                    {/* Account Status Badge */}
-                    <div className="flex items-center justify-between text-xs bg-slate-50 border border-slate-100 rounded-md p-3">
-                      <div>
-                        <p className="font-semibold text-slate-600">{selectedTeacher.name}</p>
-                        <p className="text-slate-400 mt-0.5">{selectedTeacher.email}</p>
-                      </div>
-                      <span className={`px-2.5 py-0.5 rounded-full font-semibold text-[10px] uppercase ${selectedTeacher.hasAccount ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
-                        {selectedTeacher.hasAccount ? "Account Active" : "No Login Yet (Will Auto-Create)"}
-                      </span>
-                    </div>
-
-                    {/* Password Fields */}
-                    <div className="space-y-1.5 p-3 border border-indigo-50/50 bg-indigo-50/10 rounded-md">
-                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                        {selectedTeacher.hasAccount ? "Reset / Change Password" : "Create User Password"}
-                      </label>
-                      <input
-                        type="text"
-                        value={teacherPassword}
-                        onChange={(e) => setTeacherPassword(e.target.value)}
-                        placeholder={selectedTeacher.hasAccount ? "Leave empty to keep current password" : "Enter password (default: 123456)"}
-                        className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded outline-none focus:border-indigo-400 transition"
-                      />
-                    </div>
-
-                    {/* Permissions list */}
-                    <div className="space-y-2">
-                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Assign Access Pages</label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {[
-                          { key: "students",   label: "Students Portal" },
-                          { key: "teachers",   label: "Teachers Portal" },
-                          { key: "classes",    label: "Classes Portal" },
-                          { key: "attendance", label: "Attendance Portal" },
-                          { key: "exams",      label: "Exams & Marks" },
-                          { key: "fees",       label: "Fee Collection" },
-                          { key: "subjects",   label: "Subject Management" },
-                          { key: "timetable",  label: "Timetable Grid" },
-                          { key: "notices",    label: "Notices Board" },
-                        ].map((p) => {
-                          const checked = modalAssignedPages.includes(p.key);
-                          return (
-                            <label
-                              key={p.key}
-                              className={`flex items-center justify-between p-3 border rounded-md cursor-pointer transition select-none ${
-                                checked
-                                  ? "border-indigo-200 bg-indigo-50/30 text-indigo-700 font-semibold"
-                                  : "border-slate-100 hover:bg-slate-50 text-slate-600"
-                              }`}
-                            >
-                              <span className="text-xs">{p.label}</span>
-                              <input
-                                type="checkbox"
-                                checked={checked}
-                                onChange={() => handleTogglePageKey(p.key)}
-                                className="w-4 h-4 accent-indigo-600 cursor-pointer rounded"
-                              />
-                            </label>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </>
-                )}
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
               </div>
-            )}
 
-            {/* Actions */}
-            <div className="flex gap-2.5 pt-4 border-t border-slate-100 mt-5 shrink-0">
-              <button
-                type="button"
-                onClick={() => setPermissionsModalOpen(false)}
-                className="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 rounded-md text-xs font-bold text-slate-600 transition cursor-pointer"
-              >
-                Close
-              </button>
-              <button
-                type="button"
-                onClick={handleSavePermissions}
-                disabled={savingPermissions || teachersList.length === 0}
-                className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-bold shadow-md shadow-indigo-600/10 transition cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
-              >
-                {savingPermissions ? (
-                  <>
-                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  "Save Permissions"
-                )}
-              </button>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
-
-      {/* School Settings Modal */}
-      {schoolSettingsModalOpen && createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md bg-white rounded-md border border-slate-100 shadow-2xl p-6 overflow-hidden animate-scaleIn">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <h2 className="text-lg font-black text-slate-800 flex items-center gap-2">
-                <School size={20} className="text-indigo-600" /> School Settings
-              </h2>
-              <button
-                onClick={() => setSchoolSettingsModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-50 rounded-md transition"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveSchoolSettings} className="mt-6 space-y-5">
-              {/* School Logo Upload */}
-              <div className="flex flex-col items-center gap-3">
-                <div className="relative group w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-md ring-2 ring-slate-100 hover:ring-indigo-300 transition duration-300">
-                  {previewLogo ? (
+              <form onSubmit={handleSave} className="mt-6 space-y-5">
+                {/* Profile Image Upload */}
+                <div className="flex flex-col items-center gap-3">
+                  <div className="relative group w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-md ring-2 ring-slate-100 hover:ring-indigo-300 transition duration-300">
                     <img
-                      src={previewLogo}
-                      alt="Logo Preview"
+                      src={previewImage || avatarUrl}
+                      alt="Profile Preview"
                       className="w-full h-full object-cover"
                     />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-indigo-600 to-blue-600 flex items-center justify-center text-white text-3xl font-bold">
-                      {(newSchoolName || "S")[0]?.toUpperCase()}
-                    </div>
-                  )}
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center text-[10px] text-white font-bold cursor-pointer gap-1"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                      <span>Change Photo</span>
+                    </button>
+                  </div>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                  />
+                  <p className="text-[10px] text-slate-400 font-semibold">
+                    JPG, PNG, or WEBP. Max 2MB.
+                  </p>
+                </div>
+
+                {/* Name Input */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    className="w-full px-3.5 py-2 text-sm bg-slate-50/50 border border-slate-200 rounded-md focus:border-indigo-500 focus:bg-white transition outline-none font-semibold text-slate-800"
+                    required
+                  />
+                </div>
+
+                {/* Email Input (Disabled) */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={userEmail || ""}
+                    disabled
+                    className="w-full px-3.5 py-2 text-sm bg-slate-100 border border-slate-200 rounded-md font-semibold text-slate-400 cursor-not-allowed"
+                  />
+                  <p className="text-[10px] text-slate-400/80 font-semibold italic">
+                    Email cannot be changed.
+                  </p>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2.5 pt-4 border-t border-slate-100">
                   <button
                     type="button"
-                    onClick={() => logoInputRef.current?.click()}
-                    className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center text-[10px] text-white font-bold cursor-pointer gap-1"
+                    onClick={() => setEditModalOpen(false)}
+                    className="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 rounded-md text-xs font-bold text-slate-600 transition cursor-pointer"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <span>Change Logo</span>
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-bold shadow-md shadow-indigo-600/10 transition cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    {saving ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Save Changes"
+                    )}
                   </button>
                 </div>
-                <input
-                  type="file"
-                  ref={logoInputRef}
-                  onChange={handleLogoChange}
-                  accept="image/jpeg,image/png,image/webp"
-                  className="hidden"
-                />
-                <p className="text-[10px] text-slate-400 font-semibold">JPG, PNG, or WEBP. Max 2MB.</p>
+              </form>
+            </div>
+          </div>,
+          document.body,
+        )}
+
+      {/* Teacher Permissions Modal */}
+      {permissionsModalOpen &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+            <div className="w-full max-w-lg bg-white rounded-md border border-slate-100 shadow-2xl p-6 overflow-hidden animate-scaleIn flex flex-col max-h-[90vh]">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4 shrink-0">
+                <h2 className="text-lg font-black text-slate-800 flex items-center gap-2">
+                  <Lock size={20} className="text-indigo-600" /> Teacher Page
+                  Permissions
+                </h2>
+                <button
+                  onClick={() => setPermissionsModalOpen(false)}
+                  className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-50 rounded-md transition"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
               </div>
 
-              {/* School Name Input */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">School Name</label>
-                <input
-                  type="text"
-                  value={newSchoolName}
-                  onChange={(e) => setNewSchoolName(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm bg-slate-50/50 border border-slate-200 rounded-md focus:border-indigo-500 focus:bg-white transition outline-none font-semibold text-slate-800"
-                  required
-                />
-              </div>
+              {permissionsLoading ? (
+                <div className="py-12 text-center text-slate-400 text-sm flex-1 flex flex-col justify-center items-center gap-2">
+                  <div className="animate-spin w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full" />
+                  <span>Loading teachers list...</span>
+                </div>
+              ) : teachersList.length === 0 ? (
+                <div className="py-12 text-center text-slate-400 text-sm flex-1">
+                  No teachers found in the database. Please add teachers first.
+                </div>
+              ) : (
+                <div className="mt-4 flex-1 overflow-y-auto space-y-5 pr-1">
+                  {/* Select Teacher */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      Select Teacher
+                    </label>
+                    <select
+                      value={selectedTeacher ? selectedTeacher._id : ""}
+                      onChange={(e) => {
+                        const t = teachersList.find(
+                          (x) => x._id === e.target.value,
+                        );
+                        if (t) handleSelectTeacher(t);
+                      }}
+                      className="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-md outline-none focus:border-indigo-500 focus:bg-white transition font-medium text-slate-700"
+                    >
+                      {teachersList.map((t) => (
+                        <option key={t._id} value={t._id}>
+                          {t.name} ({t.email})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {selectedTeacher && (
+                    <>
+                      {/* Account Status Badge */}
+                      <div className="flex items-center justify-between text-xs bg-slate-50 border border-slate-100 rounded-md p-3">
+                        <div>
+                          <p className="font-semibold text-slate-600">
+                            {selectedTeacher.name}
+                          </p>
+                          <p className="text-slate-400 mt-0.5">
+                            {selectedTeacher.email}
+                          </p>
+                        </div>
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full font-semibold text-[10px] uppercase ${selectedTeacher.hasAccount ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}
+                        >
+                          {selectedTeacher.hasAccount
+                            ? "Account Active"
+                            : "No Login Yet (Will Auto-Create)"}
+                        </span>
+                      </div>
+
+                      {/* Password Fields */}
+                      <div className="space-y-1.5 p-3 border border-indigo-50/50 bg-indigo-50/10 rounded-md">
+                        <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                          {selectedTeacher.hasAccount
+                            ? "Reset / Change Password"
+                            : "Create User Password"}
+                        </label>
+                        <input
+                          type="text"
+                          value={teacherPassword}
+                          onChange={(e) => setTeacherPassword(e.target.value)}
+                          placeholder={
+                            selectedTeacher.hasAccount
+                              ? "Leave empty to keep current password"
+                              : "Enter password (default: 123456)"
+                          }
+                          className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded outline-none focus:border-indigo-400 transition"
+                        />
+                      </div>
+
+                      {/* Permissions list */}
+                      <div className="space-y-2">
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                          Assign Access Pages
+                        </label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {[
+                            { key: "students", label: "Students Portal" },
+                            { key: "teachers", label: "Teachers Portal" },
+                            { key: "classes", label: "Classes Portal" },
+                            { key: "attendance", label: "Attendance Portal" },
+                            { key: "exams", label: "Exams & Marks" },
+                            { key: "fees", label: "Fee Collection" },
+                            { key: "subjects", label: "Subject Management" },
+                            { key: "timetable", label: "Timetable Grid" },
+                            { key: "notices", label: "Notices Board" },
+                          ].map((p) => {
+                            const checked = modalAssignedPages.includes(p.key);
+                            return (
+                              <label
+                                key={p.key}
+                                className={`flex items-center justify-between p-3 border rounded-md cursor-pointer transition select-none ${
+                                  checked
+                                    ? "border-indigo-200 bg-indigo-50/30 text-indigo-700 font-semibold"
+                                    : "border-slate-100 hover:bg-slate-50 text-slate-600"
+                                }`}
+                              >
+                                <span className="text-xs">{p.label}</span>
+                                <input
+                                  type="checkbox"
+                                  checked={checked}
+                                  onChange={() => handleTogglePageKey(p.key)}
+                                  className="w-4 h-4 accent-indigo-600 cursor-pointer rounded"
+                                />
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
 
               {/* Actions */}
-              <div className="flex gap-2.5 pt-4 border-t border-slate-100">
+              <div className="flex gap-2.5 pt-4 border-t border-slate-100 mt-5 shrink-0">
                 <button
                   type="button"
-                  onClick={() => setSchoolSettingsModalOpen(false)}
+                  onClick={() => setPermissionsModalOpen(false)}
                   className="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 rounded-md text-xs font-bold text-slate-600 transition cursor-pointer"
                 >
-                  Cancel
+                  Close
                 </button>
                 <button
-                  type="submit"
-                  disabled={savingSchoolSettings}
-                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-bold shadow-md shadow-indigo-600/10 transition cursor-pointer flex items-center justify-center gap-1.5"
+                  type="button"
+                  onClick={handleSavePermissions}
+                  disabled={savingPermissions || teachersList.length === 0}
+                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-bold shadow-md shadow-indigo-600/10 transition cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
                 >
-                  {savingSchoolSettings ? (
+                  {savingPermissions ? (
                     <>
                       <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       Saving...
                     </>
                   ) : (
-                    "Save Settings"
+                    "Save Permissions"
                   )}
                 </button>
               </div>
-            </form>
-          </div>
-        </div>,
-        document.body
-      )}
+            </div>
+          </div>,
+          document.body,
+        )}
 
-      {whatsappModalOpen && createPortal(
-        <WhatsAppSimulatorModal isOpen={whatsappModalOpen} onClose={() => setWhatsappModalOpen(false)} />,
-        document.body
-      )}
+      {/* School Settings Modal */}
+      {schoolSettingsModalOpen &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+            <div className="w-full max-w-md bg-white rounded-md border border-slate-100 shadow-2xl p-6 overflow-hidden animate-scaleIn">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <h2 className="text-lg font-black text-slate-800 flex items-center gap-2">
+                  <School size={20} className="text-indigo-600" /> School
+                  Settings
+                </h2>
+                <button
+                  onClick={() => setSchoolSettingsModalOpen(false)}
+                  className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-50 rounded-md transition"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <form
+                onSubmit={handleSaveSchoolSettings}
+                className="mt-6 space-y-5"
+              >
+                {/* School Logo Upload */}
+                <div className="flex flex-col items-center gap-3">
+                  <div className="relative group w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-md ring-2 ring-slate-100 hover:ring-indigo-300 transition duration-300">
+                    {previewLogo ? (
+                      <img
+                        src={previewLogo}
+                        alt="Logo Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-indigo-600 to-blue-600 flex items-center justify-center text-white text-3xl font-bold">
+                        {(newSchoolName || "S")[0]?.toUpperCase()}
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => logoInputRef.current?.click()}
+                      className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center text-[10px] text-white font-bold cursor-pointer gap-1"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                      <span>Change Logo</span>
+                    </button>
+                  </div>
+                  <input
+                    type="file"
+                    ref={logoInputRef}
+                    onChange={handleLogoChange}
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                  />
+                  <p className="text-[10px] text-slate-400 font-semibold">
+                    JPG, PNG, or WEBP. Max 2MB.
+                  </p>
+                </div>
+
+                {/* School Name Input */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    School Name
+                  </label>
+                  <input
+                    type="text"
+                    value={newSchoolName}
+                    onChange={(e) => setNewSchoolName(e.target.value)}
+                    className="w-full px-3.5 py-2 text-sm bg-slate-50/50 border border-slate-200 rounded-md focus:border-indigo-500 focus:bg-white transition outline-none font-semibold text-slate-800"
+                    required
+                  />
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2.5 pt-4 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setSchoolSettingsModalOpen(false)}
+                    className="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 rounded-md text-xs font-bold text-slate-600 transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingSchoolSettings}
+                    className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-bold shadow-md shadow-indigo-600/10 transition cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    {savingSchoolSettings ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Save Settings"
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body,
+        )}
+
+      {whatsappModalOpen &&
+        createPortal(
+          <WhatsAppSimulatorModal
+            isOpen={whatsappModalOpen}
+            onClose={() => setWhatsappModalOpen(false)}
+          />,
+          document.body,
+        )}
     </header>
   );
 }
 
-// ---------- WhatsApp Simulator Modal ----------
+// WhatsApp Simulator Modal
 const WhatsAppSimulatorModal = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState("verify");
   const [verifyToken, setVerifyToken] = useState("school_verify_token_123");
-  const [verifyChallenge, setVerifyChallenge] = useState("test_challenge_string");
+  const [verifyChallenge, setVerifyChallenge] = useState(
+    "test_challenge_string",
+  );
   const [verifyStatus, setVerifyStatus] = useState(null);
   const [verifying, setVerifying] = useState(false);
 
@@ -1049,7 +1249,7 @@ const WhatsAppSimulatorModal = ({ isOpen, onClose }) => {
     setVerifyStatus(null);
     try {
       const url = `${API_BASE}/api/whatsapp/webhook?hub.mode=subscribe&hub.challenge=${encodeURIComponent(
-        verifyChallenge
+        verifyChallenge,
       )}&hub.verify_token=${encodeURIComponent(verifyToken)}`;
 
       const res = await fetch(url, { method: "GET" });
@@ -1091,13 +1291,13 @@ const WhatsAppSimulatorModal = ({ isOpen, onClose }) => {
                   messaging_product: "whatsapp",
                   metadata: {
                     display_phone_number: "16505553333",
-                    phone_number_id: "2948293849102"
+                    phone_number_id: "2948293849102",
                   },
                   contacts: [
                     {
                       profile: { name: senderName },
-                      wa_id: phone
-                    }
+                      wa_id: phone,
+                    },
                   ],
                   messages: [
                     {
@@ -1105,15 +1305,15 @@ const WhatsAppSimulatorModal = ({ isOpen, onClose }) => {
                       id: "wamid.HBgLOTIzMDAxMjM0NTY3FQIAERgSRjVDNUNEM0M0QzZDQzZDQzMAA=",
                       timestamp: Math.floor(Date.now() / 1000).toString(),
                       text: { body: messageBody },
-                      type: "text"
-                    }
-                  ]
+                      type: "text",
+                    },
+                  ],
                 },
-                field: "messages"
-              }
-            ]
-          }
-        ]
+                field: "messages",
+              },
+            ],
+          },
+        ],
       };
 
       const res = await fetch(`${API_BASE}/api/whatsapp/webhook`, {
@@ -1156,13 +1356,30 @@ const WhatsAppSimulatorModal = ({ isOpen, onClose }) => {
               💬
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-slate-800">WhatsApp Bot Webhook Simulator</h2>
-              <p className="text-[10px] text-slate-400">Test backend message reception and verification</p>
+              <h2 className="text-sm font-semibold text-slate-800">
+                WhatsApp Bot Webhook Simulator
+              </h2>
+              <p className="text-[10px] text-slate-400">
+                Test backend message reception and verification
+              </p>
             </div>
           </div>
-          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <button
+            onClick={onClose}
+            className="w-7 h-7 flex items-center justify-center rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -1196,12 +1413,17 @@ const WhatsAppSimulatorModal = ({ isOpen, onClose }) => {
           {activeTab === "verify" && (
             <div className="space-y-4">
               <div className="bg-slate-50 border border-slate-100 rounded-md p-3.5 text-xs text-slate-500 leading-relaxed">
-                <strong>Meta Webhook verification check:</strong> Send a simulated Webhook activation check to ensure the backend validates verify tokens properly and echoes the correct challenge string.
+                <strong>Meta Webhook verification check:</strong> Send a
+                simulated Webhook activation check to ensure the backend
+                validates verify tokens properly and echoes the correct
+                challenge string.
               </div>
 
               <div className="space-y-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Verify Token</label>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                    Verify Token
+                  </label>
                   <input
                     type="text"
                     value={verifyToken}
@@ -1211,7 +1433,9 @@ const WhatsAppSimulatorModal = ({ isOpen, onClose }) => {
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Challenge String</label>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                    Challenge String
+                  </label>
                   <input
                     type="text"
                     value={verifyChallenge}
@@ -1226,7 +1450,9 @@ const WhatsAppSimulatorModal = ({ isOpen, onClose }) => {
                   disabled={verifying}
                   className="w-full py-2 bg-indigo-600 text-white rounded text-xs font-bold hover:bg-indigo-700 transition disabled:opacity-50"
                 >
-                  {verifying ? "Testing verification..." : "Send Verification GET Request"}
+                  {verifying
+                    ? "Testing verification..."
+                    : "Send Verification GET Request"}
                 </button>
 
                 {verifyStatus && (
@@ -1237,7 +1463,10 @@ const WhatsAppSimulatorModal = ({ isOpen, onClose }) => {
                         : "bg-rose-50 border-rose-100 text-rose-700"
                     }`}
                   >
-                    <strong>{verifyStatus.success ? "Success" : "Failed"}:</strong> {verifyStatus.message}
+                    <strong>
+                      {verifyStatus.success ? "Success" : "Failed"}:
+                    </strong>{" "}
+                    {verifyStatus.message}
                   </div>
                 )}
               </div>
@@ -1247,13 +1476,17 @@ const WhatsAppSimulatorModal = ({ isOpen, onClose }) => {
           {activeTab === "message" && (
             <div className="space-y-4">
               <div className="bg-slate-50 border border-slate-100 rounded-md p-3.5 text-xs text-slate-500 leading-relaxed">
-                <strong>Simulate Message payload:</strong> Send a mock Meta WhatsApp JSON payload containing a parent message to check how the backend extracts and processes it.
+                <strong>Simulate Message payload:</strong> Send a mock Meta
+                WhatsApp JSON payload containing a parent message to check how
+                the backend extracts and processes it.
               </div>
 
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Sender Name</label>
+                    <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                      Sender Name
+                    </label>
                     <input
                       type="text"
                       value={senderName}
@@ -1263,7 +1496,9 @@ const WhatsAppSimulatorModal = ({ isOpen, onClose }) => {
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Phone Number</label>
+                    <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                      Phone Number
+                    </label>
                     <input
                       type="text"
                       value={phone}
@@ -1274,7 +1509,9 @@ const WhatsAppSimulatorModal = ({ isOpen, onClose }) => {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Message Text</label>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                    Message Text
+                  </label>
                   <input
                     type="text"
                     value={messageBody}
@@ -1289,7 +1526,9 @@ const WhatsAppSimulatorModal = ({ isOpen, onClose }) => {
                   disabled={sending}
                   className="w-full py-2 bg-emerald-600 text-white rounded text-xs font-bold hover:bg-emerald-700 transition disabled:opacity-50"
                 >
-                  {sending ? "Delivering message..." : "Deliver Simulated Message (POST)"}
+                  {sending
+                    ? "Delivering message..."
+                    : "Deliver Simulated Message (POST)"}
                 </button>
 
                 {messageStatus && (
@@ -1310,7 +1549,10 @@ const WhatsAppSimulatorModal = ({ isOpen, onClose }) => {
 
         {/* Footer */}
         <div className="bg-slate-50 px-6 py-3 border-t border-slate-100 text-[10px] text-slate-400 text-center">
-          Backend Webhook URL: <code className="bg-slate-200 text-slate-700 px-1 rounded">/api/whatsapp/webhook</code>
+          Backend Webhook URL:{" "}
+          <code className="bg-slate-200 text-slate-700 px-1 rounded">
+            /api/whatsapp/webhook
+          </code>
         </div>
       </div>
     </div>
