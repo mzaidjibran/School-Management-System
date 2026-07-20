@@ -34,7 +34,7 @@ app.use(
   cors({
     origin: function (origin, callback) {
       if (!origin) return callback(null, true);
-      // Allow any localhost / 127.0.0.1 origin regardless of port
+
       if (
         origin.startsWith("http://localhost") ||
         origin.startsWith("http://127.0.0.1")
