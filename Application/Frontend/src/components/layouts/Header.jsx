@@ -1549,7 +1549,7 @@ const WhatsAppSimulatorModal = ({ isOpen, onClose }) => {
 
         {/* Footer */}
         <div className="bg-slate-50 px-6 py-3 border-t border-slate-100 text-[10px] text-slate-400 text-center">
-          Backend Webhook URL:{" "}
+          Backend Webhook URL:{"coming soon "}
           <code className="bg-slate-200 text-slate-700 px-1 rounded">
             /api/whatsapp/webhook
           </code>
