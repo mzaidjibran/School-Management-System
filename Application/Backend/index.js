@@ -33,7 +33,6 @@ app.use(express.json());
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (Postman, curl, server-to-server)
       if (!origin) return callback(null, true);
       // Allow any localhost / 127.0.0.1 origin regardless of port
       if (
