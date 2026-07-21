@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
 
 /**
- * TopHeader / TopTabs Navigation Component
+ 
  * Styled as a clean white card containing only tab navigation links.
  *
  * @param {Array} tabs
