@@ -1,11 +1,21 @@
 import { useState, useEffect, useRef } from "react";
-import { FaSearch, FaFileCsv, FaFileExcel, FaFilePdf, FaTrash } from "react-icons/fa";
+import {
+  FaSearch,
+  FaFileCsv,
+  FaFileExcel,
+  FaFilePdf,
+  FaTrash,
+} from "react-icons/fa";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveAs } from "file-saver";
 import { getAllClasses } from "../../api/Class_Api.js";
-import { getAttendanceByClassAndDate, markAttendance, deleteAttendance } from "../../api/Attendance_Api.js";
+import {
+  getAttendanceByClassAndDate,
+  markAttendance,
+  deleteAttendance,
+} from "../../api/Attendance_Api.js";
 import { getAllStudents } from "../../api/Student_Api.js";
 import { confirmToast } from "../../utils/toastHelpers.jsx";
 import toast from "react-hot-toast";
@@ -20,17 +30,28 @@ const TableSkeleton = () => (
   </div>
 );
 
-// ---------- Empty State ----------
+//  Empty State
 const EmptyState = ({ message = "No attendance records found" }) => (
   <div className="text-center py-12">
     <div className="w-20 h-20 mx-auto bg-slate-100 rounded-full flex items-center justify-center mb-4">
-      <svg className="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+      <svg
+        className="w-10 h-10 text-slate-400"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.5}
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+        />
       </svg>
     </div>
     <h3 className="text-base font-medium text-slate-700">{message}</h3>
-    <p className="text-sm text-slate-400 mt-1">Class aur date select karo records dekhne ke liye</p>
+    <p className="text-sm text-slate-400 mt-1">
+      Class aur date select karo records dekhne ke liye
+    </p>
   </div>
 );
 
@@ -38,14 +59,21 @@ const EmptyState = ({ message = "No attendance records found" }) => (
 const StatusBadge = ({ status }) => {
   const styles = {
     present: "bg-emerald-100 text-emerald-700",
-    absent:  "bg-rose-100    text-rose-700",
-    leave:   "bg-amber-100   text-amber-700",
-    late:    "bg-blue-100    text-blue-700",
+    absent: "bg-rose-100    text-rose-700",
+    leave: "bg-amber-100   text-amber-700",
+    late: "bg-blue-100    text-blue-700",
   };
-  const labels = { present: "Present", absent: "Absent", leave: "Leave", late: "Late" };
+  const labels = {
+    present: "Present",
+    absent: "Absent",
+    leave: "Leave",
+    late: "Late",
+  };
   const key = status?.toLowerCase();
   return (
-    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${styles[key] || "bg-slate-100 text-slate-600"}`}>
+    <span
+      className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${styles[key] || "bg-slate-100 text-slate-600"}`}
+    >
       {labels[key] || status}
     </span>
   );
@@ -54,22 +82,22 @@ const StatusBadge = ({ status }) => {
 export default function AttendanceList() {
   // Get local timezone-safe date string (YYYY-MM-DD)
   const getLocalDateString = () => {
-    const tzoffset = (new Date()).getTimezoneOffset() * 60000;
-    return (new Date(Date.now() - tzoffset)).toISOString().split('T')[0];
+    const tzoffset = new Date().getTimezoneOffset() * 60000;
+    return new Date(Date.now() - tzoffset).toISOString().split("T")[0];
   };
 
-  const [classes, setClasses]         = useState([]);
-  const [records, setRecords]         = useState([]);
-  const [filtered, setFiltered]       = useState([]);
-  const [loading, setLoading]         = useState(false);
+  const [classes, setClasses] = useState([]);
+  const [records, setRecords] = useState([]);
+  const [filtered, setFiltered] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [loadingClasses, setLoadingClasses] = useState(true);
 
   const [selectedClass, setSelectedClass] = useState("");
-  const [selectedDate, setSelectedDate]   = useState(getLocalDateString());
-  const [search, setSearch]           = useState("");
+  const [selectedDate, setSelectedDate] = useState(getLocalDateString());
+  const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedSection, setSelectedSection] = useState(
-    localStorage.getItem("activeSection") || "girls"
+    localStorage.getItem("activeSection") || "girls",
   );
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -105,7 +133,11 @@ export default function AttendanceList() {
     const fetch = async () => {
       setLoading(true);
       try {
-        const result = await getAttendanceByClassAndDate(selectedClass, selectedDate, selectedSection);
+        const result = await getAttendanceByClassAndDate(
+          selectedClass,
+          selectedDate,
+          selectedSection,
+        );
         setRecords(result.data || []);
       } catch (e) {
         console.error(e);
@@ -123,7 +155,8 @@ export default function AttendanceList() {
     let result = records;
     if (search) {
       result = result.filter((r) => {
-        const name = `${r.student?.firstName || ""} ${r.student?.lastName || ""}`.toLowerCase();
+        const name =
+          `${r.student?.firstName || ""} ${r.student?.lastName || ""}`.toLowerCase();
         const roll = r.student?.rollNumber || "";
         return name.includes(search.toLowerCase()) || roll.includes(search);
       });
@@ -135,36 +168,45 @@ export default function AttendanceList() {
 
   // ── Stats ──────────────────────────────────────────────────────
   const presentCount = records.filter((r) => r.status === "present").length;
-  const absentCount  = records.filter((r) => r.status === "absent").length;
-  const leaveCount   = records.filter((r) => r.status === "leave").length;
-  const lateCount    = records.filter((r) => r.status === "late").length;
+  const absentCount = records.filter((r) => r.status === "absent").length;
+  const leaveCount = records.filter((r) => r.status === "leave").length;
+  const lateCount = records.filter((r) => r.status === "late").length;
   const attendancePct = records.length
     ? ((presentCount / records.length) * 100).toFixed(1)
     : 0;
 
   // ── Pagination ─────────────────────────────────────────────────
-  const totalPages    = Math.ceil(filtered.length / itemsPerPage);
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const paginatedData = filtered.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   // ── Exports ────────────────────────────────────────────────────
   const flatRows = () =>
     filtered.map((r) => ({
-      rollNo:      r.student?.rollNumber || "—",
-      studentName: `${r.student?.firstName || ""} ${r.student?.lastName || ""}`.trim(),
-      date:        new Date(r.date).toLocaleDateString(),
-      status:      r.status,
-      remarks:     r.remarks || "",
+      rollNo: r.student?.rollNumber || "—",
+      studentName:
+        `${r.student?.firstName || ""} ${r.student?.lastName || ""}`.trim(),
+      date: new Date(r.date).toLocaleDateString(),
+      status: r.status,
+      remarks: r.remarks || "",
     }));
 
   const exportCSV = () => {
     const headers = ["Roll No", "Student Name", "Date", "Status", "Remarks"];
-    const rows    = flatRows().map((r) => [r.rollNo, r.studentName, r.date, r.status, r.remarks]);
+    const rows = flatRows().map((r) => [
+      r.rollNo,
+      r.studentName,
+      r.date,
+      r.status,
+      r.remarks,
+    ]);
     saveAs(
-      new Blob([[headers, ...rows].map((r) => r.join(",")).join("\n")], { type: "text/csv" }),
-      "attendance.csv"
+      new Blob([[headers, ...rows].map((r) => r.join(",")).join("\n")], {
+        type: "text/csv",
+      }),
+      "attendance.csv",
     );
     toast.success("Attendance CSV downloaded successfully!");
   };
@@ -183,25 +225,25 @@ export default function AttendanceList() {
         } else {
           inQuotes = !inQuotes;
         }
-      } else if (char === ',' && !inQuotes) {
-        row.push('');
-      } else if ((char === '\r' || char === '\n') && !inQuotes) {
-        if (char === '\r' && nextChar === '\n') i++;
+      } else if (char === "," && !inQuotes) {
+        row.push("");
+      } else if ((char === "\r" || char === "\n") && !inQuotes) {
+        if (char === "\r" && nextChar === "\n") i++;
         lines.push(row);
-        row = [''];
+        row = [""];
       } else {
         row[row.length - 1] += char;
       }
     }
-    if (row.length > 1 || row[0] !== '') lines.push(row);
-    const headers = lines[0].map(h => h.trim());
+    if (row.length > 1 || row[0] !== "") lines.push(row);
+    const headers = lines[0].map((h) => h.trim());
     const data = [];
     for (let i = 1; i < lines.length; i++) {
       const r = lines[i];
       if (r.length === 0 || (r.length === 1 && !r[0])) continue;
       const obj = {};
       headers.forEach((h, idx) => {
-        obj[h] = (r[idx] !== undefined) ? r[idx].trim() : "";
+        obj[h] = r[idx] !== undefined ? r[idx].trim() : "";
       });
       data.push(obj);
     }
@@ -211,7 +253,15 @@ export default function AttendanceList() {
   const csvFileInputRef = useRef(null);
 
   const handleBackupData = () => {
-    const headers = ["rollNumber", "studentName", "date", "className", "schoolSection", "status", "remarks"];
+    const headers = [
+      "rollNumber",
+      "studentName",
+      "date",
+      "className",
+      "schoolSection",
+      "status",
+      "remarks",
+    ];
     const rows = records.map((r) => [
       r.student?.rollNumber || "",
       `${r.student?.firstName || ""} ${r.student?.lastName || ""}`.trim(),
@@ -219,10 +269,18 @@ export default function AttendanceList() {
       r.class?.name || "",
       r.schoolSection || r.section || "",
       r.status || "present",
-      r.remarks || ""
+      r.remarks || "",
     ]);
-    const csvContent = [headers.join(","), ...rows.map(row => row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(","))].join("\n");
-    saveAs(new Blob([csvContent], { type: "text/csv;charset=utf-8;" }), "attendance_backup.csv");
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) =>
+        row.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(","),
+      ),
+    ].join("\n");
+    saveAs(
+      new Blob([csvContent], { type: "text/csv;charset=utf-8;" }),
+      "attendance_backup.csv",
+    );
     toast.success("Attendance backup downloaded successfully!");
   };
 
@@ -240,7 +298,7 @@ export default function AttendanceList() {
         }
         const [classesRes, studentsRes] = await Promise.all([
           getAllClasses({ section: "all" }),
-          getAllStudents()
+          getAllStudents(),
         ]);
         const classesList = classesRes.data || [];
         const studentsList = studentsRes.data || [];
@@ -255,22 +313,39 @@ export default function AttendanceList() {
               for (const k of keys) {
                 if (r[k] !== undefined) return r[k];
                 const foundKey = Object.keys(r).find(
-                  (rk) => rk.trim().toLowerCase() === k.toLowerCase()
+                  (rk) => rk.trim().toLowerCase() === k.toLowerCase(),
                 );
                 if (foundKey) return r[foundKey];
               }
               return "";
             };
 
-            const rollNo = getVal(row, "rollNumber", "roll number", "roll no", "rollNo");
+            const rollNo = getVal(
+              row,
+              "rollNumber",
+              "roll number",
+              "roll no",
+              "rollNo",
+            );
             const className = getVal(row, "className", "class name", "class");
             const date = getVal(row, "date");
-            const schoolSection = getVal(row, "schoolSection", "school section", "section");
+            const schoolSection = getVal(
+              row,
+              "schoolSection",
+              "school section",
+              "section",
+            );
             const status = getVal(row, "status");
             const remarks = getVal(row, "remarks", "remark");
 
-            const matchedClass = className ? classesList.find(c => c.name.toLowerCase() === className.toLowerCase()) : null;
-            const matchedStudent = studentsList.find(s => s.rollNumber === rollNo);
+            const matchedClass = className
+              ? classesList.find(
+                  (c) => c.name.toLowerCase() === className.toLowerCase(),
+                )
+              : null;
+            const matchedStudent = studentsList.find(
+              (s) => s.rollNumber === rollNo,
+            );
             if (!matchedStudent) {
               console.warn(`Student with roll number ${rollNo} not found.`);
               failCount++;
@@ -278,12 +353,20 @@ export default function AttendanceList() {
             }
             markPayload.push({
               student: matchedStudent._id,
-              class: matchedClass ? matchedClass._id : selectedClass || matchedStudent.class?._id || matchedStudent.class,
+              class: matchedClass
+                ? matchedClass._id
+                : selectedClass ||
+                  matchedStudent.class?._id ||
+                  matchedStudent.class,
               date: date || selectedDate || getLocalDateString(),
-              section: (schoolSection || selectedSection || "girls").toLowerCase(),
+              section: (
+                schoolSection ||
+                selectedSection ||
+                "girls"
+              ).toLowerCase(),
               status: (status || "present").toLowerCase(),
               remarks: remarks || "",
-              lateMinutes: 0
+              lateMinutes: 0,
             });
             successCount++;
           } catch (err) {
@@ -297,9 +380,15 @@ export default function AttendanceList() {
         }
         toast.dismiss(loadingToastId);
         if (successCount > 0) {
-          toast.success(`${successCount} attendance records uploaded successfully!`);
+          toast.success(
+            `${successCount} attendance records uploaded successfully!`,
+          );
           if (selectedClass && selectedDate && selectedSection) {
-            const result = await getAttendanceByClassAndDate(selectedClass, selectedDate, selectedSection);
+            const result = await getAttendanceByClassAndDate(
+              selectedClass,
+              selectedDate,
+              selectedSection,
+            );
             setRecords(result.data || []);
           }
         }
@@ -326,8 +415,14 @@ export default function AttendanceList() {
     doc.text("Attendance Records", 14, 10);
     autoTable(doc, {
       startY: 20,
-      head:   [["Roll No", "Student", "Date", "Status", "Remarks"]],
-      body:   flatRows().map((r) => [r.rollNo, r.studentName, r.date, r.status, r.remarks]),
+      head: [["Roll No", "Student", "Date", "Status", "Remarks"]],
+      body: flatRows().map((r) => [
+        r.rollNo,
+        r.studentName,
+        r.date,
+        r.status,
+        r.remarks,
+      ]),
       headStyles: { fillColor: [79, 70, 229] },
     });
     doc.save("attendance.pdf");
@@ -342,7 +437,11 @@ export default function AttendanceList() {
           await deleteAttendance(id);
           toast.success("Attendance record deleted successfully!");
           if (selectedClass && selectedDate && selectedSection) {
-            const result = await getAttendanceByClassAndDate(selectedClass, selectedDate, selectedSection);
+            const result = await getAttendanceByClassAndDate(
+              selectedClass,
+              selectedDate,
+              selectedSection,
+            );
             setRecords(result.data || []);
           }
         } catch (e) {
@@ -350,36 +449,73 @@ export default function AttendanceList() {
           toast.error("Failed to delete attendance record: " + e.message);
         }
       },
-      { confirmText: "Delete", confirmClass: "bg-rose-600 hover:bg-rose-700 shadow-rose-600/10 text-white" }
+      {
+        confirmText: "Delete",
+        confirmClass:
+          "bg-rose-600 hover:bg-rose-700 shadow-rose-600/10 text-white",
+      },
     );
   };
 
-  const inputCls = "h-8 text-xs border border-slate-200 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full";
+  const inputCls =
+    "h-8 text-xs border border-slate-200 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-3">
         {/* Breadcrumb */}
         <nav className="flex mb-5 text-sm text-slate-500">
-          <span className="hover:text-indigo-600 cursor-pointer">Dashboard</span>
+          <span className="hover:text-indigo-600 cursor-pointer">
+            Dashboard
+          </span>
           <span className="mx-2">/</span>
-          <span className="text-indigo-600 font-medium">Attendance Records</span>
+          <span className="text-indigo-600 font-medium">
+            Attendance Records
+          </span>
         </nav>
 
         {/* Header */}
         <div className="flex flex-wrap justify-between items-start gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">Attendance Records</h1>
-            <p className="text-slate-500 text-sm mt-0.5">Class aur date select karke records dekho</p>
+            <h1 className="text-2xl font-bold text-slate-800">
+              Attendance Records
+            </h1>
+            <p className="text-slate-500 text-sm mt-0.5">
+              Class aur date select karke records dekho
+            </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <input type="file" accept=".csv" ref={csvFileInputRef} className="hidden" onChange={handleUploadCSV} />
-            <button type="button" onClick={() => csvFileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold transition">Upload CSV</button>
-            <button type="button" onClick={handleBackupData} className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition">Backup Data</button>
-            <button onClick={exportExcel} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 transition">
+            <input
+              type="file"
+              accept=".csv"
+              ref={csvFileInputRef}
+              className="hidden"
+              onChange={handleUploadCSV}
+            />
+            <button
+              type="button"
+              onClick={() => csvFileInputRef.current?.click()}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold transition"
+            >
+              Upload CSV
+            </button>
+            <button
+              type="button"
+              onClick={handleBackupData}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition"
+            >
+              Backup Data
+            </button>
+            <button
+              onClick={exportExcel}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 transition"
+            >
               <FaFileExcel className="text-sm" /> Excel
             </button>
-            <button onClick={exportPDF}   className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition">
+            <button
+              onClick={exportPDF}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition"
+            >
               <FaFilePdf className="text-sm" /> PDF
             </button>
           </div>
@@ -389,7 +525,9 @@ export default function AttendanceList() {
         <div className="bg-white rounded-md shadow-sm border border-slate-100 p-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1.5">Select Section</label>
+              <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                Select Section
+              </label>
               <select
                 value={selectedSection}
                 onChange={(e) => setSelectedSection(e.target.value)}
@@ -400,14 +538,18 @@ export default function AttendanceList() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1.5">Select Class</label>
+              <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                Select Class
+              </label>
               <select
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
                 disabled={loadingClasses}
                 className="w-full px-3 py-2 text-sm border border-slate-200 rounded bg-white outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
               >
-                <option value="">{loadingClasses ? "Loading..." : "-- Select Class --"}</option>
+                <option value="">
+                  {loadingClasses ? "Loading..." : "-- Select Class --"}
+                </option>
                 {classes
                   .filter((c) => c.schoolSection === selectedSection)
                   .map((c) => (
@@ -418,7 +560,9 @@ export default function AttendanceList() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1.5">Select Date</label>
+              <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                Select Date
+              </label>
               <input
                 type="date"
                 value={selectedDate}
@@ -433,16 +577,46 @@ export default function AttendanceList() {
         {records.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
             {[
-              { label: "Total",      value: records.length, color: "text-slate-800",   bg: "bg-indigo-100"  },
-              { label: "Present",    value: presentCount,   color: "text-emerald-600", bg: "bg-emerald-100" },
-              { label: "Absent",     value: absentCount,    color: "text-rose-600",    bg: "bg-rose-100"    },
-              { label: "Leave",      value: leaveCount,     color: "text-amber-600",   bg: "bg-amber-100"   },
-              { label: "Attendance", value: `${attendancePct}%`, color: "text-blue-600", bg: "bg-blue-100"  },
+              {
+                label: "Total",
+                value: records.length,
+                color: "text-slate-800",
+                bg: "bg-indigo-100",
+              },
+              {
+                label: "Present",
+                value: presentCount,
+                color: "text-emerald-600",
+                bg: "bg-emerald-100",
+              },
+              {
+                label: "Absent",
+                value: absentCount,
+                color: "text-rose-600",
+                bg: "bg-rose-100",
+              },
+              {
+                label: "Leave",
+                value: leaveCount,
+                color: "text-amber-600",
+                bg: "bg-amber-100",
+              },
+              {
+                label: "Attendance",
+                value: `${attendancePct}%`,
+                color: "text-blue-600",
+                bg: "bg-blue-100",
+              },
             ].map((card) => (
-              <div key={card.label} className="bg-white rounded-md shadow-sm border border-slate-100 p-4 flex justify-between items-center">
+              <div
+                key={card.label}
+                className="bg-white rounded-md shadow-sm border border-slate-100 p-4 flex justify-between items-center"
+              >
                 <div>
                   <p className="text-xs text-slate-500">{card.label}</p>
-                  <p className={`text-xl font-bold mt-0.5 ${card.color}`}>{card.value}</p>
+                  <p className={`text-xl font-bold mt-0.5 ${card.color}`}>
+                    {card.value}
+                  </p>
                 </div>
                 <div className={`w-9 h-9 ${card.bg} rounded`} />
               </div>
@@ -492,8 +666,19 @@ export default function AttendanceList() {
                 <table className="w-full text-sm">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      {["#", "Roll No", "Student Name", "Date", "Status", "Remarks", "Actions"].map((h) => (
-                        <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-slate-600 whitespace-nowrap uppercase">
+                      {[
+                        "#",
+                        "Roll No",
+                        "Student Name",
+                        "Date",
+                        "Status",
+                        "Remarks",
+                        "Actions",
+                      ].map((h) => (
+                        <th
+                          key={h}
+                          className="text-left py-3 px-4 text-xs font-semibold text-slate-600 whitespace-nowrap uppercase"
+                        >
                           {h}
                         </th>
                       ))}
@@ -501,9 +686,16 @@ export default function AttendanceList() {
                   </thead>
                   <tbody>
                     {paginatedData.map((record, idx) => (
-                      <tr key={record._id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition">
-                        <td className="py-2.5 px-4 text-slate-400">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
-                        <td className="py-2.5 px-4 text-slate-500">{record.student?.rollNumber || "—"}</td>
+                      <tr
+                        key={record._id}
+                        className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition"
+                      >
+                        <td className="py-2.5 px-4 text-slate-400">
+                          {(currentPage - 1) * itemsPerPage + idx + 1}
+                        </td>
+                        <td className="py-2.5 px-4 text-slate-500">
+                          {record.student?.rollNumber || "—"}
+                        </td>
                         <td className="py-2.5 px-4 font-medium text-slate-800">
                           {record.student?.firstName} {record.student?.lastName}
                         </td>
@@ -534,17 +726,26 @@ export default function AttendanceList() {
               {/* Mobile View Cards */}
               <div className="block md:hidden p-4 space-y-3 bg-slate-50/50">
                 {paginatedData.map((record, idx) => {
-                  const avatarColor = idx % 2 === 0 ? "bg-indigo-100 text-indigo-700" : "bg-purple-100 text-purple-700";
+                  const avatarColor =
+                    idx % 2 === 0
+                      ? "bg-indigo-100 text-indigo-700"
+                      : "bg-purple-100 text-purple-700";
                   return (
-                    <div key={record._id} className="bg-white p-4 rounded-md border border-slate-100 shadow-sm flex flex-col gap-3 transition duration-200 hover:shadow-md hover:border-indigo-100">
+                    <div
+                      key={record._id}
+                      className="bg-white p-4 rounded-md border border-slate-100 shadow-sm flex flex-col gap-3 transition duration-200 hover:shadow-md hover:border-indigo-100"
+                    >
                       <div className="flex justify-between items-start">
                         <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-full ${avatarColor} font-bold text-xs flex items-center justify-center`}>
+                          <div
+                            className={`w-8 h-8 rounded-full ${avatarColor} font-bold text-xs flex items-center justify-center`}
+                          >
                             {record.student?.firstName?.charAt(0)}
                           </div>
                           <div>
                             <p className="font-semibold text-slate-800 text-sm">
-                              {record.student?.firstName} {record.student?.lastName}
+                              {record.student?.firstName}{" "}
+                              {record.student?.lastName}
                             </p>
                             <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md font-mono font-bold border border-slate-200/40">
                               Roll: {record.student?.rollNumber || "—"}
@@ -562,15 +763,21 @@ export default function AttendanceList() {
                           </button>
                         </div>
                       </div>
-                      
+
                       <div className="flex justify-between items-center text-[11px] text-slate-500 border-t border-slate-50 pt-2.5">
-                        <span>Date: {new Date(record.date).toLocaleDateString()}</span>
-                        <span className="text-slate-400">#{(currentPage - 1) * itemsPerPage + idx + 1}</span>
+                        <span>
+                          Date: {new Date(record.date).toLocaleDateString()}
+                        </span>
+                        <span className="text-slate-400">
+                          #{(currentPage - 1) * itemsPerPage + idx + 1}
+                        </span>
                       </div>
 
                       {record.remarks && (
                         <p className="text-xs text-slate-500 bg-slate-50 p-2.5 rounded border border-slate-100/80 italic mt-0.5">
-                          <strong className="text-[10px] text-slate-400 uppercase font-bold not-italic block mb-0.5">Remarks</strong>
+                          <strong className="text-[10px] text-slate-400 uppercase font-bold not-italic block mb-0.5">
+                            Remarks
+                          </strong>
                           {record.remarks}
                         </p>
                       )}
@@ -586,7 +793,8 @@ export default function AttendanceList() {
             <div className="flex flex-wrap justify-between items-center px-4 py-3 border-t border-slate-100 gap-2">
               <p className="text-xs text-slate-500">
                 Showing {(currentPage - 1) * itemsPerPage + 1}–
-                {Math.min(currentPage * itemsPerPage, filtered.length)} of {filtered.length}
+                {Math.min(currentPage * itemsPerPage, filtered.length)} of{" "}
+                {filtered.length}
               </p>
               <div className="flex items-center gap-1.5">
                 <button
