@@ -20,7 +20,7 @@ import { getAllStudents } from "../../api/Student_Api.js";
 import { confirmToast } from "../../utils/toastHelpers.jsx";
 import toast from "react-hot-toast";
 
-// ---------- Skeleton ----------
+//  Skeleton
 const TableSkeleton = () => (
   <div className="animate-pulse px-4 py-3">
     <div className="h-8 bg-slate-200 rounded-md mb-2" />
