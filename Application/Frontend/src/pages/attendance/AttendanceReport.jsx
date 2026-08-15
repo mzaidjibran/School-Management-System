@@ -17,7 +17,7 @@ import {
   Loader2,
 } from "lucide-react";
 
-// ---------- Helpers ----------
+//  Helpers
 const avatarColors = [
   "bg-indigo-500",
   "bg-purple-500",
@@ -64,7 +64,7 @@ export default function AttendanceReport() {
   );
   const [year, setYear] = useState(String(now.getFullYear()));
 
-  // ── Load classes ───────────────────────────────────────────────
+  //  Load classes
   useEffect(() => {
     getAllClasses({ section: "all" })
       .then((r) => setClasses(r.data || []))
@@ -74,7 +74,7 @@ export default function AttendanceReport() {
       });
   }, []);
 
-  // ── Load students jab class ya section filter change ho ────────
+  //  Load students jab class ya section filter change ho
   useEffect(() => {
     const params = {};
     if (classFilter) params.currentClass = classFilter;
@@ -87,7 +87,7 @@ export default function AttendanceReport() {
       });
   }, [classFilter, sectionFilter]);
 
-  // ── Build report: har student ki attendance summary ───────────
+  // Build report: har student ki attendance summary
   useEffect(() => {
     if (students.length === 0) {
       setReportData([]);
@@ -146,7 +146,7 @@ export default function AttendanceReport() {
     fetchAll();
   }, [students, month, year]);
 
-  // ── Client-side name filter ────────────────────────────────────
+  //  Client-side name filter
   useEffect(() => {
     if (!studentFilter) {
       setFilteredData(reportData);
