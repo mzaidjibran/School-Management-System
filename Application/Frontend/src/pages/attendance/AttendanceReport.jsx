@@ -163,7 +163,7 @@ export default function AttendanceReport() {
     );
   }, [studentFilter, reportData]);
 
-  // ── Totals ─────────────────────────────────────────────────────
+  // Totals
   const totalPresent = filteredData.reduce((a, s) => a + s.present, 0);
   const totalAbsent = filteredData.reduce((a, s) => a + s.absent, 0);
   const totalLeave = filteredData.reduce((a, s) => a + s.leave, 0);
