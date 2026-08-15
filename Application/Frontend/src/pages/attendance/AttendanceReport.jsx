@@ -182,7 +182,7 @@ export default function AttendanceReport() {
     .sort((a, b) => a.percent - b.percent)
     .slice(0, 5);
 
-  // ── Exports ────────────────────────────────────────────────────
+  //Exports
   const exportCSV = () => {
     const headers = [
       "Roll No",
@@ -302,7 +302,6 @@ export default function AttendanceReport() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        {/* Breadcrumb */}
         <nav className="flex mb-6 text-sm text-slate-500">
           <span className="hover:text-indigo-600 cursor-pointer">
             Dashboard
