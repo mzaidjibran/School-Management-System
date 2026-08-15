@@ -234,7 +234,6 @@ export default function AttendanceReport() {
           ))}
         </div>
 
-        {/* Filters */}
         <div className="bg-white rounded-md shadow-sm border border-slate-100 p-5 mb-6">
           <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Filter Records</label>
           <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
