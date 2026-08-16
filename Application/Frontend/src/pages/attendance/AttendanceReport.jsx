@@ -61,7 +61,6 @@ export default function AttendanceReport() {
   );
   const [year, setYear] = useState(String(now.getFullYear()));
 
-  //  Load classes
   useEffect(() => {
     getAllClasses({ section: "all" })
       .then((r) => setClasses(r.data || []))
@@ -71,7 +70,6 @@ export default function AttendanceReport() {
       });
   }, []);
 
-  //  Load students jab class ya section filter change ho
   useEffect(() => {
     const params = {};
     if (classFilter) params.currentClass = classFilter;
@@ -84,7 +82,6 @@ export default function AttendanceReport() {
       });
   }, [classFilter, sectionFilter]);
 
-  // Build report: har student ki attendance summary
   useEffect(() => {
     if (students.length === 0) {
       setReportData([]);
