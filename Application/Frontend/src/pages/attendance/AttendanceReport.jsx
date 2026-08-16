@@ -17,7 +17,6 @@ import {
   Loader2,
 } from "lucide-react";
 
-
 const avatarColors = [
   "bg-indigo-500",
   "bg-purple-500",
@@ -52,12 +51,10 @@ export default function AttendanceReport() {
     localStorage.getItem("activeSection") || "girls",
   );
 
-  // Reset class when section changes
   useEffect(() => {
     setClassFilter("");
   }, [sectionFilter]);
 
-  // Current month default
   const now = new Date();
   const [month, setMonth] = useState(
     String(now.getMonth() + 1).padStart(2, "0"),
