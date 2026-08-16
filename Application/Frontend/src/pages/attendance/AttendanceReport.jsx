@@ -17,7 +17,7 @@ import {
   Loader2,
 } from "lucide-react";
 
-//  Helpers
+
 const avatarColors = [
   "bg-indigo-500",
   "bg-purple-500",
