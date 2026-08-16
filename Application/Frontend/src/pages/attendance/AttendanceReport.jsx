@@ -140,7 +140,6 @@ export default function AttendanceReport() {
     fetchAll();
   }, [students, month, year]);
 
-  //  Client-side name filter
   useEffect(() => {
     if (!studentFilter) {
       setFilteredData(reportData);
