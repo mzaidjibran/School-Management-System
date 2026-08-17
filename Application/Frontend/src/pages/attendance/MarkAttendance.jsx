@@ -78,7 +78,6 @@ export default function MarkAttendance() {
     fetch();
   }, []);
 
-  // ── Students fetch jab class ya section change ho ───────────────
   useEffect(() => {
     if (!selectedClass || !selectedSection) {
       setStudents([]);
