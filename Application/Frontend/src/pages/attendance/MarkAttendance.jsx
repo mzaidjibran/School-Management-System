@@ -39,7 +39,6 @@ const StatusRadio = ({ value, current, onChange }) => {
 const STATUS_OPTIONS = ["Present", "Absent", "Leave", "Late"];
 
 export default function MarkAttendance() {
-  // Get local timezone-safe date string (YYYY-MM-DD)
   const getLocalDateString = () => {
     const tzoffset = new Date().getTimezoneOffset() * 60000;
     return new Date(Date.now() - tzoffset).toISOString().split("T")[0];
