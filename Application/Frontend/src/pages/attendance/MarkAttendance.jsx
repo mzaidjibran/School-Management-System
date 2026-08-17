@@ -87,7 +87,6 @@ export default function MarkAttendance() {
     const fetch = async () => {
       setLoadingStudents(true);
       try {
-        // currentClass aur section filter use karo
         const result = await getAllStudents({
           currentClass: selectedClass,
           section: selectedSection,
