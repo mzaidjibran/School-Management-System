@@ -10,16 +10,14 @@ import { getAllClasses } from "../../api/Class_Api.js";
 import { markAttendance } from "../../api/Attendance_Api.js";
 import toast from "react-hot-toast";
 
-
 import { getAllStudents } from "../../api/Student_Api.js";
 
-// ---------- Status Radio Button ----------
 const StatusRadio = ({ value, current, onChange }) => {
   const styles = {
     Present: "border-emerald-500 bg-emerald-50 text-emerald-700",
-    Absent:  "border-rose-500    bg-rose-50    text-rose-700",
-    Leave:   "border-amber-500   bg-amber-50   text-amber-700",
-    Late:    "border-blue-500    bg-blue-50    text-blue-700",
+    Absent: "border-rose-500    bg-rose-50    text-rose-700",
+    Leave: "border-amber-500   bg-amber-50   text-amber-700",
+    Late: "border-blue-500    bg-blue-50    text-blue-700",
   };
   return (
     <label
@@ -43,22 +41,22 @@ const STATUS_OPTIONS = ["Present", "Absent", "Leave", "Late"];
 export default function MarkAttendance() {
   // Get local timezone-safe date string (YYYY-MM-DD)
   const getLocalDateString = () => {
-    const tzoffset = (new Date()).getTimezoneOffset() * 60000;
-    return (new Date(Date.now() - tzoffset)).toISOString().split('T')[0];
+    const tzoffset = new Date().getTimezoneOffset() * 60000;
+    return new Date(Date.now() - tzoffset).toISOString().split("T")[0];
   };
 
-  const [classes, setClasses]               = useState([]);
-  const [students, setStudents]             = useState([]);
-  const [attendance, setAttendance]         = useState({});
-  const [selectedClass, setSelectedClass]   = useState("");
-  const [selectedDate, setSelectedDate]     = useState(getLocalDateString());
+  const [classes, setClasses] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [attendance, setAttendance] = useState({});
+  const [selectedClass, setSelectedClass] = useState("");
+  const [selectedDate, setSelectedDate] = useState(getLocalDateString());
   const [loadingClasses, setLoadingClasses] = useState(true);
   const [loadingStudents, setLoadingStudents] = useState(false);
-  const [saving, setSaving]                 = useState(false);
-  const [success, setSuccess]               = useState(false);
-  const [apiError, setApiError]             = useState("");
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [apiError, setApiError] = useState("");
   const [selectedSection, setSelectedSection] = useState(
-    localStorage.getItem("activeSection") || "girls"
+    localStorage.getItem("activeSection") || "girls",
   );
 
   // Reset class when section changes
@@ -93,7 +91,10 @@ export default function MarkAttendance() {
       setLoadingStudents(true);
       try {
         // currentClass aur section filter use karo
-        const result = await getAllStudents({ currentClass: selectedClass, section: selectedSection });
+        const result = await getAllStudents({
+          currentClass: selectedClass,
+          section: selectedSection,
+        });
         const list = result.data || [];
         setStudents(list);
         // Default sab Present
@@ -139,14 +140,14 @@ export default function MarkAttendance() {
     setSaving(true);
     try {
       const records = students.map((s) => ({
-        student:     s._id,
-        class:       selectedClass,
-        date:        selectedDate,
-        section:     selectedSection,
+        student: s._id,
+        class: selectedClass,
+        date: selectedDate,
+        section: selectedSection,
         // backend lowercase expect karta hai
-        status:      attendance[s._id]?.toLowerCase() || "present",
+        status: attendance[s._id]?.toLowerCase() || "present",
         lateMinutes: 0,
-        remarks:     "",
+        remarks: "",
       }));
       await markAttendance(records);
       toast.success("Attendance saved successfully!");
@@ -164,7 +165,9 @@ export default function MarkAttendance() {
       <div className="max-w-6xl mx-auto">
         {/* Breadcrumb */}
         <nav className="flex mb-6 text-sm text-slate-500">
-          <span className="hover:text-indigo-600 cursor-pointer">Dashboard</span>
+          <span className="hover:text-indigo-600 cursor-pointer">
+            Dashboard
+          </span>
           <span className="mx-2">/</span>
           <span className="text-indigo-600">Mark Attendance</span>
         </nav>
@@ -175,8 +178,12 @@ export default function MarkAttendance() {
             <FaCheckCircle className="w-6 h-6 text-indigo-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">Mark Attendance</h1>
-            <p className="text-slate-500 text-sm">Record daily attendance for students</p>
+            <h1 className="text-2xl font-bold text-slate-800">
+              Mark Attendance
+            </h1>
+            <p className="text-slate-500 text-sm">
+              Record daily attendance for students
+            </p>
           </div>
         </div>
 
@@ -236,13 +243,36 @@ export default function MarkAttendance() {
         {selectedClass && students.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
             {[
-              { label: "Total",   value: students.length, cls: "bg-white text-slate-800" },
-              { label: "Present", value: counts.Present,  cls: "bg-emerald-50 text-emerald-700" },
-              { label: "Absent",  value: counts.Absent,   cls: "bg-rose-50 text-rose-700" },
-              { label: "Leave",   value: counts.Leave,    cls: "bg-amber-50 text-amber-700" },
-              { label: "Late",    value: counts.Late,     cls: "bg-blue-50 text-blue-700" },
+              {
+                label: "Total",
+                value: students.length,
+                cls: "bg-white text-slate-800",
+              },
+              {
+                label: "Present",
+                value: counts.Present,
+                cls: "bg-emerald-50 text-emerald-700",
+              },
+              {
+                label: "Absent",
+                value: counts.Absent,
+                cls: "bg-rose-50 text-rose-700",
+              },
+              {
+                label: "Leave",
+                value: counts.Leave,
+                cls: "bg-amber-50 text-amber-700",
+              },
+              {
+                label: "Late",
+                value: counts.Late,
+                cls: "bg-blue-50 text-blue-700",
+              },
             ].map((card) => (
-              <div key={card.label} className={`${card.cls} rounded p-3 text-center shadow-sm border border-slate-100`}>
+              <div
+                key={card.label}
+                className={`${card.cls} rounded p-3 text-center shadow-sm border border-slate-100`}
+              >
                 <p className="text-xs opacity-70">{card.label}</p>
                 <p className="text-xl font-bold">{card.value}</p>
               </div>
@@ -260,8 +290,12 @@ export default function MarkAttendance() {
               </div>
             ) : students.length === 0 ? (
               <div className="p-10 text-center text-slate-400">
-                <p className="text-base font-medium">No students found in this class</p>
-                <p className="text-sm mt-1">Please assign students to this class first</p>
+                <p className="text-base font-medium">
+                  No students found in this class
+                </p>
+                <p className="text-sm mt-1">
+                  Please assign students to this class first
+                </p>
               </div>
             ) : (
               <>
@@ -270,17 +304,32 @@ export default function MarkAttendance() {
                   <table className="w-full">
                     <thead className="bg-slate-50 border-b border-slate-200">
                       <tr>
-                        <th className="text-left py-4 px-5 text-xs font-semibold text-slate-600 uppercase">#</th>
-                        <th className="text-left py-4 px-5 text-xs font-semibold text-slate-600 uppercase">Roll No</th>
-                        <th className="text-left py-4 px-5 text-xs font-semibold text-slate-600 uppercase">Student Name</th>
-                        <th className="text-left py-4 px-5 text-xs font-semibold text-slate-600 uppercase">Attendance</th>
+                        <th className="text-left py-4 px-5 text-xs font-semibold text-slate-600 uppercase">
+                          #
+                        </th>
+                        <th className="text-left py-4 px-5 text-xs font-semibold text-slate-600 uppercase">
+                          Roll No
+                        </th>
+                        <th className="text-left py-4 px-5 text-xs font-semibold text-slate-600 uppercase">
+                          Student Name
+                        </th>
+                        <th className="text-left py-4 px-5 text-xs font-semibold text-slate-600 uppercase">
+                          Attendance
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
                       {students.map((student, idx) => (
-                        <tr key={student._id} className="border-b border-slate-100 hover:bg-slate-50 transition">
-                          <td className="py-3 px-5 text-slate-400 text-sm">{idx + 1}</td>
-                          <td className="py-3 px-5 text-slate-600 text-sm">{student.rollNumber || "—"}</td>
+                        <tr
+                          key={student._id}
+                          className="border-b border-slate-100 hover:bg-slate-50 transition"
+                        >
+                          <td className="py-3 px-5 text-slate-400 text-sm">
+                            {idx + 1}
+                          </td>
+                          <td className="py-3 px-5 text-slate-600 text-sm">
+                            {student.rollNumber || "—"}
+                          </td>
                           <td className="py-3 px-5 font-medium text-slate-800 text-sm">
                             {student.firstName} {student.lastName}
                           </td>
@@ -291,7 +340,9 @@ export default function MarkAttendance() {
                                   key={status}
                                   value={status}
                                   current={attendance[student._id]}
-                                  onChange={(val) => handleStatusChange(student._id, val)}
+                                  onChange={(val) =>
+                                    handleStatusChange(student._id, val)
+                                  }
                                 />
                               ))}
                             </div>
@@ -305,16 +356,26 @@ export default function MarkAttendance() {
                 {/* Mobile View Cards */}
                 <div className="block md:hidden p-4 space-y-3 bg-slate-50/50">
                   {students.map((student, idx) => {
-                    const avatarColor = idx % 2 === 0 ? "bg-indigo-100 text-indigo-700" : "bg-purple-100 text-purple-700";
+                    const avatarColor =
+                      idx % 2 === 0
+                        ? "bg-indigo-100 text-indigo-700"
+                        : "bg-purple-100 text-purple-700";
                     return (
-                      <div key={student._id} className="bg-white p-4 rounded-md border border-slate-100 shadow-sm flex flex-col gap-3.5 transition duration-200 hover:shadow-md hover:border-indigo-100">
+                      <div
+                        key={student._id}
+                        className="bg-white p-4 rounded-md border border-slate-100 shadow-sm flex flex-col gap-3.5 transition duration-200 hover:shadow-md hover:border-indigo-100"
+                      >
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-full ${avatarColor} font-bold text-xs flex items-center justify-center`}>
+                            <div
+                              className={`w-8 h-8 rounded-full ${avatarColor} font-bold text-xs flex items-center justify-center`}
+                            >
                               {student.firstName?.charAt(0)}
                             </div>
                             <div>
-                              <p className="font-semibold text-slate-800 text-sm">{student.firstName} {student.lastName}</p>
+                              <p className="font-semibold text-slate-800 text-sm">
+                                {student.firstName} {student.lastName}
+                              </p>
                               <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md font-mono font-bold border border-slate-200/40">
                                 Roll No: {student.rollNumber || "—"}
                               </span>
@@ -324,20 +385,26 @@ export default function MarkAttendance() {
                             #{idx + 1}
                           </span>
                         </div>
-                        
+
                         <div className="grid grid-cols-4 gap-1.5">
                           {STATUS_OPTIONS.map((status) => {
-                            const isSelected = attendance[student._id] === status;
+                            const isSelected =
+                              attendance[student._id] === status;
                             const activeStyles = {
-                              Present: "bg-emerald-600 text-white border-emerald-600 shadow-sm ring-2 ring-emerald-100",
-                              Absent: "bg-rose-600 text-white border-rose-600 shadow-sm ring-2 ring-rose-100",
-                              Leave: "bg-amber-600 text-white border-amber-600 shadow-sm ring-2 ring-amber-100",
+                              Present:
+                                "bg-emerald-600 text-white border-emerald-600 shadow-sm ring-2 ring-emerald-100",
+                              Absent:
+                                "bg-rose-600 text-white border-rose-600 shadow-sm ring-2 ring-rose-100",
+                              Leave:
+                                "bg-amber-600 text-white border-amber-600 shadow-sm ring-2 ring-amber-100",
                               Late: "bg-blue-600 text-white border-blue-600 shadow-sm ring-2 ring-blue-100",
                             };
                             return (
                               <button
                                 key={status}
-                                onClick={() => handleStatusChange(student._id, status)}
+                                onClick={() =>
+                                  handleStatusChange(student._id, status)
+                                }
                                 className={`py-2 px-1 rounded text-[10px] font-bold border transition duration-150 text-center min-w-0 truncate ${
                                   isSelected
                                     ? activeStyles[status]
@@ -393,7 +460,6 @@ export default function MarkAttendance() {
             )}
           </div>
         )}
-
       </div>
     </div>
   );
