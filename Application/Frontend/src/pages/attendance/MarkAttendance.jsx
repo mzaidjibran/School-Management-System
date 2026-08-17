@@ -58,7 +58,6 @@ export default function MarkAttendance() {
     localStorage.getItem("activeSection") || "girls",
   );
 
-  // Reset class when section changes
   useEffect(() => {
     setSelectedClass("");
   }, [selectedSection]);
