@@ -10,8 +10,7 @@ import { getAllClasses } from "../../api/Class_Api.js";
 import { markAttendance } from "../../api/Attendance_Api.js";
 import toast from "react-hot-toast";
 
-// ─── Student fetch by classId ─────────────────────────────────────
-// Students real API se aayenge — Student_Api ka getAllStudents use karo
+
 import { getAllStudents } from "../../api/Student_Api.js";
 
 // ---------- Status Radio Button ----------
