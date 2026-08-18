@@ -138,7 +138,7 @@ export default function MarkAttendance() {
         class: selectedClass,
         date: selectedDate,
         section: selectedSection,
-        // backend lowercase expect karta hai
+
         status: attendance[s._id]?.toLowerCase() || "present",
         lateMinutes: 0,
         remarks: "",
