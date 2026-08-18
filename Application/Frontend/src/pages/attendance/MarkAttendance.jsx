@@ -165,7 +165,6 @@ export default function MarkAttendance() {
           <span className="text-indigo-600">Mark Attendance</span>
         </nav>
 
-        {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <div className="p-3 bg-indigo-100 rounded-md">
             <FaCheckCircle className="w-6 h-6 text-indigo-600" />
