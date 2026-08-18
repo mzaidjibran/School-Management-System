@@ -93,7 +93,7 @@ export default function MarkAttendance() {
         });
         const list = result.data || [];
         setStudents(list);
-        // Default sab Present
+        
         const init = {};
         list.forEach((s) => (init[s._id] = "Present"));
         setAttendance(init);
