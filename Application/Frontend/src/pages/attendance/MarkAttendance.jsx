@@ -93,7 +93,7 @@ export default function MarkAttendance() {
         });
         const list = result.data || [];
         setStudents(list);
-        
+
         const init = {};
         list.forEach((s) => (init[s._id] = "Present"));
         setAttendance(init);
@@ -117,13 +117,11 @@ export default function MarkAttendance() {
     setAttendance(updated);
   };
 
-  // ── Summary ───────────────────────────────────────────────────
   const counts = STATUS_OPTIONS.reduce((acc, s) => {
     acc[s] = Object.values(attendance).filter((v) => v === s).length;
     return acc;
   }, {});
 
-  // ── Save ──────────────────────────────────────────────────────
   const handleSave = async () => {
     if (!selectedClass) {
       toast.error("Please select a class first");
