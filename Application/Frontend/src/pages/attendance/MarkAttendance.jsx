@@ -230,7 +230,6 @@ export default function MarkAttendance() {
           </div>
         </div>
 
-        {/* Summary Cards */}
         {selectedClass && students.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
             {[
