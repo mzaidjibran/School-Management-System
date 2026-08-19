@@ -408,7 +408,6 @@ export default function MarkAttendance() {
                   })}
                 </div>
 
-                {/* Footer actions */}
                 <div className="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center px-5 py-4 border-t border-slate-100">
                   <div className="flex flex-wrap gap-2">
                     <button
