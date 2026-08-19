@@ -288,7 +288,6 @@ export default function MarkAttendance() {
               </div>
             ) : (
               <>
-                {/* Class info                {/* Desktop View Table */}
                 <div className="hidden md:block overflow-x-auto">
                   <table className="w-full">
                     <thead className="bg-slate-50 border-b border-slate-200">
