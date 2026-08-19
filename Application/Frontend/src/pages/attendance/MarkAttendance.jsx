@@ -341,7 +341,6 @@ export default function MarkAttendance() {
                   </table>
                 </div>
 
-                {/* Mobile View Cards */}
                 <div className="block md:hidden p-4 space-y-3 bg-slate-50/50">
                   {students.map((student, idx) => {
                     const avatarColor =
