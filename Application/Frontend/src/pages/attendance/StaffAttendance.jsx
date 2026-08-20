@@ -63,7 +63,6 @@ export default function StaffAttendance() {
       );
       setTeachers(list);
 
-      // 2. Fetch marked attendance for this date
       const attendanceRes = await getStaffAttendance(selectedDate);
       const markedRecords = attendanceRes.data || [];
 
