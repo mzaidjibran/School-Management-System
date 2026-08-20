@@ -45,7 +45,7 @@ export default function StaffAttendance() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Load staff list & marked attendance on date changes
+  
   const fetchAttendance = async () => {
     setLoading(true);
     try {
