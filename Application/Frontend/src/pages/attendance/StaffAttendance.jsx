@@ -1,16 +1,25 @@
 import { useState, useEffect } from "react";
-import { Users, Calendar, ClipboardCheck, AlertCircle, Save, Loader2 } from "lucide-react";
+import {
+  Users,
+  Calendar,
+  ClipboardCheck,
+  AlertCircle,
+  Save,
+  Loader2,
+} from "lucide-react";
 import { getAllTeachers } from "../../api/Teacher_Api.js";
-import { getStaffAttendance, markStaffAttendance } from "../../api/Attendance_Api.js";
+import {
+  getStaffAttendance,
+  markStaffAttendance,
+} from "../../api/Attendance_Api.js";
 import toast from "react-hot-toast";
-
 
 const StatusRadio = ({ value, current, onChange }) => {
   const styles = {
     present: "border-emerald-500 bg-emerald-50 text-emerald-700",
-    absent:  "border-rose-500    bg-rose-50    text-rose-700",
-    leave:   "border-amber-500   bg-amber-50   text-amber-700",
-    late:    "border-blue-500    bg-blue-50    text-blue-700",
+    absent: "border-rose-500    bg-rose-50    text-rose-700",
+    leave: "border-amber-500   bg-amber-50   text-amber-700",
+    late: "border-blue-500    bg-blue-50    text-blue-700",
   };
   return (
     <label
@@ -35,23 +44,23 @@ export default function StaffAttendance() {
   const [teachers, setTeachers] = useState([]);
   const [recordsMap, setRecordsMap] = useState({});
   const [remarksMap, setRemarksMap] = useState({});
- 
+
   const getLocalDateString = () => {
-    const tzoffset = (new Date()).getTimezoneOffset() * 60000;
-    return (new Date(Date.now() - tzoffset)).toISOString().split('T')[0];
+    const tzoffset = new Date().getTimezoneOffset() * 60000;
+    return new Date(Date.now() - tzoffset).toISOString().split("T")[0];
   };
 
   const [selectedDate, setSelectedDate] = useState(getLocalDateString());
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  
   const fetchAttendance = async () => {
     setLoading(true);
     try {
-      // 1. Fetch active teachers
       const teachersRes = await getAllTeachers();
-      const list = (teachersRes.data || []).filter(t => t.status === "active" || t.status === "Active" || !t.status);
+      const list = (teachersRes.data || []).filter(
+        (t) => t.status === "active" || t.status === "Active" || !t.status,
+      );
       setTeachers(list);
 
       // 2. Fetch marked attendance for this date
@@ -64,7 +73,8 @@ export default function StaffAttendance() {
 
       list.forEach((t) => {
         const existing = markedRecords.find((r) => {
-          const rTeacherId = typeof r.teacher === "object" ? r.teacher?._id : r.teacher;
+          const rTeacherId =
+            typeof r.teacher === "object" ? r.teacher?._id : r.teacher;
           return String(rTeacherId) === String(t._id);
         });
         if (existing) {
@@ -144,7 +154,9 @@ export default function StaffAttendance() {
         <div className="bg-white p-3.5 rounded-md border border-slate-100/80 shadow-sm flex items-center gap-3 flex-1">
           <Calendar size={18} className="text-indigo-600" />
           <div className="flex-1">
-            <p className="text-[10px] text-slate-400 font-bold uppercase">Attendance Date</p>
+            <p className="text-[10px] text-slate-400 font-bold uppercase">
+              Attendance Date
+            </p>
             <input
               type="date"
               value={selectedDate}
@@ -158,24 +170,44 @@ export default function StaffAttendance() {
         {/* Quick Summary Grid */}
         <div className="bg-white p-2.5 rounded-md border border-slate-100/80 shadow-sm grid grid-cols-5 gap-2 md:w-[60%] lg:w-[50%] shrink-0">
           <div className="text-center py-1 border-r border-slate-100 last:border-r-0">
-            <span className="text-[9px] text-slate-400 font-bold uppercase">Total</span>
-            <span className="block text-sm font-bold text-slate-800 mt-0.5">{teachers.length}</span>
+            <span className="text-[9px] text-slate-400 font-bold uppercase">
+              Total
+            </span>
+            <span className="block text-sm font-bold text-slate-800 mt-0.5">
+              {teachers.length}
+            </span>
           </div>
           <div className="text-center py-1 border-r border-slate-100 last:border-r-0">
-            <span className="text-[9px] text-emerald-500 font-bold uppercase">Present</span>
-            <span className="block text-sm font-bold text-emerald-600 mt-0.5">{counts.present || 0}</span>
+            <span className="text-[9px] text-emerald-500 font-bold uppercase">
+              Present
+            </span>
+            <span className="block text-sm font-bold text-emerald-600 mt-0.5">
+              {counts.present || 0}
+            </span>
           </div>
           <div className="text-center py-1 border-r border-slate-100 last:border-r-0">
-            <span className="text-[9px] text-rose-500 font-bold uppercase">Absent</span>
-            <span className="block text-sm font-bold text-rose-600 mt-0.5">{counts.absent || 0}</span>
+            <span className="text-[9px] text-rose-500 font-bold uppercase">
+              Absent
+            </span>
+            <span className="block text-sm font-bold text-rose-600 mt-0.5">
+              {counts.absent || 0}
+            </span>
           </div>
           <div className="text-center py-1 border-r border-slate-100 last:border-r-0">
-            <span className="text-[9px] text-amber-500 font-bold uppercase">Leave</span>
-            <span className="block text-sm font-bold text-amber-600 mt-0.5">{counts.leave || 0}</span>
+            <span className="text-[9px] text-amber-500 font-bold uppercase">
+              Leave
+            </span>
+            <span className="block text-sm font-bold text-amber-600 mt-0.5">
+              {counts.leave || 0}
+            </span>
           </div>
           <div className="text-center py-1">
-            <span className="text-[9px] text-blue-500 font-bold uppercase">Late</span>
-            <span className="block text-sm font-bold text-blue-600 mt-0.5">{counts.late || 0}</span>
+            <span className="text-[9px] text-blue-500 font-bold uppercase">
+              Late
+            </span>
+            <span className="block text-sm font-bold text-blue-600 mt-0.5">
+              {counts.late || 0}
+            </span>
           </div>
         </div>
       </div>
@@ -184,7 +216,9 @@ export default function StaffAttendance() {
       <div className="bg-white p-3 rounded-md border border-slate-100/80 shadow-sm flex flex-wrap gap-2.5 items-center justify-between">
         <div className="flex items-center gap-2">
           <ClipboardCheck size={16} className="text-emerald-500" />
-          <span className="text-xs font-semibold text-slate-700">Quick Mark All Active Staff:</span>
+          <span className="text-xs font-semibold text-slate-700">
+            Quick Mark All Active Staff:
+          </span>
         </div>
         <div className="flex gap-2">
           <button
@@ -229,16 +263,25 @@ export default function StaffAttendance() {
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs">
                   {teachers.map((teacher) => (
-                    <tr key={teacher._id} className="hover:bg-slate-50/40 transition">
+                    <tr
+                      key={teacher._id}
+                      className="hover:bg-slate-50/40 transition"
+                    >
                       {/* Staff details */}
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-650 ring-1 ring-slate-100 flex-shrink-0">
-                            {teacher.fullName ? teacher.fullName.charAt(0).toUpperCase() : teacher.name?.charAt(0).toUpperCase()}
+                            {teacher.fullName
+                              ? teacher.fullName.charAt(0).toUpperCase()
+                              : teacher.name?.charAt(0).toUpperCase()}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-bold text-slate-800 truncate">{teacher.fullName || teacher.name}</p>
-                            <p className="text-[10px] text-slate-400 mt-0.5">Emp ID: {teacher.employeeId || "—"}</p>
+                            <p className="font-bold text-slate-800 truncate">
+                              {teacher.fullName || teacher.name}
+                            </p>
+                            <p className="text-[10px] text-slate-400 mt-0.5">
+                              Emp ID: {teacher.employeeId || "—"}
+                            </p>
                           </div>
                         </div>
                       </td>
@@ -256,7 +299,9 @@ export default function StaffAttendance() {
                               key={opt}
                               value={opt}
                               current={recordsMap[teacher._id]}
-                              onChange={(val) => handleStatusChange(teacher._id, val)}
+                              onChange={(val) =>
+                                handleStatusChange(teacher._id, val)
+                              }
                             />
                           ))}
                         </div>
@@ -268,7 +313,9 @@ export default function StaffAttendance() {
                           type="text"
                           placeholder="Add remarks..."
                           value={remarksMap[teacher._id] || ""}
-                          onChange={(e) => handleRemarksChange(teacher._id, e.target.value)}
+                          onChange={(e) =>
+                            handleRemarksChange(teacher._id, e.target.value)
+                          }
                           className="w-full px-2.5 py-1.5 border border-slate-200 rounded-md focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none text-xs text-slate-650 bg-white"
                         />
                       </td>
@@ -288,24 +335,35 @@ export default function StaffAttendance() {
                   {/* Header: Avatar, Name, Subject */}
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-650 shrink-0">
-                      {teacher.fullName ? teacher.fullName.charAt(0).toUpperCase() : teacher.name?.charAt(0).toUpperCase()}
+                      {teacher.fullName
+                        ? teacher.fullName.charAt(0).toUpperCase()
+                        : teacher.name?.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-bold text-slate-800 text-xs truncate">{teacher.fullName || teacher.name}</p>
-                      <p className="text-[9px] text-slate-400">ID: {teacher.employeeId || "—"} • {teacher.subject || "No Subject"}</p>
+                      <p className="font-bold text-slate-800 text-xs truncate">
+                        {teacher.fullName || teacher.name}
+                      </p>
+                      <p className="text-[9px] text-slate-400">
+                        ID: {teacher.employeeId || "—"} •{" "}
+                        {teacher.subject || "No Subject"}
+                      </p>
                     </div>
                   </div>
 
                   {/* Status selector */}
                   <div className="space-y-1">
-                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Attendance Status</p>
+                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">
+                      Attendance Status
+                    </p>
                     <div className="flex flex-wrap gap-1.5 pt-0.5">
                       {STATUS_OPTIONS.map((opt) => (
                         <StatusRadio
                           key={opt}
                           value={opt}
                           current={recordsMap[teacher._id]}
-                          onChange={(val) => handleStatusChange(teacher._id, val)}
+                          onChange={(val) =>
+                            handleStatusChange(teacher._id, val)
+                          }
                         />
                       ))}
                     </div>
@@ -313,12 +371,16 @@ export default function StaffAttendance() {
 
                   {/* Remarks */}
                   <div className="space-y-1">
-                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Remarks / Reason</p>
+                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">
+                      Remarks / Reason
+                    </p>
                     <input
                       type="text"
                       placeholder="Add remarks..."
                       value={remarksMap[teacher._id] || ""}
-                      onChange={(e) => handleRemarksChange(teacher._id, e.target.value)}
+                      onChange={(e) =>
+                        handleRemarksChange(teacher._id, e.target.value)
+                      }
                       className="w-full px-2.5 py-1.5 border border-slate-200 rounded-md outline-none text-xs text-slate-650 bg-white focus:border-indigo-500"
                     />
                   </div>
