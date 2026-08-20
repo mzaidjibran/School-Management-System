@@ -4,7 +4,7 @@ import { getAllTeachers } from "../../api/Teacher_Api.js";
 import { getStaffAttendance, markStaffAttendance } from "../../api/Attendance_Api.js";
 import toast from "react-hot-toast";
 
-// Radio buttons styled with Marina active brand colors
+
 const StatusRadio = ({ value, current, onChange }) => {
   const styles = {
     present: "border-emerald-500 bg-emerald-50 text-emerald-700",
