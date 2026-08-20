@@ -66,7 +66,6 @@ export default function StaffAttendance() {
       const attendanceRes = await getStaffAttendance(selectedDate);
       const markedRecords = attendanceRes.data || [];
 
-      // Create maps
       const records = {};
       const remarks = {};
 
