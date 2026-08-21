@@ -134,7 +134,7 @@ export default function StaffAttendance() {
 
       await markStaffAttendance(recordsPayload, selectedDate);
       toast.success("Staff attendance saved successfully!");
-      fetchAttendance(); // refresh
+      fetchAttendance();
     } catch (e) {
       console.error(e);
       toast.error(e.message || "Failed to save staff attendance");
