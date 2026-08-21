@@ -146,7 +146,6 @@ export default function StaffAttendance() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row gap-3 items-stretch justify-between">
-        {/* Date Selector */}
         <div className="bg-white p-3.5 rounded-md border border-slate-100/80 shadow-sm flex items-center gap-3 flex-1">
           <Calendar size={18} className="text-indigo-600" />
           <div className="flex-1">
