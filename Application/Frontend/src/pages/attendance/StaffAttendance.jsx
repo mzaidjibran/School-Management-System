@@ -79,7 +79,7 @@ export default function StaffAttendance() {
           records[t._id] = existing.status;
           remarks[t._id] = existing.remarks || "";
         } else {
-          records[t._id] = "present"; 
+          records[t._id] = "present";
           remarks[t._id] = "";
         }
       });
@@ -113,7 +113,6 @@ export default function StaffAttendance() {
     toast.success(`Marked all as ${status}`);
   };
 
-  // Summary counts
   const counts = STATUS_OPTIONS.reduce((acc, s) => {
     acc[s] = Object.values(recordsMap).filter((v) => v === s).length;
     return acc;
