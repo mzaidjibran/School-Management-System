@@ -79,7 +79,7 @@ export default function StaffAttendance() {
           records[t._id] = existing.status;
           remarks[t._id] = existing.remarks || "";
         } else {
-          records[t._id] = "present"; // Default state
+          records[t._id] = "present"; 
           remarks[t._id] = "";
         }
       });
