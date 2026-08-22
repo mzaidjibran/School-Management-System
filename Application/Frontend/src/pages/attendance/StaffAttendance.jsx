@@ -258,7 +258,6 @@ export default function StaffAttendance() {
                       key={teacher._id}
                       className="hover:bg-slate-50/40 transition"
                     >
-                      {/* Staff details */}
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-650 ring-1 ring-slate-100 flex-shrink-0">
