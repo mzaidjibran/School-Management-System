@@ -162,7 +162,7 @@ export default function StaffAttendance() {
           </div>
         </div>
 
-        {/* Quick Summary Grid */}
+       
         <div className="bg-white p-2.5 rounded-md border border-slate-100/80 shadow-sm grid grid-cols-5 gap-2 md:w-[60%] lg:w-[50%] shrink-0">
           <div className="text-center py-1 border-r border-slate-100 last:border-r-0">
             <span className="text-[9px] text-slate-400 font-bold uppercase">
