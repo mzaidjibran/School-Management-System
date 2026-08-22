@@ -242,7 +242,6 @@ export default function StaffAttendance() {
           </div>
         ) : (
           <>
-            {/* Desktop View Table */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
