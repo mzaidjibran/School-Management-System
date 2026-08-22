@@ -229,7 +229,6 @@ export default function StaffAttendance() {
         </div>
       </div>
 
-      {/* Main Teachers Table Card */}
       <div className="bg-white rounded-md border border-slate-100/80 shadow-sm overflow-hidden">
         {loading ? (
           <div className="p-10 text-center flex flex-col items-center justify-center gap-2 text-slate-500 text-xs">
