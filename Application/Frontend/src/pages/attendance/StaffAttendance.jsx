@@ -162,7 +162,6 @@ export default function StaffAttendance() {
           </div>
         </div>
 
-       
         <div className="bg-white p-2.5 rounded-md border border-slate-100/80 shadow-sm grid grid-cols-5 gap-2 md:w-[60%] lg:w-[50%] shrink-0">
           <div className="text-center py-1 border-r border-slate-100 last:border-r-0">
             <span className="text-[9px] text-slate-400 font-bold uppercase">
@@ -207,7 +206,6 @@ export default function StaffAttendance() {
         </div>
       </div>
 
-      {/* Quick Action Banners */}
       <div className="bg-white p-3 rounded-md border border-slate-100/80 shadow-sm flex flex-wrap gap-2.5 items-center justify-between">
         <div className="flex items-center gap-2">
           <ClipboardCheck size={16} className="text-emerald-500" />
