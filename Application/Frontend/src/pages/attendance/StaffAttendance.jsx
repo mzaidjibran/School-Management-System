@@ -318,7 +318,6 @@ export default function StaffAttendance() {
                   key={teacher._id}
                   className="bg-white border border-slate-100 rounded-md p-3.5 space-y-3 shadow-sm hover:shadow transition duration-200"
                 >
-                  {/* Header: Avatar, Name, Subject */}
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-650 shrink-0">
                       {teacher.fullName
