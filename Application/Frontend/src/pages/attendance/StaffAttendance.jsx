@@ -295,7 +295,6 @@ export default function StaffAttendance() {
                         </div>
                       </td>
 
-                      {/* Remarks Input */}
                       <td className="px-4 py-3">
                         <input
                           type="text"
