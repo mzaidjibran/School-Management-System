@@ -280,7 +280,6 @@ export default function StaffAttendance() {
                         {teacher.subject || "—"}
                       </td>
 
-                      {/* Status Options */}
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex gap-1.5">
                           {STATUS_OPTIONS.map((opt) => (
