@@ -312,7 +312,6 @@ export default function StaffAttendance() {
               </table>
             </div>
 
-            {/* Mobile View Cards */}
             <div className="block md:hidden space-y-3 p-3">
               {teachers.map((teacher) => (
                 <div
