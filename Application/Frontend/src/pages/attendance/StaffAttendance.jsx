@@ -276,7 +276,6 @@ export default function StaffAttendance() {
                         </div>
                       </td>
 
-                      {/* Subject */}
                       <td className="px-4 py-3 text-slate-600 font-medium whitespace-nowrap">
                         {teacher.subject || "—"}
                       </td>
