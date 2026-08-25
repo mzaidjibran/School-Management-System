@@ -85,7 +85,6 @@ export const paySalary = async (request, response) => {
   }
 };
 
-// Get payroll history for a given month
 export const getPayrollHistory = async (request, response) => {
   try {
     const { month } = request.query;
