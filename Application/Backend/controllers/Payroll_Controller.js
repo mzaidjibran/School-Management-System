@@ -2,23 +2,46 @@ import { Payroll } from "../models/Payroll_Model.js";
 import Teacher from "../models/Teacher_Model.js";
 import { StaffAttendance } from "../models/Staff_Attendence_Model.js";
 
-// Pay or record salary payment
 export const paySalary = async (request, response) => {
   try {
-    const { teacherId, month, salaryBasis, rate, units, allowance, deduction, netSalary, status } = request.body;
+    const {
+      teacherId,
+      month,
+      salaryBasis,
+      rate,
+      units,
+      allowance,
+      deduction,
+      netSalary,
+      status,
+    } = request.body;
 
-    if (!teacherId || !month || !salaryBasis || rate === undefined || units === undefined || netSalary === undefined) {
+    if (
+      !teacherId ||
+      !month ||
+      !salaryBasis ||
+      rate === undefined ||
+      units === undefined ||
+      netSalary === undefined
+    ) {
       return response.status(400).json({
         success: false,
         error: true,
-        message: "Teacher, month, salary basis, rate, units, and netSalary are mandatory",
+        message:
+          "Teacher, month, salary basis, rate, units, and netSalary are mandatory",
       });
     }
 
-    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
-    
+    const ownerId =
+      request.user && request.user.role === "teacher"
+        ? request.user.createdBy
+        : request.userId;
+
     // Verify teacher belongs to admin
-    const teacherExists = await Teacher.findOne({ _id: teacherId, userId: ownerId });
+    const teacherExists = await Teacher.findOne({
+      _id: teacherId,
+      userId: ownerId,
+    });
     if (!teacherExists) {
       return response.status(403).json({
         success: false,
@@ -45,7 +68,7 @@ export const paySalary = async (request, response) => {
         paymentDate: status === "paid" ? new Date() : null,
         branch: branchId,
       },
-      { new: true, upsert: true, runValidators: true }
+      { new: true, upsert: true, runValidators: true },
     );
 
     response.status(201).json({
@@ -76,15 +99,18 @@ export const getPayrollHistory = async (request, response) => {
       });
     }
 
-    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
-    
+    const ownerId =
+      request.user && request.user.role === "teacher"
+        ? request.user.createdBy
+        : request.userId;
+
     // Get all teachers for this admin
     const teacherQuery = { userId: ownerId };
     if (request.headers["x-branch-id"]) {
       teacherQuery.branch = request.headers["x-branch-id"];
     }
     const teachersList = await Teacher.find(teacherQuery);
-    const teacherIds = teachersList.map(t => t._id);
+    const teacherIds = teachersList.map((t) => t._id);
 
     const records = await Payroll.find({
       teacher: { $in: teacherIds },
@@ -119,11 +145,14 @@ export const updateTeacherBaseSalary = async (request, response) => {
       });
     }
 
-    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+    const ownerId =
+      request.user && request.user.role === "teacher"
+        ? request.user.createdBy
+        : request.userId;
     const teacher = await Teacher.findOneAndUpdate(
       { _id: teacherId, userId: ownerId },
       { salary, salaryBasis },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!teacher) {
@@ -162,27 +191,44 @@ export const getPayrollAttendanceStats = async (request, response) => {
       });
     }
 
-    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
-    
+    const ownerId =
+      request.user && request.user.role === "teacher"
+        ? request.user.createdBy
+        : request.userId;
+
     // Get all teachers for this admin
     const teacherQuery = { userId: ownerId };
     if (request.headers["x-branch-id"]) {
       teacherQuery.branch = request.headers["x-branch-id"];
     }
     const teachersList = await Teacher.find(teacherQuery);
-    const teacherIds = teachersList.map(t => t._id);
+    const teacherIds = teachersList.map((t) => t._id);
 
     // Parse month name to get start and end dates in local / UTC time
     // month is like "July 2026"
     const [monthName, yearName] = month.trim().split(" ");
-    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
     const monthIndex = months.indexOf(monthName);
-    
+
     if (monthIndex === -1 || !yearName) {
       return response.status(400).json({
         success: false,
         error: true,
-        message: "Invalid month format. Expected 'Month Year' (e.g. 'July 2026')",
+        message:
+          "Invalid month format. Expected 'Month Year' (e.g. 'July 2026')",
       });
     }
 
@@ -196,11 +242,11 @@ export const getPayrollAttendanceStats = async (request, response) => {
     });
 
     const stats = {};
-    teacherIds.forEach(id => {
+    teacherIds.forEach((id) => {
       stats[id] = { present: 0, absent: 0, late: 0, leave: 0 };
     });
 
-    records.forEach(r => {
+    records.forEach((r) => {
       const teacherIdStr = r.teacher.toString();
       if (stats[teacherIdStr] && r.status) {
         const statusKey = r.status.toLowerCase();
