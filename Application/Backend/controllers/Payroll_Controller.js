@@ -102,7 +102,6 @@ export const getPayrollHistory = async (request, response) => {
         ? request.user.createdBy
         : request.userId;
 
-    // Get all teachers for this admin
     const teacherQuery = { userId: ownerId };
     if (request.headers["x-branch-id"]) {
       teacherQuery.branch = request.headers["x-branch-id"];
