@@ -37,7 +37,6 @@ export const paySalary = async (request, response) => {
         ? request.user.createdBy
         : request.userId;
 
-    // Verify teacher belongs to admin
     const teacherExists = await Teacher.findOne({
       _id: teacherId,
       userId: ownerId,
