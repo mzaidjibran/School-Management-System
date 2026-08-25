@@ -129,7 +129,6 @@ export const getPayrollHistory = async (request, response) => {
   }
 };
 
-// Update teacher default base salary and basis
 export const updateTeacherBaseSalary = async (request, response) => {
   try {
     const { teacherId, salary, salaryBasis } = request.body;
