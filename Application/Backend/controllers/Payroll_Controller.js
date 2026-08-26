@@ -174,7 +174,6 @@ export const updateTeacherBaseSalary = async (request, response) => {
   }
 };
 
-// Get monthly attendance summaries for all teachers
 export const getPayrollAttendanceStats = async (request, response) => {
   try {
     const { month } = request.query;
