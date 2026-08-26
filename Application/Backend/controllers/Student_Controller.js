@@ -9,7 +9,6 @@ function escapeRegExp(value) {
 function normalizePayload(body, file) {
   const data = { ...body };
 
-  // Name → firstName + lastName
   if (data.Name) {
     const parts = String(data.Name).trim().split(/\s+/);
     data.firstName = parts[0] || "";
