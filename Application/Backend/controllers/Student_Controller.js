@@ -16,7 +16,6 @@ function normalizePayload(body, file) {
     delete data.Name;
   }
 
-  // Map class to currentClass
   if (data.class) {
     data.currentClass = data.class;
     delete data.class;
