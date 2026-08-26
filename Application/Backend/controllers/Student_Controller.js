@@ -6,7 +6,6 @@ function escapeRegExp(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-// ─── Helper: Normalize Incoming Data ─────────────────────────────
 function normalizePayload(body, file) {
   const data = { ...body };
 
@@ -104,7 +103,7 @@ export const createStudent = async (request, response) => {
     await createNotificationHelper(
       "New Student Registered",
       `${studentData.firstName} ${studentData.lastName || ""} was admitted under admission number ${studentData.admissionNumber}.`,
-      "student"
+      "student",
     );
     const populated = await Student.findById(student._id).populate(
       "currentClass",
@@ -128,7 +127,10 @@ export const createStudent = async (request, response) => {
 // ─── Get All Students ─────────────────────────────────────────────
 export const getAllStudents = async (request, response) => {
   try {
-    const ownerId = request.user && request.user.role === "teacher" ? request.user.createdBy : request.userId;
+    const ownerId =
+      request.user && request.user.role === "teacher"
+        ? request.user.createdBy
+        : request.userId;
     const query = { createdBy: ownerId };
     const { rollNumber, name, search } = request.query;
 
@@ -144,28 +146,22 @@ export const getAllStudents = async (request, response) => {
       const words = searchTerm.split(/\s+/);
       if (words.length > 1) {
         const firstRegex = new RegExp(escapeRegExp(words[0]), "i");
-        const lastRegex = new RegExp(escapeRegExp(words.slice(1).join(" ")), "i");
+        const lastRegex = new RegExp(
+          escapeRegExp(words.slice(1).join(" ")),
+          "i",
+        );
         query.$or = [
           { firstName: regex },
           { lastName: regex },
           {
-            $and: [
-              { firstName: firstRegex },
-              { lastName: lastRegex }
-            ]
+            $and: [{ firstName: firstRegex }, { lastName: lastRegex }],
           },
           {
-            $and: [
-              { firstName: lastRegex },
-              { lastName: firstRegex }
-            ]
-          }
+            $and: [{ firstName: lastRegex }, { lastName: firstRegex }],
+          },
         ];
       } else {
-        query.$or = [
-          { firstName: regex },
-          { lastName: regex }
-        ];
+        query.$or = [{ firstName: regex }, { lastName: regex }];
       }
     }
     if (request.user && request.user.role === "teacher") {
