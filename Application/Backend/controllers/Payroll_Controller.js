@@ -198,8 +198,6 @@ export const getPayrollAttendanceStats = async (request, response) => {
     const teachersList = await Teacher.find(teacherQuery);
     const teacherIds = teachersList.map((t) => t._id);
 
-    // Parse month name to get start and end dates in local / UTC time
-    // month is like "July 2026"
     const [monthName, yearName] = month.trim().split(" ");
     const months = [
       "January",
