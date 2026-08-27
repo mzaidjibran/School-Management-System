@@ -36,7 +36,6 @@ function normalizePayload(body, file) {
     if (["male", "female", "other"].includes(g)) data.gender = g;
   }
 
-  // Status — match karo model ke enum se
   if (data.status && typeof data.status === "string") {
     const s = data.status.toLowerCase();
     const map = {
