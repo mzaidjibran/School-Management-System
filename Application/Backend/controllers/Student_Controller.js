@@ -31,7 +31,6 @@ function normalizePayload(body, file) {
     delete data.dateofBirth;
   }
 
-  // Gender — match karo model ke enum se (lowercase)
   if (data.gender && typeof data.gender === "string") {
     const g = data.gender.toLowerCase();
     if (["male", "female", "other"].includes(g)) data.gender = g;
