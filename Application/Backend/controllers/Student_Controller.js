@@ -21,7 +21,6 @@ function normalizePayload(body, file) {
     delete data.class;
   }
 
-  // CNIC
   if (data.cnic && !data.CNIC) {
     data.CNIC = data.cnic;
     delete data.cnic;
