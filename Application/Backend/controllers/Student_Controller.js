@@ -26,7 +26,6 @@ function normalizePayload(body, file) {
     delete data.cnic;
   }
 
-  // Date of Birth
   if (data.dateofBirth && !data.dateOfBirth) {
     data.dateOfBirth = data.dateofBirth;
     delete data.dateofBirth;
