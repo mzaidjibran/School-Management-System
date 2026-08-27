@@ -48,7 +48,6 @@ function normalizePayload(body, file) {
     if (map[s]) data.status = map[s];
   }
 
-  // Profile Image
   if (file) data.profileImage = `/image/${file.filename}`;
 
   return data;
