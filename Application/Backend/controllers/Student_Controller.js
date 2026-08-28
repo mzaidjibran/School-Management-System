@@ -212,7 +212,6 @@ export const getSingleStudent = async (request, response) => {
   }
 };
 
-// ─── Update Student ───────────────────────────────────────────────
 export const updateStudent = async (request, response) => {
   try {
     const updateData = normalizePayload(request.body, request.file);
