@@ -76,7 +76,6 @@ function transformStudentDoc(doc) {
   };
 }
 
-// ─── Create Student ───────────────────────────────────────────────
 export const createStudent = async (request, response) => {
   try {
     const studentData = normalizePayload(request.body, request.file);
