@@ -114,7 +114,6 @@ export const createStudent = async (request, response) => {
   }
 };
 
-// ─── Get All Students ─────────────────────────────────────────────
 export const getAllStudents = async (request, response) => {
   try {
     const ownerId =
