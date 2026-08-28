@@ -36,7 +36,9 @@ function normalizePayload(body, file) {
     delete data.emergencyPhone;
   }
 
-  if (file) data.profileImage = `/image/${file.filename}`;
+  if (file) {
+    data.profileImage = file.path || file.secure_url || file.url || `/image/${file.filename}`;
+  }
 
   return data;
 }
@@ -50,7 +52,9 @@ function transformTeacherDoc(doc) {
     emergencyName: raw.emergencyContact?.name || "",
     emergencyPhone: raw.emergencyContact?.phone || "",
     profileImage: raw.profileImage
-      ? raw.profileImage.startsWith("/image/")
+      ? raw.profileImage.startsWith("http://") || raw.profileImage.startsWith("https://")
+        ? raw.profileImage
+        : raw.profileImage.startsWith("/image/")
         ? raw.profileImage
         : `/image/${path.basename(raw.profileImage)}`
       : "",

@@ -56,11 +56,23 @@ const getSafeUserWithSchool = async (user) => {
     const admin = await User_Model.findById(user.createdBy);
     if (admin) {
       safeUser.schoolName = admin.schoolName || "";
-      safeUser.schoolLogo = admin.schoolLogo ? (admin.schoolLogo.startsWith("/image/") ? admin.schoolLogo : `/image/${admin.schoolLogo.split(/[\\/]/).pop()}`) : "";
+      safeUser.schoolLogo = admin.schoolLogo
+        ? admin.schoolLogo.startsWith("http://") || admin.schoolLogo.startsWith("https://")
+          ? admin.schoolLogo
+          : admin.schoolLogo.startsWith("/image/")
+          ? admin.schoolLogo
+          : `/image/${admin.schoolLogo.split(/[\\/]/).pop()}`
+        : "";
     }
   } else if (user.role === "admin") {
     safeUser.schoolName = user.schoolName || "";
-    safeUser.schoolLogo = user.schoolLogo ? (user.schoolLogo.startsWith("/image/") ? user.schoolLogo : `/image/${user.schoolLogo.split(/[\\/]/).pop()}`) : "";
+    safeUser.schoolLogo = user.schoolLogo
+      ? user.schoolLogo.startsWith("http://") || user.schoolLogo.startsWith("https://")
+        ? user.schoolLogo
+        : user.schoolLogo.startsWith("/image/")
+        ? user.schoolLogo
+        : `/image/${user.schoolLogo.split(/[\\/]/).pop()}`
+      : "";
   }
   return safeUser;
 };
@@ -168,7 +180,9 @@ export const UpdateMyProfile = async (request, response) => {
     delete updateData.password;
     delete updateData.role;
 
-    if (request.file) updateData.profileImage = `/image/${request.file.filename}`;
+    if (request.file) {
+      updateData.profileImage = request.file.path || request.file.secure_url || request.file.url || `/image/${request.file.filename}`;
+    }
 
     const updated = await User_Model.findByIdAndUpdate(request.userId, updateData, { new: true });
     if (!updated)
@@ -209,7 +223,7 @@ export const UpdateSchoolSettings = async (request, response) => {
     }
 
     if (request.file) {
-      updateData.schoolLogo = `/image/${request.file.filename}`;
+      updateData.schoolLogo = request.file.path || request.file.secure_url || request.file.url || `/image/${request.file.filename}`;
     }
 
     const updated = await User_Model.findByIdAndUpdate(request.userId, updateData, { new: true });

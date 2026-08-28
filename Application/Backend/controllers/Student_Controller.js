@@ -48,7 +48,9 @@ function normalizePayload(body, file) {
     if (map[s]) data.status = map[s];
   }
 
-  if (file) data.profileImage = `/image/${file.filename}`;
+  if (file) {
+    data.profileImage = file.path || file.secure_url || file.url || `/image/${file.filename}`;
+  }
 
   return data;
 }
@@ -69,7 +71,9 @@ function transformStudentDoc(doc) {
         : raw.currentClass
       : "",
     profileImage: raw.profileImage
-      ? raw.profileImage.startsWith("/image/")
+      ? raw.profileImage.startsWith("http://") || raw.profileImage.startsWith("https://")
+        ? raw.profileImage
+        : raw.profileImage.startsWith("/image/")
         ? raw.profileImage
         : `/image/${path.basename(raw.profileImage)}`
       : "",

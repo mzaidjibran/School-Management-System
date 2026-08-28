@@ -16,7 +16,7 @@ export default function Footer() {
             <div className="w-9 h-9 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-lg flex items-center justify-center shadow-md overflow-hidden">
               {schoolLogo ? (
                 <img
-                  src={`${API_BASE}${schoolLogo}`}
+                  src={schoolLogo.startsWith("http") ? schoolLogo : `${API_BASE}${schoolLogo}`}
                   alt="School Logo"
                   className="w-full h-full object-cover"
                 />

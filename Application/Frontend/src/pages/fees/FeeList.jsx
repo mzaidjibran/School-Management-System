@@ -277,7 +277,7 @@ const FeeSlipModal = ({ record, onClose }) => {
         <div className="overflow-y-auto flex-1 p-6" ref={printRef}>
           <div className="text-center border-b border-slate-100 pb-4 mb-4">
             {schoolLogo ? (
-              <img src={`${API_BASE}${schoolLogo}`} alt="School Logo" className="w-14 h-14 mx-auto rounded-full object-cover mb-2" />
+              <img src={schoolLogo.startsWith("http") ? schoolLogo : `${API_BASE}${schoolLogo}`} alt="School Logo" className="w-14 h-14 mx-auto rounded-full object-cover mb-2" />
             ) : (
               <div className="w-14 h-14 mx-auto bg-indigo-600 rounded-full flex items-center justify-center text-white text-xl font-bold mb-2">
                 {(schoolName || "P")[0].toUpperCase()}

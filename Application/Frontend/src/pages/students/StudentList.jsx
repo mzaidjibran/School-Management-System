@@ -503,7 +503,7 @@ export default function StudentList() {
         emergencyPhone: s.emergencyPhone || "",
         biometricId: s.biometricId || "",
         picture: s.profileImage
-          ? `${API_BASE}${s.profileImage}`
+          ? (s.profileImage.startsWith("http") ? s.profileImage : `${API_BASE}${s.profileImage}`)
           : `https://ui-avatars.com/api/?name=${encodeURIComponent(
               s.Name || s.firstName || "S"
             )}&background=3b82f6&color=fff`,

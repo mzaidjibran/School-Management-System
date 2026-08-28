@@ -296,7 +296,7 @@ export default function ProHeader() {
   useEffect(() => {
     if (schoolSettingsModalOpen) {
       setNewSchoolName(schoolName || "");
-      setPreviewLogo(schoolLogo ? `${API_BASE}${schoolLogo}` : "");
+      setPreviewLogo(schoolLogo ? (schoolLogo.startsWith("http") ? schoolLogo : `${API_BASE}${schoolLogo}`) : "");
       setSelectedLogoFile(null);
     }
   }, [schoolSettingsModalOpen, schoolName, schoolLogo]);
@@ -431,7 +431,7 @@ export default function ProHeader() {
 
   // Avatar URL — real custom upload or UI Avatars fallback
   const avatarUrl = userImage
-    ? `${API_BASE}${userImage}`
+    ? (userImage.startsWith("http") ? userImage : `${API_BASE}${userImage}`)
     : `https://ui-avatars.com/api/?name=${encodeURIComponent(userName || "U")}&background=4f46e5&color=fff&bold=true&size=40`;
   return (
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-lg border-b border-slate-200/80">
@@ -442,7 +442,7 @@ export default function ProHeader() {
             <div className="w-9 h-9 xl:w-10 xl:h-10 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-full flex items-center justify-center shadow-md shrink-0 overflow-hidden">
               {schoolLogo ? (
                 <img
-                  src={`${API_BASE}${schoolLogo}`}
+                  src={schoolLogo.startsWith("http") ? schoolLogo : `${API_BASE}${schoolLogo}`}
                   alt="School Logo"
                   className="w-full h-full object-cover"
                 />

@@ -4,6 +4,7 @@
 // Handles cases where the stored value is an absolute disk path or already normalized.
 export const normalizeUserImage = (image) => {
   if (!image) return "";
+  if (image.startsWith("http://") || image.startsWith("https://")) return image;
   return image.startsWith("/image/")
     ? image
     : `/image/${image.split(/[\\/]/).pop()}`;
