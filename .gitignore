@@ -1,0 +1,41 @@
+# Dependencies (never commit node_modules)
+node_modules/
+*/node_modules/
+Application/Backend/node_modules/
+Application/Frontend/node_modules/
+
+# Environment Variables & Secrets (CRITICAL: contains DB & API keys)
+.env
+.env.local
+.env.*.local
+*.env
+Application/Backend/.env
+Application/Frontend/.env.local
+
+# Production Build outputs
+dist/
+dist-ssr/
+build/
+Application/Frontend/dist/
+
+# Local media / uploads
+Application/Backend/public/image/
+public/image/
+uploads/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
