@@ -35,9 +35,6 @@ const FloatingInput = ({
   </div>
 );
 
-// ---------- Floating Select ----------
-// options ab dono support karta hai: array of strings (Shift, Status)
-// ya array of {value, label} objects (Class Teacher dropdown)
 const FloatingSelect = ({
   label,
   name,
