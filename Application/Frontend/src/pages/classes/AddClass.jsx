@@ -5,7 +5,6 @@ import { createClass } from "../../api/Class_Api.js"; // path apne folder struct
 import { getAllTeachers } from "../../api/Teacher_Api.js"; // path apne folder structure ke hisaab se adjust kar lein
 import toast from "react-hot-toast";
 
-// ---------- Floating Input ----------
 const FloatingInput = ({
   label,
   name,
@@ -130,7 +129,10 @@ export default function AddClass() {
   const teacherOptions = teachers
     .map((t) => ({
       value: t._id,
-      label: t.name || `${t.firstName || ""} ${t.lastName || ""}`.trim() || "Unknown",
+      label:
+        t.name ||
+        `${t.firstName || ""} ${t.lastName || ""}`.trim() ||
+        "Unknown",
     }))
     .sort((a, b) => a.label.localeCompare(b.label));
 
