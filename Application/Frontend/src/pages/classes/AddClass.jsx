@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaBook, FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
-import { createClass } from "../../api/Class_Api.js"; // path apne folder structure ke hisaab se adjust kar lein
-import { getAllTeachers } from "../../api/Teacher_Api.js"; // path apne folder structure ke hisaab se adjust kar lein
-import toast from "react-hot-toast";
+import { createClass } from "../../api/Class_Api.js";
+import { getAllTeachers } from "../../api/Teacher_Api.js";
 
 const FloatingInput = ({
   label,
