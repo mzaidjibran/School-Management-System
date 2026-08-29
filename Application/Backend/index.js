@@ -30,6 +30,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 app.use(express.json());
+const allowedOrigins = [
+  "https://nullstacksloution.online",
+  "http://nullstacksloution.online",
+  "https://www.nullstacksloution.online",
+  "http://www.nullstacksloution.online",
+  "https://api.nullstacksloution.online",
+  "http://api.nullstacksloution.online",
+  ...(process.env.CLIENT_URL ? process.env.CLIENT_URL.split(",").map((s) => s.trim()) : []),
+  ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",").map((s) => s.trim()) : []),
+];
+
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -37,7 +48,9 @@ app.use(
 
       if (
         origin.startsWith("http://localhost") ||
-        origin.startsWith("http://127.0.0.1")
+        origin.startsWith("http://127.0.0.1") ||
+        allowedOrigins.includes(origin) ||
+        origin.includes("nullstacksloution.online")
       ) {
         return callback(null, true);
       }
