@@ -10,11 +10,13 @@ export const markAttendance = async (records) => {
     body: JSON.stringify({ records }),
   });
   const result = await response.json();
-  if (!response.ok) throw new Error(result.message || `Mark attendance failed: ${response.status}`);
+  if (!response.ok)
+    throw new Error(
+      result.message || `Mark attendance failed: ${response.status}`,
+    );
   return result;
 };
 
-// ─── Get Attendance By Class and Date ────────────────────────────
 export const getAttendanceByClassAndDate = async (classId, date, section) => {
   let url = `${API_BASE}/api/attendance?classId=${classId}&date=${date}`;
   if (section) url += `&section=${section}`;
@@ -22,7 +24,8 @@ export const getAttendanceByClassAndDate = async (classId, date, section) => {
     method: "GET",
     headers: getHeaders(),
   });
-  if (!response.ok) throw new Error(`Get attendance failed: ${response.status}`);
+  if (!response.ok)
+    throw new Error(`Get attendance failed: ${response.status}`);
   return response.json();
 };
 
@@ -36,7 +39,8 @@ export const getAttendanceByStudent = async (studentId, month, year) => {
     method: "GET",
     headers: getHeaders(),
   });
-  if (!response.ok) throw new Error(`Get student attendance failed: ${response.status}`);
+  if (!response.ok)
+    throw new Error(`Get student attendance failed: ${response.status}`);
   return response.json();
 };
 
@@ -47,7 +51,8 @@ export const updateAttendance = async (id, data) => {
     headers: getHeaders(),
     body: JSON.stringify(data),
   });
-  if (!response.ok) throw new Error(`Update attendance failed: ${response.status}`);
+  if (!response.ok)
+    throw new Error(`Update attendance failed: ${response.status}`);
   return response.json();
 };
 
@@ -58,7 +63,10 @@ export const deleteAttendance = async (id) => {
     headers: getHeaders(),
   });
   const result = await response.json();
-  if (!response.ok) throw new Error(result.message || `Delete attendance failed: ${response.status}`);
+  if (!response.ok)
+    throw new Error(
+      result.message || `Delete attendance failed: ${response.status}`,
+    );
   return result;
 };
 
@@ -70,17 +78,26 @@ export const markStaffAttendance = async (records, date) => {
     body: JSON.stringify({ records, date }),
   });
   const result = await response.json();
-  if (!response.ok) throw new Error(result.message || `Mark staff attendance failed: ${response.status}`);
+  if (!response.ok)
+    throw new Error(
+      result.message || `Mark staff attendance failed: ${response.status}`,
+    );
   return result;
 };
 
 // ─── Get Staff Attendance ─────────────────────────────────────────
 export const getStaffAttendance = async (date) => {
-  const response = await fetch(`${API_BASE}/api/attendance/staff?date=${date}`, {
-    method: "GET",
-    headers: getHeaders(),
-  });
+  const response = await fetch(
+    `${API_BASE}/api/attendance/staff?date=${date}`,
+    {
+      method: "GET",
+      headers: getHeaders(),
+    },
+  );
   const result = await response.json();
-  if (!response.ok) throw new Error(result.message || `Get staff attendance failed: ${response.status}`);
+  if (!response.ok)
+    throw new Error(
+      result.message || `Get staff attendance failed: ${response.status}`,
+    );
   return result;
 };
