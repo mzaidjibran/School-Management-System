@@ -175,7 +175,7 @@ export default function AttendanceList() {
     ? ((presentCount / records.length) * 100).toFixed(1)
     : 0;
 
-  // ── Pagination ─────────────────────────────────────────────────
+  
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const paginatedData = filtered.slice(
     (currentPage - 1) * itemsPerPage,
