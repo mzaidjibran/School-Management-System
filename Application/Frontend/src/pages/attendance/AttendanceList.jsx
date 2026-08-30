@@ -515,7 +515,6 @@ export default function AttendanceList() {
           </div>
         </div>
 
-        {/* Class + Date selector */}
         <div className="bg-white rounded-md shadow-sm border border-slate-100 p-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
