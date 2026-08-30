@@ -469,7 +469,6 @@ export default function AttendanceList() {
           </span>
         </nav>
 
-        {/* Header */}
         <div className="flex flex-wrap justify-between items-start gap-3">
           <div>
             <h1 className="text-2xl font-bold text-slate-800">
