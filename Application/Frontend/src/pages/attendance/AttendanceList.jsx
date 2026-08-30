@@ -166,7 +166,6 @@ export default function AttendanceList() {
     setCurrentPage(1);
   }, [search, statusFilter, records]);
 
-  // ── Stats ──────────────────────────────────────────────────────
   const presentCount = records.filter((r) => r.status === "present").length;
   const absentCount = records.filter((r) => r.status === "absent").length;
   const leaveCount = records.filter((r) => r.status === "leave").length;
@@ -175,14 +174,12 @@ export default function AttendanceList() {
     ? ((presentCount / records.length) * 100).toFixed(1)
     : 0;
 
-  
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const paginatedData = filtered.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
 
-  // ── Exports ────────────────────────────────────────────────────
   const flatRows = () =>
     filtered.map((r) => ({
       rollNo: r.student?.rollNumber || "—",
