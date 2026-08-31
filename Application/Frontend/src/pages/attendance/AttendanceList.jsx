@@ -712,7 +712,6 @@ export default function AttendanceList() {
                 </table>
               </div>
 
-              {/* Mobile View Cards */}
               <div className="block md:hidden p-4 space-y-3 bg-slate-50/50">
                 {paginatedData.map((record, idx) => {
                   const avatarColor =
