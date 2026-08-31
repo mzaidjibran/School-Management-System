@@ -652,7 +652,6 @@ export default function AttendanceList() {
             <EmptyState message="No records found for this date" />
           ) : (
             <>
-              {/* Desktop View Table */}
               <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-slate-50 border-b border-slate-200">
