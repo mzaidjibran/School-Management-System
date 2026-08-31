@@ -566,7 +566,6 @@ export default function AttendanceList() {
           </div>
         </div>
 
-        
         {records.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
             {[
@@ -617,7 +616,6 @@ export default function AttendanceList() {
           </div>
         )}
 
-        {/* Filters */}
         <div className="bg-white rounded-md shadow-sm border border-slate-100 px-4 py-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 items-center">
             <div className="relative">
