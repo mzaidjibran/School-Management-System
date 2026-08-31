@@ -642,7 +642,6 @@ export default function AttendanceList() {
           </div>
         </div>
 
-        {/* Table */}
         <div className="bg-white rounded-md shadow-sm border border-slate-100 overflow-hidden">
           {loading ? (
             <TableSkeleton />
