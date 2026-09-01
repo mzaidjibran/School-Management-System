@@ -776,7 +776,7 @@ export default function AttendanceList() {
             </>
           )}
 
-          {/* Pagination */}
+          
           {!loading && paginatedData.length > 0 && (
             <div className="flex flex-wrap justify-between items-center px-4 py-3 border-t border-slate-100 gap-2">
               <p className="text-xs text-slate-500">
