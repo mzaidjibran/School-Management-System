@@ -46,16 +46,14 @@ const getAuthState = () => {
 
   return {
     token,
-    userRole:  normalizeRole(localStorage.getItem("userRole")),
-    userId:    localStorage.getItem("userId"),
-    userName:  localStorage.getItem("userName"),
+    userRole: normalizeRole(localStorage.getItem("userRole")),
+    userId: localStorage.getItem("userId"),
+    userName: localStorage.getItem("userName"),
     userEmail: localStorage.getItem("userEmail"),
     userImage: localStorage.getItem("userImage"),
   };
 };
 
-// Returns the current authenticated user's state and derived role flags.
-// Listens to "auth-changed" (same tab) and "storage" (other tabs) to stay in sync.
 export const useAuth = () => {
   const [authState, setAuthState] = useState(getAuthState);
 
@@ -73,15 +71,15 @@ export const useAuth = () => {
 
   return {
     isLoggedIn: !!authState.token,
-    token:      authState.token,
-    userRole:   authState.userRole,
-    userId:     authState.userId,
-    userName:   authState.userName,
-    userEmail:  authState.userEmail,
-    userImage:  authState.userImage,
-    isAdmin:    authState.userRole === "admin",
+    token: authState.token,
+    userRole: authState.userRole,
+    userId: authState.userId,
+    userName: authState.userName,
+    userEmail: authState.userEmail,
+    userImage: authState.userImage,
+    isAdmin: authState.userRole === "admin",
     isEmployee: authState.userRole === "employee",
-    isTeacher:  authState.userRole === "teacher",
+    isTeacher: authState.userRole === "teacher",
     assignedPages: (() => {
       try {
         const u = localStorage.getItem("user");
