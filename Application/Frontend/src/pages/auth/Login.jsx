@@ -43,7 +43,6 @@ export default function Login() {
   const [spotlight, setSpotlight] = useState({ x: 0, y: 0 });
   const navigate = useNavigate();
 
-  // Developer Access States
   const [devAccessOpen, setDevAccessOpen] = useState(false);
   const [devVerified, setDevVerified] = useState(false);
   const [devLoginForm, setDevLoginForm] = useState({
@@ -134,7 +133,11 @@ export default function Login() {
     try {
       const result = await signIn(form.email, form.password);
       toast.success(`Welcome back, ${result.Name || ""}!`);
-      if (result.role === "teacher" && result.assignedPages && result.assignedPages.length > 0) {
+      if (
+        result.role === "teacher" &&
+        result.assignedPages &&
+        result.assignedPages.length > 0
+      ) {
         navigate(`/${result.assignedPages[0]}`);
       } else {
         navigate("/");
@@ -210,9 +213,17 @@ export default function Login() {
     setSpotlight({ x: e.clientX, y: e.clientY });
   }
 
-  const matchedPrincipal = principalsList.find(p => p.email && p.email.toLowerCase().trim() === form.email.toLowerCase().trim());
-  const displaySchoolName = matchedPrincipal?.schoolName || (principalsList[0]?.schoolName) || "Punjab Public High School";
-  const displaySchoolLogo = matchedPrincipal?.schoolLogo || (principalsList[0]?.schoolLogo) || "";
+  const matchedPrincipal = principalsList.find(
+    (p) =>
+      p.email &&
+      p.email.toLowerCase().trim() === form.email.toLowerCase().trim(),
+  );
+  const displaySchoolName =
+    matchedPrincipal?.schoolName ||
+    principalsList[0]?.schoolName ||
+    "Punjab Public High School";
+  const displaySchoolLogo =
+    matchedPrincipal?.schoolLogo || principalsList[0]?.schoolLogo || "";
   const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
   return (
@@ -266,9 +277,26 @@ export default function Login() {
           <div className="signin-logo">
             <div className="logo-ring">
               <div className="logo-orbit-dot"></div>
-              <div className="logo-inner" style={{ overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div
+                className="logo-inner"
+                style={{
+                  overflow: "hidden",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
                 {displaySchoolLogo ? (
-                  <img src={`${API_BASE}${displaySchoolLogo}`} alt="School Logo" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
+                  <img
+                    src={`${API_BASE}${displaySchoolLogo}`}
+                    alt="School Logo"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      borderRadius: "50%",
+                    }}
+                  />
                 ) : (
                   <School className="logo-icon" size={24} />
                 )}
