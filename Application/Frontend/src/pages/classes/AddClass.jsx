@@ -108,7 +108,6 @@ export default function AddClass() {
   const [savingAnother, setSavingAnother] = useState(false);
   const [teachers, setTeachers] = useState([]);
 
-  // Teacher list fetch karo dropdown ke liye
   useEffect(() => {
     const fetchTeachers = async () => {
       try {
