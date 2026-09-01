@@ -131,7 +131,6 @@ export default function AddClass() {
     }))
     .sort((a, b) => a.label.localeCompare(b.label));
 
-  // Model ke hisaab se sirf yeh teen fields actually required hain
   const requiredFields = ["className", "section", "academicYear"];
   const filledCount = requiredFields.filter((f) => form[f]?.trim()).length;
   const progressPercent = (filledCount / requiredFields.length) * 100;
