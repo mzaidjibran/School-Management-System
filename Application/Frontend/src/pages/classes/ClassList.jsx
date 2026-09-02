@@ -58,11 +58,6 @@ const FloatingInput = ({
   </div>
 );
 
-// ---------- Floating Select (disabled = plain text) ----------
-// options ab dono support karta hai: array of strings, ya array of
-// {value, label} objects (Class Teacher dropdown). displayValue use
-// hota hai sirf jab disabled=true ho aur value ko name mein resolve
-// karna ho (jaise Teacher ID ki jagah Teacher ka naam dikhana).
 const FloatingSelect = ({
   label,
   name,
