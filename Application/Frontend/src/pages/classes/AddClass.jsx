@@ -232,7 +232,6 @@ export default function AddClass() {
           </div>
         </div>
 
-        {/* Progress */}
         <div className="mb-8 bg-white/60 backdrop-blur-sm rounded-md p-4 shadow-sm">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium text-slate-600">
