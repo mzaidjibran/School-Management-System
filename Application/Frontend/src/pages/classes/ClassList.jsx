@@ -12,14 +12,18 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveAs } from "file-saver";
-import { getAllClasses, updateClass, deleteClass, createClass } from "../../api/Class_Api.js"; // path apne folder structure ke hisaab se adjust kar lein
-import { getAllTeachers } from "../../api/Teacher_Api.js"; // path apne folder structure ke hisaab se adjust kar lein
+import {
+  getAllClasses,
+  updateClass,
+  deleteClass,
+  createClass,
+} from "../../api/Class_Api.js";
+import { getAllTeachers } from "../../api/Teacher_Api.js";
 import toast from "react-hot-toast";
 import { confirmToast } from "../../utils/toastHelpers.jsx";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
-// ---------- Floating Input ----------
 const FloatingInput = ({
   label,
   name,
@@ -183,8 +187,16 @@ const TeacherAvatar = ({ teacher }) => {
   if (!teacher) {
     return <span className="text-xs text-slate-400 italic">Not Assigned</span>;
   }
-  const name = teacher.name || `${teacher.firstName || ""} ${teacher.lastName || ""}`.trim() || "-";
-  const initials = name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+  const name =
+    teacher.name ||
+    `${teacher.firstName || ""} ${teacher.lastName || ""}`.trim() ||
+    "-";
+  const initials = name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
   const getProfileImageUrl = (img) => {
     if (!img) return null;
@@ -233,7 +245,10 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave, teachers }) => {
   const teacherOptions = teachers
     .map((t) => ({
       value: t._id,
-      label: t.name || `${t.firstName || ""} ${t.lastName || ""}`.trim() || "Unknown",
+      label:
+        t.name ||
+        `${t.firstName || ""} ${t.lastName || ""}`.trim() ||
+        "Unknown",
     }))
     .sort((a, b) => a.label.localeCompare(b.label));
 
@@ -272,7 +287,7 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave, teachers }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-     console.log("formData:", JSON.stringify(formData));
+    console.log("formData:", JSON.stringify(formData));
     if (isViewOnly || !validate()) return;
 
     setIsSaving(true);
@@ -298,15 +313,19 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave, teachers }) => {
     } catch (error) {
       toast.error(error.message || "Update failed.");
       setIsSaving(false);
-      setErrors((prev) => ({ ...prev, submit: error.message || "Update failed" }));
+      setErrors((prev) => ({
+        ...prev,
+        submit: error.message || "Update failed",
+      }));
     }
   };
 
   if (!isOpen) return null;
 
- const classTeacherDisplayName = cls?.classTeacher
-  ? cls.classTeacher.name || `${cls.classTeacher.firstName || ""} ${cls.classTeacher.lastName || ""}`.trim()
-  : "Not Assigned";
+  const classTeacherDisplayName = cls?.classTeacher
+    ? cls.classTeacher.name ||
+      `${cls.classTeacher.firstName || ""} ${cls.classTeacher.lastName || ""}`.trim()
+    : "Not Assigned";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
@@ -552,13 +571,13 @@ export default function ClassList() {
           (c.classTeacher &&
             `${c.classTeacher.firstName} ${c.classTeacher.lastName}`
               .toLowerCase()
-              .includes(search.toLowerCase()))
+              .includes(search.toLowerCase())),
       );
     }
     if (shiftFilter) result = result.filter((c) => c.shift === shiftFilter);
     if (statusFilter)
       result = result.filter((c) =>
-        statusFilter === "Active" ? c.isActive : !c.isActive
+        statusFilter === "Active" ? c.isActive : !c.isActive,
       );
     setFiltered(result);
   }, [search, shiftFilter, statusFilter, classes]);
@@ -567,7 +586,9 @@ export default function ClassList() {
   const activeClasses = classes.filter((c) => c.isActive).length;
   const totalCapacity = classes.reduce((acc, c) => acc + (c.capacity || 0), 0);
   const totalTeachers = [
-    ...new Set(classes.filter((c) => c.classTeacher).map((c) => c.classTeacher._id)),
+    ...new Set(
+      classes.filter((c) => c.classTeacher).map((c) => c.classTeacher._id),
+    ),
   ].length;
 
   const exportCSV = () => {
@@ -586,14 +607,21 @@ export default function ClassList() {
       c.name || "",
       c.section || "",
       c.academicYear || "",
-      c.classTeacher ? `${c.classTeacher.firstName || ""} ${c.classTeacher.lastName || ""}`.trim() : "Not Assigned",
+      c.classTeacher
+        ? `${c.classTeacher.firstName || ""} ${c.classTeacher.lastName || ""}`.trim()
+        : "Not Assigned",
       c.capacity || "40",
       c.room || "",
       c.shift || "Morning",
       c.description || "",
       c.isActive ? "Active" : "Inactive",
     ]);
-    const csvContent = [headers.join(","), ...rows.map(r => r.map(val => `"${String(val || '').replace(/"/g, '""')}"`).join(","))].join("\n");
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((r) =>
+        r.map((val) => `"${String(val || "").replace(/"/g, '""')}"`).join(","),
+      ),
+    ].join("\n");
     saveAs(
       new Blob([csvContent], {
         type: "text/csv;charset=utf-8;",
@@ -616,25 +644,25 @@ export default function ClassList() {
         } else {
           inQuotes = !inQuotes;
         }
-      } else if (char === ',' && !inQuotes) {
-        row.push('');
-      } else if ((char === '\r' || char === '\n') && !inQuotes) {
-        if (char === '\r' && nextChar === '\n') i++;
+      } else if (char === "," && !inQuotes) {
+        row.push("");
+      } else if ((char === "\r" || char === "\n") && !inQuotes) {
+        if (char === "\r" && nextChar === "\n") i++;
         lines.push(row);
-        row = [''];
+        row = [""];
       } else {
         row[row.length - 1] += char;
       }
     }
-    if (row.length > 1 || row[0] !== '') lines.push(row);
-    const headers = lines[0].map(h => h.trim());
+    if (row.length > 1 || row[0] !== "") lines.push(row);
+    const headers = lines[0].map((h) => h.trim());
     const data = [];
     for (let i = 1; i < lines.length; i++) {
       const r = lines[i];
       if (r.length === 0 || (r.length === 1 && !r[0])) continue;
       const obj = {};
       headers.forEach((h, idx) => {
-        obj[h] = (r[idx] !== undefined) ? r[idx].trim() : "";
+        obj[h] = r[idx] !== undefined ? r[idx].trim() : "";
       });
       data.push(obj);
     }
@@ -644,19 +672,38 @@ export default function ClassList() {
   const csvFileInputRef = useRef(null);
 
   const handleBackupData = () => {
-    const headers = ["name", "section", "academicYear", "teacherName", "capacity", "room", "shift", "isActive"];
+    const headers = [
+      "name",
+      "section",
+      "academicYear",
+      "teacherName",
+      "capacity",
+      "room",
+      "shift",
+      "isActive",
+    ];
     const rows = classes.map((c) => [
       c.name || "",
       c.section || "",
       c.academicYear || "",
-      c.classTeacher ? `${c.classTeacher.firstName} ${c.classTeacher.lastName}`.trim() : "",
+      c.classTeacher
+        ? `${c.classTeacher.firstName} ${c.classTeacher.lastName}`.trim()
+        : "",
       c.capacity || "",
       c.room || "",
       c.shift || "",
-      c.isActive !== undefined ? c.isActive : true
+      c.isActive !== undefined ? c.isActive : true,
     ]);
-    const csvContent = [headers.join(","), ...rows.map(r => r.map(val => `"${String(val).replace(/"/g, '""')}"`).join(","))].join("\n");
-    saveAs(new Blob([csvContent], { type: "text/csv;charset=utf-8;" }), "classes_backup.csv");
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((r) =>
+        r.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(","),
+      ),
+    ].join("\n");
+    saveAs(
+      new Blob([csvContent], { type: "text/csv;charset=utf-8;" }),
+      "classes_backup.csv",
+    );
     toast.success("Classes backup downloaded successfully!");
   };
 
@@ -683,27 +730,53 @@ export default function ClassList() {
             const getVal = (r, ...keys) => {
               for (const k of keys) {
                 if (r[k] !== undefined) return r[k];
-                const foundKey = Object.keys(r).find(rk => rk.trim().toLowerCase() === k.toLowerCase());
+                const foundKey = Object.keys(r).find(
+                  (rk) => rk.trim().toLowerCase() === k.toLowerCase(),
+                );
                 if (foundKey) return r[foundKey];
               }
               return "";
             };
 
-            const classNameVal = getVal(row, "name", "class", "className", "class name");
-            const teacherNameVal = getVal(row, "teacherName", "teacher", "classTeacher", "class teacher", "teacherName");
+            const classNameVal = getVal(
+              row,
+              "name",
+              "class",
+              "className",
+              "class name",
+            );
+            const teacherNameVal = getVal(
+              row,
+              "teacherName",
+              "teacher",
+              "classTeacher",
+              "class teacher",
+              "teacherName",
+            );
 
-            const matchedTeacher = teachersList.find(t => {
-              const fullName = `${t.firstName || ""} ${t.lastName || ""}`.trim().toLowerCase();
-              return fullName === teacherNameVal.toLowerCase() || (t.name || "").toLowerCase() === teacherNameVal.toLowerCase();
+            const matchedTeacher = teachersList.find((t) => {
+              const fullName = `${t.firstName || ""} ${t.lastName || ""}`
+                .trim()
+                .toLowerCase();
+              return (
+                fullName === teacherNameVal.toLowerCase() ||
+                (t.name || "").toLowerCase() === teacherNameVal.toLowerCase()
+              );
             });
 
             const statusVal = getVal(row, "status", "isActive", "active");
-            const isActive = statusVal ? (statusVal.toLowerCase() === "active" || statusVal.toLowerCase() === "true" || statusVal === "1") : true;
+            const isActive = statusVal
+              ? statusVal.toLowerCase() === "active" ||
+                statusVal.toLowerCase() === "true" ||
+                statusVal === "1"
+              : true;
 
             const payload = {
               name: classNameVal,
               section: getVal(row, "section"),
-              academicYear: getVal(row, "academicYear", "academic year", "year") || new Date().getFullYear().toString(),
+              academicYear:
+                getVal(row, "academicYear", "academic year", "year") ||
+                new Date().getFullYear().toString(),
               capacity: Number(getVal(row, "capacity")) || 40,
               room: getVal(row, "room", "room no", "room number", "roomNo"),
               shift: getVal(row, "shift") || "Morning",
@@ -744,7 +817,9 @@ export default function ClassList() {
         Class: c.name,
         Section: c.section,
         "Academic Year": c.academicYear,
-        Teacher: c.classTeacher ? `${c.classTeacher.firstName} ${c.classTeacher.lastName}` : "Not Assigned",
+        Teacher: c.classTeacher
+          ? `${c.classTeacher.firstName} ${c.classTeacher.lastName}`
+          : "Not Assigned",
         Capacity: c.capacity,
         "Room No": c.room,
         Shift: c.shift,
@@ -761,13 +836,24 @@ export default function ClassList() {
     autoTable(doc, {
       startY: 20,
       head: [
-        ["Class", "Section", "Academic Year", "Teacher", "Capacity", "Room", "Shift", "Status"],
+        [
+          "Class",
+          "Section",
+          "Academic Year",
+          "Teacher",
+          "Capacity",
+          "Room",
+          "Shift",
+          "Status",
+        ],
       ],
       body: filtered.map((c) => [
         c.name,
         c.section,
         c.academicYear,
-        c.classTeacher ? `${c.classTeacher.firstName} ${c.classTeacher.lastName}` : "Not Assigned",
+        c.classTeacher
+          ? `${c.classTeacher.firstName} ${c.classTeacher.lastName}`
+          : "Not Assigned",
         c.capacity,
         c.room,
         c.shift,
@@ -787,12 +873,12 @@ export default function ClassList() {
     setModalOpen(false);
     setSelectedClass(null);
   };
-const handleSave = (updatedClass) => {
-  setClasses((prev) =>
-    prev.map((c) => (c._id === updatedClass._id ? updatedClass : c))
-  );
-  closeModal();
-};
+  const handleSave = (updatedClass) => {
+    setClasses((prev) =>
+      prev.map((c) => (c._id === updatedClass._id ? updatedClass : c)),
+    );
+    closeModal();
+  };
   const handleDelete = (cls) => {
     confirmToast(
       `Delete "${cls.name}"? This action cannot be undone.`,
@@ -805,7 +891,11 @@ const handleSave = (updatedClass) => {
           toast.error(error.message || "Failed to delete class");
         }
       },
-      { confirmText: "Delete", confirmClass: "bg-rose-600 hover:bg-rose-700 shadow-rose-600/10 text-white" }
+      {
+        confirmText: "Delete",
+        confirmClass:
+          "bg-rose-600 hover:bg-rose-700 shadow-rose-600/10 text-white",
+      },
     );
   };
 
@@ -936,9 +1026,27 @@ const handleSave = (updatedClass) => {
             </select>
             {/* Exports — colorful */}
             <div className="flex flex-wrap gap-2 items-center ml-auto">
-              <input type="file" accept=".csv" ref={csvFileInputRef} className="hidden" onChange={handleUploadCSV} />
-              <button type="button" onClick={() => csvFileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold transition">Upload CSV</button>
-              <button type="button" onClick={handleBackupData} className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition">Backup Data</button>
+              <input
+                type="file"
+                accept=".csv"
+                ref={csvFileInputRef}
+                className="hidden"
+                onChange={handleUploadCSV}
+              />
+              <button
+                type="button"
+                onClick={() => csvFileInputRef.current?.click()}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold transition"
+              >
+                Upload CSV
+              </button>
+              <button
+                type="button"
+                onClick={handleBackupData}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition"
+              >
+                Backup Data
+              </button>
               <button
                 onClick={exportExcel}
                 title="Export Excel"
@@ -1018,7 +1126,9 @@ const handleSave = (updatedClass) => {
                         </span>
                       </td>
                       <td className="py-3.5 px-5">
-                        <StatusBadge status={cls.isActive ? "Active" : "Inactive"} />
+                        <StatusBadge
+                          status={cls.isActive ? "Active" : "Inactive"}
+                        />
                       </td>
                       <td className="py-3.5 px-5">
                         <div className="flex items-center gap-2">
@@ -1056,16 +1166,27 @@ const handleSave = (updatedClass) => {
         {/* Mobile Card List View */}
         <div className="block md:hidden space-y-2.5">
           {loading ? (
-            <div className="p-10 text-center text-slate-500 bg-white rounded-md border border-slate-100 text-sm animate-pulse">Loading classes...</div>
+            <div className="p-10 text-center text-slate-500 bg-white rounded-md border border-slate-100 text-sm animate-pulse">
+              Loading classes...
+            </div>
           ) : filtered.length === 0 ? (
-            <div className="p-10 text-center text-slate-500 bg-white rounded-md border border-slate-100 text-sm">No classes found</div>
+            <div className="p-10 text-center text-slate-500 bg-white rounded-md border border-slate-100 text-sm">
+              No classes found
+            </div>
           ) : (
             filtered.map((cls) => (
-              <div key={cls._id} className="bg-white p-3 border border-slate-100 shadow-sm flex flex-col gap-2 rounded-md">
+              <div
+                key={cls._id}
+                className="bg-white p-3 border border-slate-100 shadow-sm flex flex-col gap-2 rounded-md"
+              >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-sm font-bold text-slate-800">{cls.name}</h3>
-                    <p className="text-xs text-slate-500">Section {cls.section} • {cls.shift} Shift</p>
+                    <h3 className="text-sm font-bold text-slate-800">
+                      {cls.name}
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Section {cls.section} • {cls.shift} Shift
+                    </p>
                   </div>
                   <div className="flex items-center gap-1">
                     <button
@@ -1092,10 +1213,35 @@ const handleSave = (updatedClass) => {
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 pt-2 border-t border-slate-50 text-[11px] text-slate-500">
-                  <div><span className="text-slate-400">Teacher:</span> <strong className="text-slate-700 font-medium">{cls.classTeacher ? (cls.classTeacher.name || `${cls.classTeacher.firstName || ""} ${cls.classTeacher.lastName || ""}`.trim()) : "—"}</strong></div>
-                  <div><span className="text-slate-400">Room No:</span> <strong className="text-slate-700 font-medium">{cls.room || "—"}</strong></div>
-                  <div><span className="text-slate-400">Capacity:</span> <strong className="text-slate-700 font-medium">{cls.capacity}</strong></div>
-                  <div><span className="text-slate-400">Status:</span> <strong className={`font-medium ${cls.isActive ? "text-emerald-600" : "text-slate-500"}`}>{cls.isActive ? "Active" : "Inactive"}</strong></div>
+                  <div>
+                    <span className="text-slate-400">Teacher:</span>{" "}
+                    <strong className="text-slate-700 font-medium">
+                      {cls.classTeacher
+                        ? cls.classTeacher.name ||
+                          `${cls.classTeacher.firstName || ""} ${cls.classTeacher.lastName || ""}`.trim()
+                        : "—"}
+                    </strong>
+                  </div>
+                  <div>
+                    <span className="text-slate-400">Room No:</span>{" "}
+                    <strong className="text-slate-700 font-medium">
+                      {cls.room || "—"}
+                    </strong>
+                  </div>
+                  <div>
+                    <span className="text-slate-400">Capacity:</span>{" "}
+                    <strong className="text-slate-700 font-medium">
+                      {cls.capacity}
+                    </strong>
+                  </div>
+                  <div>
+                    <span className="text-slate-400">Status:</span>{" "}
+                    <strong
+                      className={`font-medium ${cls.isActive ? "text-emerald-600" : "text-slate-500"}`}
+                    >
+                      {cls.isActive ? "Active" : "Inactive"}
+                    </strong>
+                  </div>
                 </div>
               </div>
             ))

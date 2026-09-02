@@ -249,7 +249,6 @@ export default function AddClass() {
           </div>
         </div>
 
-        {/* Form */}
         <div className="bg-white rounded-md shadow-xl border border-slate-100 overflow-hidden">
           <form onSubmit={(e) => handleSubmit(e, false)} className="p-6 md:p-8">
             <div className="grid md:grid-cols-2 gap-6">
