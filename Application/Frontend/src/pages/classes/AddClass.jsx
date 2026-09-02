@@ -220,7 +220,6 @@ export default function AddClass() {
           <span className="text-indigo-600">Add Class</span>
         </nav>
 
-        {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <div className="p-3 bg-indigo-100 rounded-md">
             <FaBook className="w-6 h-6 text-indigo-600" />
