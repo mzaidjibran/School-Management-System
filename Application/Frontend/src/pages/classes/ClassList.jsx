@@ -128,7 +128,6 @@ const FloatingSelect = ({
   );
 };
 
-
 const TableSkeleton = () => (
   <div className="animate-pulse p-4 space-y-2">
     <div className="h-10 bg-slate-200 rounded-md"></div>
@@ -162,7 +161,6 @@ const EmptyState = () => (
   </div>
 );
 
-// ---------- Status Badge ----------
 const StatusBadge = ({ status }) => (
   <span
     className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
@@ -175,7 +173,6 @@ const StatusBadge = ({ status }) => (
   </span>
 );
 
-// ---------- Teacher Avatar ----------
 const TeacherAvatar = ({ teacher }) => {
   const [imgError, setImgError] = useState(false);
   if (!teacher) {
