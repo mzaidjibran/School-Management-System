@@ -128,7 +128,7 @@ const FloatingSelect = ({
   );
 };
 
-// ---------- Skeleton ----------
+
 const TableSkeleton = () => (
   <div className="animate-pulse p-4 space-y-2">
     <div className="h-10 bg-slate-200 rounded-md"></div>
@@ -138,7 +138,6 @@ const TableSkeleton = () => (
   </div>
 );
 
-// ---------- Empty State ----------
 const EmptyState = () => (
   <div className="text-center py-12">
     <div className="w-24 h-24 mx-auto bg-slate-100 rounded-full flex items-center justify-center mb-4">
