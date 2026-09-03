@@ -216,7 +216,6 @@ const TeacherAvatar = ({ teacher }) => {
   );
 };
 
-// ---------- View/Edit Modal ----------
 const ClassModal = ({ isOpen, onClose, cls, mode, onSave, teachers }) => {
   const [formData, setFormData] = useState({
     className: "",
