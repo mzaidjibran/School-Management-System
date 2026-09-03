@@ -319,7 +319,6 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave, teachers }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="bg-white rounded-md shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <h2 className="text-sm font-semibold text-slate-700">
             {mode === "edit" ? "Edit Class" : "Class Details"}
