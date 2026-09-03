@@ -299,7 +299,6 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave, teachers }) => {
       toast.success("Class updated successfully!");
       setIsSaving(false);
       onSave(result.data);
-      // onClose();
     } catch (error) {
       toast.error(error.message || "Update failed.");
       setIsSaving(false);
