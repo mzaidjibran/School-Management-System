@@ -439,7 +439,6 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave, teachers }) => {
           </form>
         </div>
 
-        {/* Footer */}
         <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-2.5">
           {!isViewOnly ? (
             <>
