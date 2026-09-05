@@ -711,7 +711,6 @@ export default function ClassList() {
         const loadingToastId = toast.loading("Uploading classes...");
         for (const row of parsed) {
           try {
-            // Case-insensitive key lookup helper
             const getVal = (r, ...keys) => {
               for (const k of keys) {
                 if (r[k] !== undefined) return r[k];
