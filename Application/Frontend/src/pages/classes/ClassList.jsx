@@ -343,7 +343,6 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave, teachers }) => {
           </button>
         </div>
 
-        {/* Content */}
         <div className="overflow-y-auto flex-1 px-6 py-5">
           <form onSubmit={handleSubmit} id="class-form">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
