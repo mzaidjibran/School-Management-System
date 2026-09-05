@@ -886,7 +886,6 @@ export default function ClassList() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-3">
-        {/* Breadcrumb */}
         <nav className="flex mb-6 text-sm text-slate-500">
           <span className="hover:text-indigo-600 cursor-pointer">
             Dashboard
@@ -895,7 +894,6 @@ export default function ClassList() {
           <span className="text-indigo-600">Class Management</span>
         </nav>
 
-        {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
           <div>
             <h1 className="text-2xl font-bold text-slate-800">
