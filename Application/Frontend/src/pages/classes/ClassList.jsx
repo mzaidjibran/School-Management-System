@@ -494,7 +494,6 @@ const ClassModal = ({ isOpen, onClose, cls, mode, onSave, teachers }) => {
   );
 };
 
-// ---------- Main Component ----------
 export default function ClassList() {
   const [classes, setClasses] = useState([]);
   const [filtered, setFiltered] = useState([]);
