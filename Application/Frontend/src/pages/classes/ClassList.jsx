@@ -971,7 +971,6 @@ export default function ClassList() {
           ))}
         </div>
 
-        {/* Search + Filters + Exports — all in one box */}
         <div className="bg-white rounded-md shadow-sm border border-slate-100 p-4">
           <div className="flex flex-wrap gap-3 items-center">
             {/* Search */}
