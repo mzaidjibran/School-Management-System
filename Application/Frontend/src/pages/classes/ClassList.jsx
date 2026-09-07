@@ -993,7 +993,7 @@ export default function ClassList() {
               <option value="Morning">Morning</option>
               <option value="Evening">Evening</option>
             </select>
-            {/* Status filter */}
+
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
