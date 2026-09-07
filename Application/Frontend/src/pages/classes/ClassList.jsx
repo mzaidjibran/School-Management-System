@@ -983,7 +983,7 @@ export default function ClassList() {
                 className="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-md bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
               />
             </div>
-            {/* Shift filter */}
+
             <select
               value={shiftFilter}
               onChange={(e) => setShiftFilter(e.target.value)}
