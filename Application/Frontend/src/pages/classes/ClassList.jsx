@@ -973,7 +973,6 @@ export default function ClassList() {
 
         <div className="bg-white rounded-md shadow-sm border border-slate-100 p-4">
           <div className="flex flex-wrap gap-3 items-center">
-            {/* Search */}
             <div className="relative flex-1 min-w-[220px]">
               <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
               <input
