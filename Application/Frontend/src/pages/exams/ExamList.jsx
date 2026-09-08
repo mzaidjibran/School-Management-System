@@ -611,7 +611,6 @@ export default function ExamList() {
             </table>
           </div>
 
-          {/* Mobile View Cards */}
           <div className="block md:hidden p-4 space-y-3 bg-slate-50/50">
             {loading ? (
               <TableSkeleton />
