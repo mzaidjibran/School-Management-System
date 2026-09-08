@@ -519,7 +519,6 @@ export default function ExamList() {
 
         {/* Table */}
         <div className="bg-white rounded-md border border-slate-100 shadow-sm overflow-hidden">
-          {/* Desktop View Table */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
