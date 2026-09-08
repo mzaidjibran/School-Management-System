@@ -517,7 +517,6 @@ export default function ExamList() {
           </div>
         </div>
 
-        {/* Table */}
         <div className="bg-white rounded-md border border-slate-100 shadow-sm overflow-hidden">
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
