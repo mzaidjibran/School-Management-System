@@ -465,7 +465,6 @@ export default function ExamList() {
           ))}
         </div>
 
-        {/* Filters */}
         <div className="bg-white rounded-md border border-slate-100 shadow-sm px-4 py-3">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div className="relative">
