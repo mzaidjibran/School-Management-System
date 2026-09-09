@@ -167,7 +167,6 @@ export default function CreateTimetable() {
   const [teachers, setTeachers] = useState([]);
   const [loadingDropdowns, setLoadingDropdowns] = useState(true);
 
-  // ── Load classes, subjects, teachers with auth headers ─────────────────────
   useEffect(() => {
     const fetchDropdowns = async () => {
       setLoadingDropdowns(true);
