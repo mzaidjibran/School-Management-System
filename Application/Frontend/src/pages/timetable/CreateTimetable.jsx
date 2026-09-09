@@ -159,7 +159,6 @@ export default function CreateTimetable() {
   const [fetchLoading, setFetchLoading] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
 
-  // Mobile: which day is selected in the day-view
   const [activeDay, setActiveDay] = useState(0);
 
   // Dropdowns
