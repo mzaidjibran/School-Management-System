@@ -5,7 +5,7 @@ import {
   getTodayTimetable,
   getTeacherTimetable,
   deleteTimetable,
-} from "../controllers/Timetable_Controller.js";
+} from "../controllers/TimeTable_Controller.js";
 import { protect, authorize } from "../middleware/Auth_Middleware.js";
 
 const router = express.Router();
