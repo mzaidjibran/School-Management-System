@@ -161,7 +161,6 @@ export default function CreateTimetable() {
 
   const [activeDay, setActiveDay] = useState(0);
 
-  // Dropdowns
   const [classes, setClasses] = useState([]);
   const [allSubjects, setAllSubjects] = useState([]);
   const [filteredSubjects, setFilteredSubjects] = useState([]);
