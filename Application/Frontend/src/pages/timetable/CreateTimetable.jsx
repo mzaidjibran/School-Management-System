@@ -290,7 +290,6 @@ export default function CreateTimetable() {
     });
   };
 
-  // ── Cell change ────────────────────────────────────────────────────────────
   const handleCellChange = (day, slot, field, value) => {
     setTimetable((prev) => ({
       ...prev,
