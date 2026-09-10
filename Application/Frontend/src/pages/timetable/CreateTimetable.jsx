@@ -203,7 +203,6 @@ export default function CreateTimetable() {
     setFilteredSubjects(filtered.length > 0 ? filtered : allSubjects);
   }, [form.classId, allSubjects]);
 
-  // ── If edit mode: load existing timetable ──────────────────────────────────
   useEffect(() => {
     if (!isEdit) return;
     const loadExisting = async () => {
