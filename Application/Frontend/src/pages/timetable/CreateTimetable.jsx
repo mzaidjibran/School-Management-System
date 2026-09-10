@@ -239,7 +239,6 @@ export default function CreateTimetable() {
     loadExisting();
   }, [isEdit, id]);
 
-  // ── Slot management ────────────────────────────────────────────────────────
   const validateSlotFormat = (val) =>
     /^\d{2}:\d{2}-\d{2}:\d{2}$/.test(val.trim());
 
