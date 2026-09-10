@@ -179,7 +179,7 @@ export default function CreateTimetable() {
         setClasses(classRes.data || []);
         const subs = subjectRes.data || [];
         setAllSubjects(subs);
-        setFilteredSubjects(subs); 
+        setFilteredSubjects(subs);
         setTeachers(teacherRes.data || []);
       } catch (err) {
         toast.error("Dropdowns load error: " + err.message);
@@ -190,7 +190,6 @@ export default function CreateTimetable() {
     fetchDropdowns();
   }, []);
 
-  // ── When class changes, filter subjects for that class ─────────────────────
   useEffect(() => {
     if (!form.classId) {
       setFilteredSubjects(allSubjects);
