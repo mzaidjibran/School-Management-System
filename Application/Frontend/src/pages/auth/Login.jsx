@@ -288,7 +288,7 @@ export default function Login() {
               >
                 {displaySchoolLogo ? (
                   <img
-                    src={`${API_BASE}${displaySchoolLogo}`}
+                    src={displaySchoolLogo.startsWith("http") ? displaySchoolLogo : `${API_BASE}${displaySchoolLogo}`}
                     alt="School Logo"
                     style={{
                       width: "100%",
