@@ -58,7 +58,8 @@ export const markAttendance = async (request, response) => {
         await createNotificationHelper(
           "Attendance Marked",
           `Attendance marked for ${inserted.length} students of Class ${className}.`,
-          "attendance"
+          "attendance",
+          ownerId
         );
       } catch (err) {
         console.error("Attendance Notification error:", err);

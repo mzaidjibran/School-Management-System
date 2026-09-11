@@ -58,7 +58,8 @@ export const createExam = async (req, res) => {
     await createNotificationHelper(
       "New Exam Scheduled",
       `Exam "${exam.title}" of type ${exam.examType || "test"} has been scheduled.`,
-      "exam"
+      "exam",
+      examData.createdBy
     );
     
     const query = { _id: exam._id, createdBy: req.userId };

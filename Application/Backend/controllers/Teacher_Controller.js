@@ -73,7 +73,8 @@ export const createTeacher = async (request, response) => {
     await createNotificationHelper(
       "New Teacher Onboarded",
       `${teacherData.name || "A new teacher"} has been successfully onboarded with email ${teacherData.email}.`,
-      "teacher"
+      "teacher",
+      teacherData.userId
     );
 
     // Create corresponding login User account

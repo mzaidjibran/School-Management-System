@@ -73,7 +73,8 @@ export const createNotice = async (req, res) => {
     await createNotificationHelper(
       "New Notice Circular",
       `Notice "${notice.title}" has been published for ${notice.targetAudience || "everyone"}.`,
-      "notice"
+      "notice",
+      ownerId
     );
     const populated = await Notice.findById(notice._id).populate("createdBy", "Name");
     res.status(201).json({ success: true, message: "Notice created", notice: populated });

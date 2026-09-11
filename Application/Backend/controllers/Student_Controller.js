@@ -98,6 +98,7 @@ export const createStudent = async (request, response) => {
       "New Student Registered",
       `${studentData.firstName} ${studentData.lastName || ""} was admitted under admission number ${studentData.admissionNumber}.`,
       "student",
+      studentData.createdBy,
     );
     const populated = await Student.findById(student._id).populate(
       "currentClass",

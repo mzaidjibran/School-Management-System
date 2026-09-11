@@ -25,7 +25,8 @@ export const createFee = async (request, response) => {
     await createNotificationHelper(
       "Fee Invoice Created",
       `New Fee Invoice of Rs. ${fee.amount} generated for student.`,
-      "fee"
+      "fee",
+      ownerId
     );
 
     response.status(201).json({
@@ -216,7 +217,8 @@ export const payFee = async (request, response) => {
     await createNotificationHelper(
       "Fee Payment Received",
       `Payment of Rs. ${payingAmount} received for Student Fee (Status: ${fee.status.toUpperCase()}).`,
-      "fee"
+      "fee",
+      ownerId
     );
 
     response.status(200).json({

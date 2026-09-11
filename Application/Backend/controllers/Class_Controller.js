@@ -11,7 +11,8 @@ export const createClass = async (request, response) => {
     await createNotificationHelper(
       "New Class Created",
       `Class "${newClass.name}" (Section ${newClass.section || "N/A"}) has been created successfully.`,
-      "class"
+      "class",
+      request.userId
     );
 
     response.status(201).json({
