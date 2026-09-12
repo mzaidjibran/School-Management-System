@@ -92,7 +92,6 @@ const ViewModal = ({ tt, onClose }) => {
             </div>
           ) : (
             <>
-              {/* Desktop table */}
               <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full border-collapse text-xs">
                   <thead>
