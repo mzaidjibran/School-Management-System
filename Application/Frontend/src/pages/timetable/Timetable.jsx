@@ -277,7 +277,6 @@ export default function TimetableList() {
     return () => window.removeEventListener("branch-changed", fetchAll);
   }, [fetchAll]);
 
-  // Filters
   useEffect(() => {
     let result = timetables;
     if (searchClass)
