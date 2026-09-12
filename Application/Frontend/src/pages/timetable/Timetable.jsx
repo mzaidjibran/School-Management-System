@@ -153,7 +153,6 @@ const ViewModal = ({ tt, onClose }) => {
                 </table>
               </div>
 
-              {/* Mobile: cards per slot */}
               <div className="block sm:hidden space-y-3">
                 {allSlots.map((slot) => (
                   <div
