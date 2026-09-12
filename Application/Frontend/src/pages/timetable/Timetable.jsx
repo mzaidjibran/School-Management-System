@@ -382,7 +382,6 @@ export default function TimetableList() {
     <div className="space-y-3">
       <style>{printStyles}</style>
 
-      {/* ── Header ── */}
       <div className="flex flex-wrap justify-between items-start gap-3">
         <div>
           <p className="text-xs text-slate-400 mb-0.5">Dashboard / Timetable</p>
