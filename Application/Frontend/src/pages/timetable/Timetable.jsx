@@ -215,7 +215,6 @@ const ViewModal = ({ tt, onClose }) => {
   );
 };
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
 export default function TimetableList() {
   const navigate = useNavigate();
   const [timetables, setTimetables] = useState([]);
