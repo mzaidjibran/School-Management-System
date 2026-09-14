@@ -151,10 +151,11 @@ export const updateMyProfile = async (data) => {
 
 // ── Sign Up ───────────────────────────────────────────────────────────────────
 export const signUp = async (userData) => {
+  const isFormData = userData instanceof FormData;
   const response = await fetch(`${API_BASE}/api/auth/signup`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(userData),
+    headers: isFormData ? {} : { "Content-Type": "application/json" },
+    body: isFormData ? userData : JSON.stringify(userData),
   });
   const data = await response.json();
   if (!response.ok) throw new Error(data.message || "Signup failed");
@@ -185,7 +186,7 @@ export const verifyOtp = async (email, otp) => {
   return data;
 };
 
-// ── Reset Password ────────────────────────────────────────────────────────────
+// ── Reset Password ────────────────────────────────────────────────────
 export const resetPassword = async (resetToken, newPassword) => {
   const response = await fetch(`${API_BASE}/api/auth/reset-password`, {
     method: "POST",
@@ -210,10 +211,11 @@ export const getPrincipals = async () => {
 
 // ── Update Principal (Admin) ──────────────────────────────────────────────────
 export const updatePrincipal = async (id, principalData) => {
+  const isFormData = principalData instanceof FormData;
   const response = await fetch(`${API_BASE}/api/auth/principals/${id}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(principalData),
+    headers: isFormData ? {} : { "Content-Type": "application/json" },
+    body: isFormData ? principalData : JSON.stringify(principalData),
   });
   const data = await response.json();
   if (!response.ok) throw new Error(data.message || "Failed to update principal");

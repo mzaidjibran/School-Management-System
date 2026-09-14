@@ -16,6 +16,8 @@ import {
   GraduationCap,
   Pencil,
   Trash2,
+  Camera,
+  User,
   Ruler,
   Brain,
 } from "lucide-react";
@@ -53,6 +55,8 @@ export default function Login() {
     password: "",
   });
   const [editingPrincipalId, setEditingPrincipalId] = useState(null);
+  const [principalImageFile, setPrincipalImageFile] = useState(null);
+  const [principalImagePreview, setPrincipalImagePreview] = useState(null);
   const [principalForm, setPrincipalForm] = useState({
     Name: "",
     email: "",
@@ -105,39 +109,46 @@ export default function Login() {
       password: "",
       schoolName: p.schoolName || "",
     });
+    const imgUrl = p.profileImage || p.image || "";
+    setPrincipalImagePreview(
+      imgUrl ? (imgUrl.startsWith("http") ? imgUrl : `${API_BASE}${imgUrl}`) : null
+    );
+    setPrincipalImageFile(null);
   }
 
   function handleCancelEditPrincipal() {
     setEditingPrincipalId(null);
     setPrincipalForm({ Name: "", email: "", password: "", schoolName: "" });
+    setPrincipalImageFile(null);
+    setPrincipalImagePreview(null);
   }
 
   async function handlePrincipalFormSubmit(e) {
     e.preventDefault();
     setDevLoading(true);
     try {
+      const formData = new FormData();
+      formData.append("Name", principalForm.Name);
+      formData.append("email", principalForm.email);
+      if (principalForm.schoolName) {
+        formData.append("schoolName", principalForm.schoolName);
+      }
+      if (principalForm.password && principalForm.password.trim()) {
+        formData.append("password", principalForm.password.trim());
+      }
+      if (principalImageFile) {
+        formData.append("profileImage", principalImageFile);
+      }
+
       if (editingPrincipalId) {
-        const payload = {
-          Name: principalForm.Name,
-          email: principalForm.email,
-          schoolName: principalForm.schoolName,
-        };
-        if (principalForm.password && principalForm.password.trim()) {
-          payload.password = principalForm.password.trim();
-        }
-        await updatePrincipal(editingPrincipalId, payload);
+        await updatePrincipal(editingPrincipalId, formData);
         toast.success("Principal account updated successfully!");
         handleCancelEditPrincipal();
         await loadPrincipals();
       } else {
-        await signUp({
-          Name: principalForm.Name,
-          email: principalForm.email,
-          password: principalForm.password,
-          schoolName: principalForm.schoolName,
-        });
+        await signUp(formData);
         toast.success("Principal user account created successfully!");
-        setPrincipalForm({ Name: "", email: "", password: "", schoolName: "" });
+        handleCancelEditPrincipal();
         await loadPrincipals();
       }
     } catch (err) {
@@ -724,6 +735,50 @@ export default function Login() {
                       onSubmit={handlePrincipalFormSubmit}
                       className="signin-form"
                     >
+                      {/* Principal Profile Photo Upload */}
+                      <div className="form-group mb-3 text-center">
+                        <div className="principal-upload-wrapper">
+                          <div className="principal-preview-circle">
+                            {principalImagePreview ? (
+                              <img
+                                src={principalImagePreview}
+                                alt="Principal Preview"
+                                className="principal-preview-img"
+                              />
+                            ) : (
+                              <User size={28} style={{ color: "#94a3b8" }} />
+                            )}
+                            <label
+                              htmlFor="principal-img-upload"
+                              className="principal-upload-badge"
+                              title="Upload Principal Photo"
+                            >
+                              <Camera size={13} />
+                              <input
+                                id="principal-img-upload"
+                                type="file"
+                                accept="image/*"
+                                style={{ display: "none" }}
+                                onChange={(e) => {
+                                  const file = e.target.files[0];
+                                  if (file) {
+                                    setPrincipalImageFile(file);
+                                    setPrincipalImagePreview(
+                                      URL.createObjectURL(file)
+                                    );
+                                  }
+                                }}
+                              />
+                            </label>
+                          </div>
+                          <span className="upload-label-hint">
+                            {editingPrincipalId
+                              ? "Change Profile Photo"
+                              : "Upload Profile Photo"}
+                          </span>
+                        </div>
+                      </div>
+
                       <div className="form-group mb-3">
                         <label className="form-label">Principal Name</label>
                         <input
@@ -820,51 +875,73 @@ export default function Login() {
                           No Principal accounts registered yet.
                         </div>
                       ) : (
-                        principalsList.map((p, idx) => (
-                          <div
-                            className={`principal-item ${
-                              editingPrincipalId === p._id ? "editing-active" : ""
-                            }`}
-                            key={p._id || idx}
-                          >
-                            <div className="principal-item-main">
-                              <div className="principal-avatar">
-                                {p.Name ? p.Name.charAt(0).toUpperCase() : "P"}
-                              </div>
-                              <div className="principal-info">
-                                <div className="principal-name">
-                                  {p.Name}
-                                  {p.schoolName && (
-                                    <span className="principal-school-tag">
-                                      {p.schoolName}
-                                    </span>
+                        principalsList.map((p, idx) => {
+                          const pImg = p.profileImage || p.image || "";
+                          const pImgUrl = pImg
+                            ? pImg.startsWith("http")
+                              ? pImg
+                              : `${API_BASE}${pImg}`
+                            : null;
+                          return (
+                            <div
+                              className={`principal-item ${
+                                editingPrincipalId === p._id
+                                  ? "editing-active"
+                                  : ""
+                              }`}
+                              key={p._id || idx}
+                            >
+                              <div className="principal-item-main">
+                                <div className="principal-avatar">
+                                  {pImgUrl ? (
+                                    <img
+                                      src={pImgUrl}
+                                      alt={p.Name}
+                                      className="principal-avatar-img"
+                                    />
+                                  ) : p.Name ? (
+                                    p.Name.charAt(0).toUpperCase()
+                                  ) : (
+                                    "P"
                                   )}
                                 </div>
-                                <div className="principal-email">{p.email}</div>
+                                <div className="principal-info">
+                                  <div className="principal-name">
+                                    {p.Name}
+                                    {p.schoolName && (
+                                      <span className="principal-school-tag">
+                                        {p.schoolName}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="principal-email">
+                                    {p.email}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="principal-actions">
+                                <button
+                                  type="button"
+                                  className="principal-action-btn edit"
+                                  title="Edit Principal"
+                                  onClick={() => handleStartEditPrincipal(p)}
+                                >
+                                  <Pencil size={15} />
+                                </button>
+                                <button
+                                  type="button"
+                                  className="principal-action-btn delete"
+                                  title="Delete Principal"
+                                  onClick={() =>
+                                    handleDeletePrincipal(p._id, p.Name)
+                                  }
+                                >
+                                  <Trash2 size={15} />
+                                </button>
                               </div>
                             </div>
-                            <div className="principal-actions">
-                              <button
-                                type="button"
-                                className="principal-action-btn edit"
-                                title="Edit Principal"
-                                onClick={() => handleStartEditPrincipal(p)}
-                              >
-                                <Pencil size={15} />
-                              </button>
-                              <button
-                                type="button"
-                                className="principal-action-btn delete"
-                                title="Delete Principal"
-                                onClick={() =>
-                                  handleDeletePrincipal(p._id, p.Name)
-                                }
-                              >
-                                <Trash2 size={15} />
-                              </button>
-                            </div>
-                          </div>
-                        ))
+                          );
+                        })
                       )}
                     </div>
                   </div>
@@ -1472,6 +1549,56 @@ export default function Login() {
           background: #94a3b8;
         }
         
+        .principal-upload-wrapper {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.35rem;
+          margin-bottom: 0.5rem;
+        }
+        .principal-preview-circle {
+          width: 64px;
+          height: 64px;
+          border-radius: 50%;
+          background: #f1f5f9;
+          border: 2px dashed #cbd5e1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          overflow: visible;
+        }
+        .principal-preview-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 50%;
+        }
+        .principal-upload-badge {
+          position: absolute;
+          bottom: -2px;
+          right: -2px;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: #326080;
+          color: #ffffff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+          transition: transform 0.15s ease, background 0.15s ease;
+        }
+        .principal-upload-badge:hover {
+          transform: scale(1.1);
+          background: #1e3a4f;
+        }
+        .upload-label-hint {
+          font-size: 0.72rem;
+          color: #64748b;
+          font-weight: 500;
+        }
         .btn-cancel-edit {
           background: transparent;
           border: none;
@@ -1513,9 +1640,9 @@ export default function Login() {
           min-width: 0;
         }
         .principal-avatar {
-          width: 32px;
-          height: 32px;
-          min-width: 32px;
+          width: 34px;
+          height: 34px;
+          min-width: 34px;
           border-radius: 50%;
           background: #326080;
           color: #ffffff;
@@ -1524,6 +1651,13 @@ export default function Login() {
           justify-content: center;
           font-weight: 700;
           font-size: 0.85rem;
+          overflow: hidden;
+        }
+        .principal-avatar-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 50%;
         }
         .principal-info {
           display: flex;

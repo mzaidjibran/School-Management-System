@@ -20,7 +20,7 @@ import { upload } from "../middleware/Upload_Middleware.js";
 const router = express.Router();
 
 // ── Public Routes ─────────────────────────────────────────────────
-router.post("/signup",          SignUp);
+router.post("/signup",          upload.single("profileImage"), SignUp);
 router.post("/signin",          SignIn);
 router.post("/logout",          LogOut);
 router.post("/refresh-token",   RefreshAccessToken);
@@ -28,7 +28,7 @@ router.post("/forgot-password", ForgotPassword);
 router.post("/verify-otp",      VerifyOtp);
 router.post("/reset-password",  ResetPassword);
 router.get("/principals",       GetPrincipals);
-router.put("/principals/:id",   UpdatePrincipal);
+router.put("/principals/:id",   upload.single("profileImage"), UpdatePrincipal);
 router.delete("/principals/:id", DeletePrincipal);
 
 // ── Protected Routes (login zaruri) ──────────────────────────────

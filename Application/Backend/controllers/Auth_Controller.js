@@ -53,10 +53,18 @@ export const SignUp = async (request, response) => {
           message: "This email is already registered!",
         });
 
+    const { Name, email, password, schoolName } = request.body;
+    let profileImage = null;
+    if (request.file) {
+      profileImage = request.file.path || request.file.secure_url;
+    }
+
     const newUser = await User_Model.create({
       Name: Name.trim(),
       email: email.toLowerCase().trim(),
       password: await bcrypt.hash(password, 10),
+      schoolName: schoolName ? schoolName.trim() : "",
+      profileImage,
       role: "admin",
       createdBy: null,
     });
@@ -507,10 +515,11 @@ export const GetPrincipals = async (request, response) => {
     const principals = await User_Model.find({ role: "admin" }).select(
       "-password",
     );
+    const safePrincipals = principals.map((p) => toSafeUser(p));
     return response.status(200).json({
       success: true,
       error: false,
-      data: principals,
+      data: safePrincipals,
     });
   } catch (error) {
     response
@@ -560,16 +569,17 @@ export const UpdatePrincipal = async (request, response) => {
     if (password && password.trim().length >= 6) {
       user.password = await bcrypt.hash(password.trim(), 10);
     }
+    if (request.file) {
+      user.profileImage = request.file.path || request.file.secure_url;
+    }
 
     await user.save();
-    const safeUser = user.toObject();
-    delete safeUser.password;
 
     return response.status(200).json({
       success: true,
       error: false,
       message: "Principal updated successfully!",
-      data: safeUser,
+      data: toSafeUser(user),
     });
   } catch (error) {
     return response
