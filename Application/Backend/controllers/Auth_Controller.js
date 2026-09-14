@@ -3,11 +3,14 @@ import RefreshToken from "../models/refreshToken.js";
 import otpModel from "../models/otpModel.js";
 import { toSafeUser } from "../utils/userHelpers.js";
 import { sendOtpEmail } from "../utils/sendEmail.js";
-import { generateAccessToken, generateRefreshToken } from "../utils/generateToken.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../utils/generateToken.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
-// ── Helper: Refresh token DB mein save karo (7 din ki expiry) ────────────────
+// ── Helper
 const saveRefreshToken = (userId, token) =>
   RefreshToken.create({
     userId,
@@ -15,20 +18,40 @@ const saveRefreshToken = (userId, token) =>
     expiresIn: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
   });
 
-// ── Sign Up (pehla user hamesha admin banta hai) ──────────────────────────────
+// ── Sign Up
 export const SignUp = async (request, response) => {
   try {
     const { Name, email, password } = request.body;
 
     if (!Name || !email || !password)
-      return response.status(400).json({ success: false, error: true, message: "Name, email and password are required!" });
+      return response
+        .status(400)
+        .json({
+          success: false,
+          error: true,
+          message: "Name, email and password are required!",
+        });
 
     if (password.length < 6)
-      return response.status(400).json({ success: false, error: true, message: "Password must be at least 6 characters!" });
+      return response
+        .status(400)
+        .json({
+          success: false,
+          error: true,
+          message: "Password must be at least 6 characters!",
+        });
 
-    const existing = await User_Model.findOne({ email: email.toLowerCase().trim() });
+    const existing = await User_Model.findOne({
+      email: email.toLowerCase().trim(),
+    });
     if (existing)
-      return response.status(400).json({ success: false, error: true, message: "This email is already registered!" });
+      return response
+        .status(400)
+        .json({
+          success: false,
+          error: true,
+          message: "This email is already registered!",
+        });
 
     const newUser = await User_Model.create({
       Name: Name.trim(),
@@ -45,7 +68,9 @@ export const SignUp = async (request, response) => {
       data: toSafeUser(newUser),
     });
   } catch (error) {
-    response.status(500).json({ success: false, error: true, message: error.message });
+    response
+      .status(500)
+      .json({ success: false, error: true, message: error.message });
   }
 };
 
@@ -57,39 +82,55 @@ const getSafeUserWithSchool = async (user) => {
     if (admin) {
       safeUser.schoolName = admin.schoolName || "";
       safeUser.schoolLogo = admin.schoolLogo
-        ? admin.schoolLogo.startsWith("http://") || admin.schoolLogo.startsWith("https://")
+        ? admin.schoolLogo.startsWith("http://") ||
+          admin.schoolLogo.startsWith("https://")
           ? admin.schoolLogo
           : admin.schoolLogo.startsWith("/image/")
-          ? admin.schoolLogo
-          : `/image/${admin.schoolLogo.split(/[\\/]/).pop()}`
+            ? admin.schoolLogo
+            : `/image/${admin.schoolLogo.split(/[\\/]/).pop()}`
         : "";
     }
   } else if (user.role === "admin") {
     safeUser.schoolName = user.schoolName || "";
     safeUser.schoolLogo = user.schoolLogo
-      ? user.schoolLogo.startsWith("http://") || user.schoolLogo.startsWith("https://")
+      ? user.schoolLogo.startsWith("http://") ||
+        user.schoolLogo.startsWith("https://")
         ? user.schoolLogo
         : user.schoolLogo.startsWith("/image/")
-        ? user.schoolLogo
-        : `/image/${user.schoolLogo.split(/[\\/]/).pop()}`
+          ? user.schoolLogo
+          : `/image/${user.schoolLogo.split(/[\\/]/).pop()}`
       : "";
   }
   return safeUser;
 };
 
-// ── Sign In ───────────────────────────────────────────────────────────────────
+// ── Sign In
 export const SignIn = async (request, response) => {
   try {
     const { email, password } = request.body;
 
     if (!email || !password)
-      return response.status(400).json({ success: false, error: true, message: "Email and password are required!" });
+      return response
+        .status(400)
+        .json({
+          success: false,
+          error: true,
+          message: "Email and password are required!",
+        });
 
-    const user = await User_Model.findOne({ email: email.toLowerCase().trim() });
+    const user = await User_Model.findOne({
+      email: email.toLowerCase().trim(),
+    });
     if (!user || !(await bcrypt.compare(password, user.password)))
-      return response.status(401).json({ success: false, error: true, message: "Invalid email or password!" });
+      return response
+        .status(401)
+        .json({
+          success: false,
+          error: true,
+          message: "Invalid email or password!",
+        });
 
-    const accessToken  = generateAccessToken(user._id, user.role, user.email);
+    const accessToken = generateAccessToken(user._id, user.role, user.email);
     const refreshToken = generateRefreshToken(user._id);
     await saveRefreshToken(user._id, refreshToken);
 
@@ -102,7 +143,9 @@ export const SignIn = async (request, response) => {
       data: { user: safeUser, accessToken, refreshToken },
     });
   } catch (error) {
-    response.status(500).json({ success: false, error: true, message: error.message });
+    response
+      .status(500)
+      .json({ success: false, error: true, message: error.message });
   }
 };
 
@@ -112,14 +155,26 @@ export const RefreshAccessToken = async (request, response) => {
     const { refreshToken } = request.body;
 
     if (!refreshToken)
-      return response.status(400).json({ success: false, error: true, message: "Refresh token is required!" });
+      return response
+        .status(400)
+        .json({
+          success: false,
+          error: true,
+          message: "Refresh token is required!",
+        });
 
     let decoded;
     try {
       decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
     } catch {
       await RefreshToken.deleteOne({ token: refreshToken });
-      return response.status(401).json({ success: false, error: true, message: "Refresh token is invalid or expired!" });
+      return response
+        .status(401)
+        .json({
+          success: false,
+          error: true,
+          message: "Refresh token is invalid or expired!",
+        });
     }
 
     const storedToken = await RefreshToken.findOne({
@@ -128,12 +183,18 @@ export const RefreshAccessToken = async (request, response) => {
     }).populate("userId");
 
     if (!storedToken)
-      return response.status(401).json({ success: false, error: true, message: "Refresh token not recognised!" });
+      return response
+        .status(401)
+        .json({
+          success: false,
+          error: true,
+          message: "Refresh token not recognised!",
+        });
 
     await RefreshToken.deleteOne({ token: refreshToken });
 
     const user = storedToken.userId;
-    const newAccessToken  = generateAccessToken(user._id, user.role, user.email);
+    const newAccessToken = generateAccessToken(user._id, user.role, user.email);
     const newRefreshToken = generateRefreshToken(user._id);
     await saveRefreshToken(user._id, newRefreshToken);
 
@@ -143,7 +204,9 @@ export const RefreshAccessToken = async (request, response) => {
       data: { accessToken: newAccessToken, refreshToken: newRefreshToken },
     });
   } catch (error) {
-    response.status(500).json({ success: false, error: true, message: error.message });
+    response
+      .status(500)
+      .json({ success: false, error: true, message: error.message });
   }
 };
 
@@ -153,9 +216,17 @@ export const LogOut = async (request, response) => {
     const { refreshToken } = request.body;
     if (refreshToken) await RefreshToken.deleteOne({ token: refreshToken });
 
-    return response.status(200).json({ success: true, error: false, message: "Logged out successfully!" });
+    return response
+      .status(200)
+      .json({
+        success: true,
+        error: false,
+        message: "Logged out successfully!",
+      });
   } catch (error) {
-    response.status(500).json({ success: false, error: true, message: error.message });
+    response
+      .status(500)
+      .json({ success: false, error: true, message: error.message });
   }
 };
 
@@ -164,12 +235,18 @@ export const GetCurrentUser = async (request, response) => {
   try {
     const user = await User_Model.findById(request.userId);
     if (!user)
-      return response.status(404).json({ success: false, error: true, message: "User not found!" });
+      return response
+        .status(404)
+        .json({ success: false, error: true, message: "User not found!" });
 
     const safeUser = await getSafeUserWithSchool(user);
-    return response.status(200).json({ success: true, error: false, data: safeUser });
+    return response
+      .status(200)
+      .json({ success: true, error: false, data: safeUser });
   } catch (error) {
-    response.status(500).json({ success: false, error: true, message: error.message });
+    response
+      .status(500)
+      .json({ success: false, error: true, message: error.message });
   }
 };
 
@@ -181,12 +258,22 @@ export const UpdateMyProfile = async (request, response) => {
     delete updateData.role;
 
     if (request.file) {
-      updateData.profileImage = request.file.path || request.file.secure_url || request.file.url || `/image/${request.file.filename}`;
+      updateData.profileImage =
+        request.file.path ||
+        request.file.secure_url ||
+        request.file.url ||
+        `/image/${request.file.filename}`;
     }
 
-    const updated = await User_Model.findByIdAndUpdate(request.userId, updateData, { new: true });
+    const updated = await User_Model.findByIdAndUpdate(
+      request.userId,
+      updateData,
+      { new: true },
+    );
     if (!updated)
-      return response.status(404).json({ success: false, error: true, message: "User not found!" });
+      return response
+        .status(404)
+        .json({ success: false, error: true, message: "User not found!" });
 
     const safeUser = await getSafeUserWithSchool(updated);
     return response.status(200).json({
@@ -196,7 +283,9 @@ export const UpdateMyProfile = async (request, response) => {
       data: safeUser,
     });
   } catch (error) {
-    response.status(500).json({ success: false, error: true, message: error.message });
+    response
+      .status(500)
+      .json({ success: false, error: true, message: error.message });
   }
 };
 
@@ -205,7 +294,9 @@ export const UpdateSchoolSettings = async (request, response) => {
   try {
     const user = await User_Model.findById(request.userId);
     if (!user) {
-      return response.status(404).json({ success: false, error: true, message: "User not found!" });
+      return response
+        .status(404)
+        .json({ success: false, error: true, message: "User not found!" });
     }
 
     if (user.role !== "admin") {
@@ -223,10 +314,18 @@ export const UpdateSchoolSettings = async (request, response) => {
     }
 
     if (request.file) {
-      updateData.schoolLogo = request.file.path || request.file.secure_url || request.file.url || `/image/${request.file.filename}`;
+      updateData.schoolLogo =
+        request.file.path ||
+        request.file.secure_url ||
+        request.file.url ||
+        `/image/${request.file.filename}`;
     }
 
-    const updated = await User_Model.findByIdAndUpdate(request.userId, updateData, { new: true });
+    const updated = await User_Model.findByIdAndUpdate(
+      request.userId,
+      updateData,
+      { new: true },
+    );
     const safeUser = await getSafeUserWithSchool(updated);
 
     return response.status(200).json({
@@ -236,7 +335,9 @@ export const UpdateSchoolSettings = async (request, response) => {
       data: safeUser,
     });
   } catch (error) {
-    response.status(500).json({ success: false, error: true, message: error.message });
+    response
+      .status(500)
+      .json({ success: false, error: true, message: error.message });
   }
 };
 
@@ -244,12 +345,18 @@ export const UpdateSchoolSettings = async (request, response) => {
 export const ForgotPassword = async (request, response) => {
   try {
     const { email } = request.body;
-    const user = await User_Model.findOne({ email: email?.toLowerCase().trim() });
+    const user = await User_Model.findOne({
+      email: email?.toLowerCase().trim(),
+    });
 
     if (user) {
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       await otpModel.deleteMany({ email: user.email });
-      await otpModel.create({ email: user.email, otp, expiresAt: new Date(Date.now() + 10 * 60 * 1000) });
+      await otpModel.create({
+        email: user.email,
+        otp,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+      });
       await sendOtpEmail(user.email, otp);
     }
 
@@ -259,7 +366,9 @@ export const ForgotPassword = async (request, response) => {
       message: "If this email is registered, an OTP has been sent.",
     });
   } catch (error) {
-    response.status(500).json({ success: false, error: true, message: error.message });
+    response
+      .status(500)
+      .json({ success: false, error: true, message: error.message });
   }
 };
 
@@ -269,32 +378,63 @@ export const VerifyOtp = async (request, response) => {
     const { email, otp } = request.body;
 
     if (!email || !otp)
-      return response.status(400).json({ success: false, error: true, message: "Email and OTP are required!" });
+      return response
+        .status(400)
+        .json({
+          success: false,
+          error: true,
+          message: "Email and OTP are required!",
+        });
 
-    const otpRecord = await otpModel.findOne({ email: email.toLowerCase().trim() });
+    const otpRecord = await otpModel.findOne({
+      email: email.toLowerCase().trim(),
+    });
 
     if (!otpRecord)
-      return response.status(400).json({ success: false, error: true, message: "OTP not found. Please request again!" });
+      return response
+        .status(400)
+        .json({
+          success: false,
+          error: true,
+          message: "OTP not found. Please request again!",
+        });
 
     if (new Date() > otpRecord.expiresAt) {
       await otpModel.deleteOne({ email });
-      return response.status(400).json({ success: false, error: true, message: "OTP has expired. Please request again!" });
+      return response
+        .status(400)
+        .json({
+          success: false,
+          error: true,
+          message: "OTP has expired. Please request again!",
+        });
     }
 
     if (otpRecord.otp !== otp)
-      return response.status(400).json({ success: false, error: true, message: "Wrong OTP!" });
+      return response
+        .status(400)
+        .json({ success: false, error: true, message: "Wrong OTP!" });
 
     const resetToken = jwt.sign(
       { email: email.toLowerCase().trim() },
       process.env.JWT_RESET_SECRET || process.env.JWT_ACCESS_SECRET,
-      { expiresIn: "15m" }
+      { expiresIn: "15m" },
     );
 
     await otpModel.deleteOne({ email });
 
-    return response.status(200).json({ success: true, error: false, message: "OTP verified!", resetToken });
+    return response
+      .status(200)
+      .json({
+        success: true,
+        error: false,
+        message: "OTP verified!",
+        resetToken,
+      });
   } catch (error) {
-    response.status(500).json({ success: false, error: true, message: error.message });
+    response
+      .status(500)
+      .json({ success: false, error: true, message: error.message });
   }
 };
 
@@ -304,42 +444,166 @@ export const ResetPassword = async (request, response) => {
     const { resetToken, newPassword } = request.body;
 
     if (!resetToken || !newPassword)
-      return response.status(400).json({ success: false, error: true, message: "Reset token and new password are required!" });
+      return response
+        .status(400)
+        .json({
+          success: false,
+          error: true,
+          message: "Reset token and new password are required!",
+        });
 
     if (newPassword.length < 6)
-      return response.status(400).json({ success: false, error: true, message: "Password must be at least 6 characters!" });
+      return response
+        .status(400)
+        .json({
+          success: false,
+          error: true,
+          message: "Password must be at least 6 characters!",
+        });
 
     let payload;
     try {
-      payload = jwt.verify(resetToken, process.env.JWT_RESET_SECRET || process.env.JWT_ACCESS_SECRET);
+      payload = jwt.verify(
+        resetToken,
+        process.env.JWT_RESET_SECRET || process.env.JWT_ACCESS_SECRET,
+      );
     } catch {
-      return response.status(400).json({ success: false, error: true, message: "Reset token is invalid or expired!" });
+      return response
+        .status(400)
+        .json({
+          success: false,
+          error: true,
+          message: "Reset token is invalid or expired!",
+        });
     }
 
     const user = await User_Model.findOne({ email: payload.email });
     if (!user)
-      return response.status(404).json({ success: false, error: true, message: "User not found!" });
+      return response
+        .status(404)
+        .json({ success: false, error: true, message: "User not found!" });
 
     user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
     await RefreshToken.deleteMany({ userId: user._id });
 
-    return response.status(200).json({ success: true, error: false, message: "Password reset successfully. Please login again!" });
+    return response
+      .status(200)
+      .json({
+        success: true,
+        error: false,
+        message: "Password reset successfully. Please login again!",
+      });
   } catch (error) {
-    response.status(500).json({ success: false, error: true, message: error.message });
+    response
+      .status(500)
+      .json({ success: false, error: true, message: error.message });
   }
 };
 
 // ── Get All Principals (Admins) ───────────────────────────────────────────────
 export const GetPrincipals = async (request, response) => {
   try {
-    const principals = await User_Model.find({ role: "admin" }).select("-password");
+    const principals = await User_Model.find({ role: "admin" }).select(
+      "-password",
+    );
     return response.status(200).json({
       success: true,
       error: false,
       data: principals,
     });
   } catch (error) {
-    response.status(500).json({ success: false, error: true, message: error.message });
+    response
+      .status(500)
+      .json({ success: false, error: true, message: error.message });
+  }
+};
+
+// ── Update Principal (Admin) ──────────────────────────────────────────────────
+export const UpdatePrincipal = async (request, response) => {
+  try {
+    const { id } = request.params;
+    const { Name, email, password, schoolName } = request.body;
+
+    const user = await User_Model.findOne({ _id: id, role: "admin" });
+    if (!user) {
+      return response
+        .status(404)
+        .json({
+          success: false,
+          error: true,
+          message: "Principal account not found!",
+        });
+    }
+
+    if (Name) user.Name = Name.trim();
+    if (schoolName !== undefined) user.schoolName = schoolName.trim();
+    if (email) {
+      const emailLower = email.toLowerCase().trim();
+      if (emailLower !== user.email) {
+        const existing = await User_Model.findOne({
+          email: emailLower,
+          _id: { $ne: id },
+        });
+        if (existing) {
+          return response
+            .status(400)
+            .json({
+              success: false,
+              error: true,
+              message: "Email is already taken by another account!",
+            });
+        }
+        user.email = emailLower;
+      }
+    }
+    if (password && password.trim().length >= 6) {
+      user.password = await bcrypt.hash(password.trim(), 10);
+    }
+
+    await user.save();
+    const safeUser = user.toObject();
+    delete safeUser.password;
+
+    return response.status(200).json({
+      success: true,
+      error: false,
+      message: "Principal updated successfully!",
+      data: safeUser,
+    });
+  } catch (error) {
+    return response
+      .status(500)
+      .json({ success: false, error: true, message: error.message });
+  }
+};
+
+// ── Delete Principal (Admin) ──────────────────────────────────────────────────
+export const DeletePrincipal = async (request, response) => {
+  try {
+    const { id } = request.params;
+    const user = await User_Model.findOne({ _id: id, role: "admin" });
+    if (!user) {
+      return response
+        .status(404)
+        .json({
+          success: false,
+          error: true,
+          message: "Principal account not found!",
+        });
+    }
+
+    await User_Model.findByIdAndDelete(id);
+    await RefreshToken.deleteMany({ userId: id });
+
+    return response.status(200).json({
+      success: true,
+      error: false,
+      message: "Principal deleted successfully!",
+    });
+  } catch (error) {
+    return response
+      .status(500)
+      .json({ success: false, error: true, message: error.message });
   }
 };

@@ -10,6 +10,8 @@ import {
   VerifyOtp,
   ResetPassword,
   GetPrincipals,
+  UpdatePrincipal,
+  DeletePrincipal,
   UpdateSchoolSettings,
 } from "../controllers/Auth_Controller.js";
 import { protect, authorize } from "../middleware/Auth_Middleware.js";
@@ -26,6 +28,8 @@ router.post("/forgot-password", ForgotPassword);
 router.post("/verify-otp",      VerifyOtp);
 router.post("/reset-password",  ResetPassword);
 router.get("/principals",       GetPrincipals);
+router.put("/principals/:id",   UpdatePrincipal);
+router.delete("/principals/:id", DeletePrincipal);
 
 // ── Protected Routes (login zaruri) ──────────────────────────────
 router.put ("/me",              protect, upload.single("profileImage"), UpdateMyProfile);

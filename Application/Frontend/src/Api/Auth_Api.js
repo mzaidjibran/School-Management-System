@@ -208,6 +208,29 @@ export const getPrincipals = async () => {
   return data.data;
 };
 
+// ── Update Principal (Admin) ──────────────────────────────────────────────────
+export const updatePrincipal = async (id, principalData) => {
+  const response = await fetch(`${API_BASE}/api/auth/principals/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(principalData),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || "Failed to update principal");
+  return data.data;
+};
+
+// ── Delete Principal (Admin) ──────────────────────────────────────────────────
+export const deletePrincipal = async (id) => {
+  const response = await fetch(`${API_BASE}/api/auth/principals/${id}`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || "Failed to delete principal");
+  return data;
+};
+
 // ── Update School Settings ──────────────────────────────────────────────────
 export const updateSchoolSettings = async (data) => {
   const isFormData = data instanceof FormData;

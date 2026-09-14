@@ -15,6 +15,7 @@ import {
   Award,
   GraduationCap,
   Pencil,
+  Trash2,
   Ruler,
   Brain,
 } from "lucide-react";
@@ -25,6 +26,8 @@ import {
   verifyOtp,
   signUp,
   getPrincipals,
+  updatePrincipal,
+  deletePrincipal,
 } from "../../Api/Auth_Api.js";
 
 export default function Login() {
