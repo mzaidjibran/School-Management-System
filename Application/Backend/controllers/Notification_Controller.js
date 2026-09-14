@@ -10,13 +10,15 @@ export const createNotificationHelper = async (title, message, type = "system", 
   }
 };
 
-// Fetch notifications (scoped to logged in principal/owner)
+// Fetch notifications (scoped strictly to logged in principal/owner)
 export const getNotifications = async (req, res) => {
   try {
     const ownerId = req.user && req.user.role === "teacher" ? req.user.createdBy : req.userId;
-    const filter = ownerId ? { $or: [{ createdBy: ownerId }, { createdBy: null }] } : {};
+    if (!ownerId) {
+      return res.status(200).json({ success: true, data: [] });
+    }
 
-    const notifications = await Notification.find(filter)
+    const notifications = await Notification.find({ createdBy: ownerId })
       .sort({ createdAt: -1 })
       .limit(20);
     res.status(200).json({
@@ -28,14 +30,15 @@ export const getNotifications = async (req, res) => {
   }
 };
 
-// Mark all as read (scoped to logged in principal/owner)
+// Mark all as read (scoped strictly to logged in principal/owner)
 export const markAllAsRead = async (req, res) => {
   try {
     const ownerId = req.user && req.user.role === "teacher" ? req.user.createdBy : req.userId;
-    const filter = { read: false };
-    if (ownerId) filter.$or = [{ createdBy: ownerId }, { createdBy: null }];
+    if (!ownerId) {
+      return res.status(200).json({ success: true, message: "No notifications to mark" });
+    }
 
-    await Notification.updateMany(filter, { read: true });
+    await Notification.updateMany({ createdBy: ownerId, read: false }, { read: true });
     res.status(200).json({
       success: true,
       message: "All notifications marked as read",

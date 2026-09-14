@@ -21,7 +21,7 @@ const saveRefreshToken = (userId, token) =>
 // ── Sign Up
 export const SignUp = async (request, response) => {
   try {
-    const { Name, email, password } = request.body;
+    const { Name, email, password, schoolName } = request.body;
 
     if (!Name || !email || !password)
       return response
@@ -53,7 +53,6 @@ export const SignUp = async (request, response) => {
           message: "This email is already registered!",
         });
 
-    const { Name, email, password, schoolName } = request.body;
     let profileImage = null;
     if (request.file) {
       profileImage = request.file.path || request.file.secure_url;

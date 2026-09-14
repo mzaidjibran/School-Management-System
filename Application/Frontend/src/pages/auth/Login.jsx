@@ -163,27 +163,80 @@ export default function Login() {
     }
   }
 
-  async function handleDeletePrincipal(id, name) {
-    if (
-      !window.confirm(
-        `Are you sure you want to delete Principal "${name || "this account"}"?`
-      )
-    ) {
-      return;
-    }
-    setDevLoading(true);
-    try {
-      await deletePrincipal(id);
-      toast.success("Principal account deleted successfully!");
-      if (editingPrincipalId === id) {
-        handleCancelEditPrincipal();
+  function handleDeletePrincipal(id, name) {
+    toast(
+      (t) => (
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px", minWidth: "220px" }}>
+          <div style={{ fontWeight: "600", color: "#0f172a", fontSize: "13px" }}>
+            Delete Principal &ldquo;{name || "this account"}&rdquo;?
+          </div>
+          <div style={{ fontSize: "11px", color: "#64748b" }}>
+            This account and access will be removed.
+          </div>
+          <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", marginTop: "4px" }}>
+            <button
+              type="button"
+              onClick={() => toast.dismiss(t.id)}
+              style={{
+                padding: "4px 10px",
+                background: "#f1f5f9",
+                color: "#475569",
+                border: "1px solid #cbd5e1",
+                borderRadius: "5px",
+                fontSize: "11px",
+                fontWeight: "600",
+                cursor: "pointer",
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
+                toast.dismiss(t.id);
+                setDevLoading(true);
+                try {
+                  await deletePrincipal(id);
+                  toast.success("Principal account deleted successfully!");
+                  if (editingPrincipalId === id) {
+                    handleCancelEditPrincipal();
+                  }
+                  await loadPrincipals();
+                } catch (err) {
+                  toast.error(err.message || "Failed to delete principal");
+                } finally {
+                  setDevLoading(false);
+                }
+              }}
+              style={{
+                padding: "4px 10px",
+                background: "#ef4444",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "5px",
+                fontSize: "11px",
+                fontWeight: "600",
+                cursor: "pointer",
+              }}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        duration: 5000,
+        position: "top-center",
+        style: {
+          background: "#ffffff",
+          border: "1px solid #e2e8f0",
+          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.15)",
+          padding: "12px 14px",
+          borderRadius: "10px",
+          maxWidth: "320px",
+        },
       }
-      await loadPrincipals();
-    } catch (err) {
-      toast.error(err.message || "Failed to delete principal");
-    } finally {
-      setDevLoading(false);
-    }
+    );
   }
 
   function openDevAccess() {
