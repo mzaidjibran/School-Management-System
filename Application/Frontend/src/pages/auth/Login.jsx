@@ -52,10 +52,12 @@ export default function Login() {
     username: "",
     password: "",
   });
+  const [editingPrincipalId, setEditingPrincipalId] = useState(null);
   const [principalForm, setPrincipalForm] = useState({
     Name: "",
     email: "",
     password: "",
+    schoolName: "",
   });
   const [principalsList, setPrincipalsList] = useState([]);
   const [devLoading, setDevLoading] = useState(false);
@@ -95,20 +97,79 @@ export default function Login() {
     }
   }
 
-  async function handleCreatePrincipalSubmit(e) {
+  function handleStartEditPrincipal(p) {
+    setEditingPrincipalId(p._id);
+    setPrincipalForm({
+      Name: p.Name || "",
+      email: p.email || "",
+      password: "",
+      schoolName: p.schoolName || "",
+    });
+  }
+
+  function handleCancelEditPrincipal() {
+    setEditingPrincipalId(null);
+    setPrincipalForm({ Name: "", email: "", password: "", schoolName: "" });
+  }
+
+  async function handlePrincipalFormSubmit(e) {
     e.preventDefault();
     setDevLoading(true);
     try {
-      await signUp({
-        Name: principalForm.Name,
-        email: principalForm.email,
-        password: principalForm.password,
-      });
-      toast.success("Principal user account created successfully!");
-      setPrincipalForm({ Name: "", email: "", password: "" });
+      if (editingPrincipalId) {
+        const payload = {
+          Name: principalForm.Name,
+          email: principalForm.email,
+          schoolName: principalForm.schoolName,
+        };
+        if (principalForm.password && principalForm.password.trim()) {
+          payload.password = principalForm.password.trim();
+        }
+        await updatePrincipal(editingPrincipalId, payload);
+        toast.success("Principal account updated successfully!");
+        handleCancelEditPrincipal();
+        await loadPrincipals();
+      } else {
+        await signUp({
+          Name: principalForm.Name,
+          email: principalForm.email,
+          password: principalForm.password,
+          schoolName: principalForm.schoolName,
+        });
+        toast.success("Principal user account created successfully!");
+        setPrincipalForm({ Name: "", email: "", password: "", schoolName: "" });
+        await loadPrincipals();
+      }
+    } catch (err) {
+      toast.error(
+        err.message ||
+          (editingPrincipalId
+            ? "Failed to update principal account"
+            : "Failed to create principal account")
+      );
+    } finally {
+      setDevLoading(false);
+    }
+  }
+
+  async function handleDeletePrincipal(id, name) {
+    if (
+      !window.confirm(
+        `Are you sure you want to delete Principal "${name || "this account"}"?`
+      )
+    ) {
+      return;
+    }
+    setDevLoading(true);
+    try {
+      await deletePrincipal(id);
+      toast.success("Principal account deleted successfully!");
+      if (editingPrincipalId === id) {
+        handleCancelEditPrincipal();
+      }
       await loadPrincipals();
     } catch (err) {
-      toast.error(err.message || "Failed to create principal account");
+      toast.error(err.message || "Failed to delete principal");
     } finally {
       setDevLoading(false);
     }
@@ -116,13 +177,14 @@ export default function Login() {
 
   function openDevAccess() {
     setDevLoginForm({ username: "", password: "" });
-    setPrincipalForm({ Name: "", email: "", password: "" });
+    handleCancelEditPrincipal();
     setDevVerified(false);
     setDevAccessOpen(true);
   }
 
   function closeDevAccess() {
     setDevAccessOpen(false);
+    handleCancelEditPrincipal();
     setDevVerified(false);
   }
 
@@ -642,13 +704,24 @@ export default function Login() {
               /* Unlocked Developer Dashboard: Dual-Column Layout */
               <div className="dev-panel-content">
                 <div className="dev-panel-columns">
-                  {/* Left Column: Create Principal */}
+                  {/* Left Column: Create or Edit Principal */}
                   <div className="dev-panel-left">
-                    <h6 className="dev-section-title">
-                      Create Principal Account
-                    </h6>
+                    <div className="d-flex align-items-center justify-content-between mb-2">
+                      <h6 className="dev-section-title m-0">
+                        {editingPrincipalId ? "Edit Principal Account" : "Create Principal Account"}
+                      </h6>
+                      {editingPrincipalId && (
+                        <button
+                          type="button"
+                          className="btn-cancel-edit"
+                          onClick={handleCancelEditPrincipal}
+                        >
+                          Cancel Edit
+                        </button>
+                      )}
+                    </div>
                     <form
-                      onSubmit={handleCreatePrincipalSubmit}
+                      onSubmit={handlePrincipalFormSubmit}
                       className="signin-form"
                     >
                       <div className="form-group mb-3">
@@ -665,6 +738,17 @@ export default function Login() {
                         />
                       </div>
                       <div className="form-group mb-3">
+                        <label className="form-label">School Name</label>
+                        <input
+                          name="schoolName"
+                          type="text"
+                          className="form-control modal-input"
+                          value={principalForm.schoolName}
+                          onChange={handlePrincipalChange}
+                          placeholder="e.g. Punjab Public High School"
+                        />
+                      </div>
+                      <div className="form-group mb-3">
                         <label className="form-label">Email Address</label>
                         <input
                           name="email"
@@ -677,31 +761,53 @@ export default function Login() {
                         />
                       </div>
                       <div className="form-group mb-4">
-                        <label className="form-label">Password</label>
+                        <label className="form-label">
+                          {editingPrincipalId
+                            ? "New Password (Leave blank to keep current)"
+                            : "Password"}
+                        </label>
                         <input
                           name="password"
                           type="password"
                           className="form-control modal-input"
                           value={principalForm.password}
                           onChange={handlePrincipalChange}
-                          placeholder="Min 6 characters"
-                          required
+                          placeholder={
+                            editingPrincipalId
+                              ? "Optional (Min 6 chars)"
+                              : "Min 6 characters"
+                          }
+                          required={!editingPrincipalId}
                         />
                       </div>
-                      <button
-                        type="submit"
-                        className="btn-primary w-100"
-                        disabled={devLoading}
-                      >
-                        {devLoading ? (
-                          <span className="d-flex align-items-center justify-content-center">
-                            <Loader2 className="spinner me-2" size={18} />
-                            Creating...
-                          </span>
-                        ) : (
-                          "Create Principal Account"
+                      <div className="d-flex gap-2">
+                        <button
+                          type="submit"
+                          className="btn-primary w-100"
+                          disabled={devLoading}
+                        >
+                          {devLoading ? (
+                            <span className="d-flex align-items-center justify-content-center">
+                              <Loader2 className="spinner me-2" size={18} />
+                              {editingPrincipalId ? "Saving..." : "Creating..."}
+                            </span>
+                          ) : editingPrincipalId ? (
+                            "Update Principal"
+                          ) : (
+                            "Create Principal Account"
+                          )}
+                        </button>
+                        {editingPrincipalId && (
+                          <button
+                            type="button"
+                            className="btn-outline-secondary"
+                            onClick={handleCancelEditPrincipal}
+                            style={{ minWidth: "80px" }}
+                          >
+                            Cancel
+                          </button>
                         )}
-                      </button>
+                      </div>
                     </form>
                   </div>
 
@@ -715,13 +821,47 @@ export default function Login() {
                         </div>
                       ) : (
                         principalsList.map((p, idx) => (
-                          <div className="principal-item" key={p._id || idx}>
-                            <div className="principal-avatar">
-                              {p.Name ? p.Name.charAt(0).toUpperCase() : "P"}
+                          <div
+                            className={`principal-item ${
+                              editingPrincipalId === p._id ? "editing-active" : ""
+                            }`}
+                            key={p._id || idx}
+                          >
+                            <div className="principal-item-main">
+                              <div className="principal-avatar">
+                                {p.Name ? p.Name.charAt(0).toUpperCase() : "P"}
+                              </div>
+                              <div className="principal-info">
+                                <div className="principal-name">
+                                  {p.Name}
+                                  {p.schoolName && (
+                                    <span className="principal-school-tag">
+                                      {p.schoolName}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="principal-email">{p.email}</div>
+                              </div>
                             </div>
-                            <div className="principal-info">
-                              <div className="principal-name">{p.Name}</div>
-                              <div className="principal-email">{p.email}</div>
+                            <div className="principal-actions">
+                              <button
+                                type="button"
+                                className="principal-action-btn edit"
+                                title="Edit Principal"
+                                onClick={() => handleStartEditPrincipal(p)}
+                              >
+                                <Pencil size={15} />
+                              </button>
+                              <button
+                                type="button"
+                                className="principal-action-btn delete"
+                                title="Delete Principal"
+                                onClick={() =>
+                                  handleDeletePrincipal(p._id, p.Name)
+                                }
+                              >
+                                <Trash2 size={15} />
+                              </button>
                             </div>
                           </div>
                         ))
@@ -1332,11 +1472,25 @@ export default function Login() {
           background: #94a3b8;
         }
         
+        .btn-cancel-edit {
+          background: transparent;
+          border: none;
+          color: #ef4444;
+          font-size: 0.75rem;
+          font-weight: 600;
+          cursor: pointer;
+          text-decoration: underline;
+          padding: 0;
+        }
+        .btn-cancel-edit:hover {
+          color: #b91c1c;
+        }
         .principal-item {
           display: flex;
           align-items: center;
-          gap: 0.75rem;
-          padding: 0.6rem 0.8rem;
+          justify-content: space-between;
+          gap: 0.5rem;
+          padding: 0.6rem 0.75rem;
           background: #f8fafc;
           border: 1px solid #e2e8f0;
           border-radius: 0.5rem;
@@ -1346,9 +1500,22 @@ export default function Login() {
           background: #f1f5f9;
           border-color: #cbd5e1;
         }
+        .principal-item.editing-active {
+          background: #f0fdf4;
+          border-color: #22c55e;
+          box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+        }
+        .principal-item-main {
+          display: flex;
+          align-items: center;
+          gap: 0.65rem;
+          flex: 1;
+          min-width: 0;
+        }
         .principal-avatar {
           width: 32px;
           height: 32px;
+          min-width: 32px;
           border-radius: 50%;
           background: #326080;
           color: #ffffff;
@@ -1362,15 +1529,67 @@ export default function Login() {
           display: flex;
           flex-direction: column;
           text-align: left;
+          overflow: hidden;
         }
         .principal-name {
           font-size: 0.85rem;
           font-weight: 700;
           color: #0f172a;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: flex;
+          align-items: center;
+          gap: 0.35rem;
+        }
+        .principal-school-tag {
+          font-size: 0.65rem;
+          font-weight: 600;
+          background: #e2e8f0;
+          color: #475569;
+          padding: 0.1rem 0.35rem;
+          border-radius: 0.25rem;
+          max-width: 120px;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         .principal-email {
           font-size: 0.75rem;
           color: #64748b;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .principal-actions {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+          flex-shrink: 0;
+        }
+        .principal-action-btn {
+          background: transparent;
+          border: none;
+          padding: 0.35rem;
+          border-radius: 0.375rem;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.15s ease;
+        }
+        .principal-action-btn.edit {
+          color: #326080;
+        }
+        .principal-action-btn.edit:hover {
+          background: #e0f2fe;
+          color: #0369a1;
+        }
+        .principal-action-btn.delete {
+          color: #ef4444;
+        }
+        .principal-action-btn.delete:hover {
+          background: #fee2e2;
+          color: #b91c1c;
         }
         .empty-list-text {
           font-size: 0.85rem;
