@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaBook, FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
 import { createClass } from "../../api/Class_Api.js";
 import { getAllTeachers } from "../../api/Teacher_Api.js";
+import toast from "react-hot-toast";
 
 const FloatingInput = ({
   label,
