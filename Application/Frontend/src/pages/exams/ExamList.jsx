@@ -20,6 +20,7 @@ import { getAllExams, deleteExam, updateExam } from "../../api/Exam_Api.js";
 import { getAllClasses } from "../../api/Class_Api.js";
 import toast from "react-hot-toast";
 import { confirmToast } from "../../utils/toastHelpers.jsx";
+import { useAuth } from "../auth/useAuth.js";
 
 const STATUS_MAP = {
   scheduled: {
@@ -234,7 +235,278 @@ const EditModal = ({ exam, classes, onClose, onSave }) => {
   );
 };
 
+const ExamNoticeModal = ({ exam, schoolName, schoolLogo, onClose }) => {
+  if (!exam) return null;
+  const logoUrl = schoolLogo
+    ? schoolLogo.startsWith("http")
+      ? schoolLogo
+      : `https://api.nullstacksloution.online${schoolLogo}`
+    : null;
+
+  const handlePrint = () => {
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${exam.name} - Exam Notice</title>
+          <style>
+            body { font-family: 'Inter', system-ui, -apple-system, sans-serif; padding: 40px; color: #1e293b; margin: 0; background: #fff; }
+            .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #326080; padding-bottom: 15px; margin-bottom: 20px; }
+            .logo-title { display: flex; align-items: center; gap: 15px; }
+            .logo { width: 65px; height: 65px; object-fit: cover; border-radius: 50%; border: 2px solid #326080; }
+            .school-name { font-size: 22px; font-weight: 800; color: #326080; margin: 0; }
+            .notice-badge { font-size: 11px; font-weight: 700; color: #805232; text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
+            .exam-title-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; }
+            .exam-name { font-size: 18px; font-weight: 700; color: #0f172a; margin: 0; }
+            .exam-type { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; }
+            .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+            .card { border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px; background: #ffffff; }
+            .label { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; }
+            .val { font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 4px; }
+            .instructions { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 15px; margin-bottom: 30px; font-size: 12px; color: #92400e; line-height: 1.6; }
+            .signatures { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 40px; padding-top: 20px; }
+            .sig-line { border-bottom: 1px solid #000; width: 180px; margin-bottom: 6px; }
+            .sig-text { font-size: 11px; font-weight: 700; color: #334155; }
+            @media print { body { padding: 20px; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="logo-title">
+              ${logoUrl ? `<img src="${logoUrl}" class="logo" alt="Logo" />` : `<div style="width:60px;height:60px;border-radius:50%;background:#326080;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:bold;">${(schoolName || "S")[0]?.toUpperCase()}</div>`}
+              <div>
+                <h1 class="school-name">${schoolName || "Punjab Public High School"}</h1>
+                <div class="notice-badge">Official Examination Notice & Schedule</div>
+              </div>
+            </div>
+            <div style="text-align: right; font-size: 11px; color: #64748b;">
+              <strong>Date:</strong> ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+            </div>
+          </div>
+
+          <div class="exam-title-box">
+            <div class="exam-type">${EXAM_TYPE_LABELS[exam.examType] || exam.examType || "Examination"}</div>
+            <h2 class="exam-name">${exam.name}</h2>
+          </div>
+
+          <div class="grid">
+            <div class="card"><div class="label">Class & Section</div><div class="val">${exam.class?.name || "—"} ${exam.class?.section ? `(${exam.class.section})` : ""}</div></div>
+            <div class="card"><div class="label">Subject</div><div class="val" style="color:#326080;">${exam.subject}</div></div>
+            <div class="card"><div class="label">Exam Date</div><div class="val">${exam.examDate ? new Date(exam.examDate).toLocaleDateString("en-US", { weekday: "short", year: "numeric", month: "short", day: "numeric" }) : "—"}</div></div>
+            <div class="card"><div class="label">Time / Duration</div><div class="val">${exam.startTime || "Morning Session"} ${exam.duration ? `(${exam.duration} mins)` : ""}</div></div>
+            <div class="card"><div class="label">Total Marks</div><div class="val">${exam.totalMarks} Marks</div></div>
+            <div class="card"><div class="label">Passing Marks</div><div class="val" style="color:#805232;">${exam.passingMarks} Marks</div></div>
+            <div class="card" style="grid-column: span 3;"><div class="label">Venue / Room</div><div class="val">${exam.venue || "Main Examination Hall / Respective Classroom"}</div></div>
+          </div>
+
+          <div class="instructions">
+            <strong>📌 Examination Instructions:</strong><br/>
+            ${(exam.instructions || "1. Students must bring their own stationery and admit card.\n2. Cell phones and unauthorized materials are strictly prohibited.\n3. Be present in the hall 15 minutes before the exam begins.").replace(/\n/g, "<br/>")}
+          </div>
+
+          <div class="signatures">
+            <div>
+              <div class="sig-line"></div>
+              <div class="sig-text">Prepared By / Class Teacher</div>
+            </div>
+            <div style="text-align: right;">
+              <div class="sig-line" style="margin-left: auto;"></div>
+              <div class="sig-text">Principal Signature & Stamp</div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      toast.error("Please allow popups to print notice");
+      return;
+    }
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 300);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
+      <div className="bg-white rounded-md shadow-2xl w-full max-w-2xl overflow-hidden my-auto border border-slate-200">
+        {/* Notice Header - School Branding */}
+        <div className="bg-[#326080] text-white px-6 py-5 flex items-center justify-between">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-full bg-white/10 p-1 flex items-center justify-center border border-white/20 shrink-0 overflow-hidden">
+              {logoUrl ? (
+                <img
+                  src={logoUrl}
+                  alt="School Logo"
+                  className="w-full h-full object-cover rounded-full"
+                />
+              ) : (
+                <span className="text-xl font-bold font-serif text-white">
+                  {(schoolName || "S")[0]?.toUpperCase()}
+                </span>
+              )}
+            </div>
+            <div>
+              <h2 className="text-lg font-bold leading-tight tracking-wide">
+                {schoolName || "Punjab Public High School"}
+              </h2>
+              <p className="text-xs text-white/80 font-medium tracking-wider uppercase mt-0.5">
+                Official Examination Notice & Schedule
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Notice Body */}
+        <div className="p-6 space-y-5 bg-[#fffaf6]/40">
+          {/* Main Title & Status */}
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-200">
+            <div>
+              <span className="text-[10px] font-bold text-[#805232] uppercase tracking-wider bg-[#805232]/10 px-2 py-0.5 rounded">
+                {EXAM_TYPE_LABELS[exam.examType] || exam.examType || "Examination"}
+              </span>
+              <h3 className="text-xl font-bold text-slate-800 mt-1">
+                {exam.name}
+              </h3>
+            </div>
+            <StatusBadge status={exam.status} />
+          </div>
+
+          {/* Grid Information */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+            <div className="bg-white p-3 rounded border border-slate-200 shadow-sm">
+              <span className="text-[10px] text-slate-400 font-bold uppercase block">
+                Class & Section
+              </span>
+              <span className="font-bold text-slate-800 text-sm mt-0.5 block">
+                {exam.class?.name || "—"}{" "}
+                {exam.class?.section ? `(${exam.class.section})` : ""}
+              </span>
+            </div>
+
+            <div className="bg-white p-3 rounded border border-slate-200 shadow-sm">
+              <span className="text-[10px] text-slate-400 font-bold uppercase block">
+                Subject
+              </span>
+              <span className="font-bold text-[#326080] text-sm mt-0.5 block">
+                {exam.subject}
+              </span>
+            </div>
+
+            <div className="bg-white p-3 rounded border border-slate-200 shadow-sm">
+              <span className="text-[10px] text-slate-400 font-bold uppercase block">
+                Exam Date
+              </span>
+              <span className="font-bold text-slate-800 text-sm mt-0.5 block">
+                {exam.examDate
+                  ? new Date(exam.examDate).toLocaleDateString("en-US", {
+                      weekday: "short",
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })
+                  : "—"}
+              </span>
+            </div>
+
+            <div className="bg-white p-3 rounded border border-slate-200 shadow-sm">
+              <span className="text-[10px] text-slate-400 font-bold uppercase block">
+                Time / Duration
+              </span>
+              <span className="font-semibold text-slate-700 mt-0.5 block">
+                {exam.startTime || "Morning Session"}{" "}
+                {exam.duration ? `(${exam.duration} mins)` : ""}
+              </span>
+            </div>
+
+            <div className="bg-white p-3 rounded border border-slate-200 shadow-sm">
+              <span className="text-[10px] text-slate-400 font-bold uppercase block">
+                Total Marks
+              </span>
+              <span className="font-bold text-slate-800 text-sm mt-0.5 block">
+                {exam.totalMarks} Marks
+              </span>
+            </div>
+
+            <div className="bg-white p-3 rounded border border-slate-200 shadow-sm">
+              <span className="text-[10px] text-slate-400 font-bold uppercase block">
+                Passing Marks
+              </span>
+              <span className="font-bold text-[#805232] text-sm mt-0.5 block">
+                {exam.passingMarks} Marks
+              </span>
+            </div>
+
+            <div className="bg-white p-3 rounded border border-slate-200 shadow-sm col-span-2 sm:col-span-3">
+              <span className="text-[10px] text-slate-400 font-bold uppercase block">
+                Exam Venue / Hall
+              </span>
+              <span className="font-medium text-slate-700 mt-0.5 block">
+                {exam.venue || "Main Examination Hall / Respective Classroom"}
+              </span>
+            </div>
+          </div>
+
+          {/* Instructions / Notice Notes */}
+          <div className="bg-amber-50/70 border border-amber-200 rounded p-3.5 text-xs text-amber-900 leading-relaxed">
+            <span className="font-bold text-amber-950 uppercase tracking-wide block mb-1">
+              📌 Instructions & Guidelines:
+            </span>
+            <p className="text-slate-700 whitespace-pre-wrap">
+              {exam.instructions ||
+                "1. Students must bring their own stationery and admit card.\n2. Cell phones, smart watches, and unauthorized materials are strictly prohibited.\n3. Students arriving more than 15 minutes after the start time will not be permitted."}
+            </p>
+          </div>
+
+          {/* Signature Line */}
+          <div className="flex justify-between items-end pt-4 border-t border-slate-200 text-xs text-slate-500">
+            <div>
+              <p className="text-[10px] text-slate-400">Issued by Administration</p>
+              <p className="font-bold text-slate-700">
+                {schoolName || "School Administration"}
+              </p>
+            </div>
+            <div className="text-right">
+              <div className="h-8 border-b border-slate-300 w-32 mb-1"></div>
+              <p className="font-bold text-slate-700">Principal Signature</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Modal Footer Actions */}
+        <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex justify-end gap-2.5">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 border border-slate-200 hover:bg-slate-100 rounded text-xs font-semibold text-slate-600 transition"
+          >
+            Close
+          </button>
+          <button
+            type="button"
+            onClick={handlePrint}
+            className="px-4 py-2 bg-[#326080] hover:bg-[#254961] text-white rounded text-xs font-bold shadow transition flex items-center gap-1.5"
+          >
+            <FaPrint className="w-3.5 h-3.5" /> Print Notice
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function ExamList() {
+  const { schoolName, schoolLogo } = useAuth();
   const [exams, setExams] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [classes, setClasses] = useState([]);
@@ -245,6 +517,7 @@ export default function ExamList() {
   const [statusFilter, setStatusFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [editExam, setEditExam] = useState(null);
+  const [viewExam, setViewExam] = useState(null);
   const itemsPerPage = 10;
 
   const fetchData = async () => {
@@ -588,14 +861,23 @@ export default function ExamList() {
                       <td className="py-2.5 px-4">
                         <div className="flex items-center gap-1">
                           <button
+                            onClick={() => setViewExam(exam)}
+                            className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-md transition"
+                            title="View Exam Notice"
+                          >
+                            <FaEye className="w-3 h-3" />
+                          </button>
+                          <button
                             onClick={() => setEditExam(exam)}
                             className="p-1.5 text-amber-500 hover:bg-amber-50 rounded-md transition"
+                            title="Edit Exam"
                           >
                             <FaEdit className="w-3 h-3" />
                           </button>
                           <button
                             onClick={() => handleDelete(exam)}
                             className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-md transition"
+                            title="Delete Exam"
                           >
                             <FaTrash className="w-3 h-3" />
                           </button>
@@ -695,6 +977,13 @@ export default function ExamList() {
                       </span>
                       <div className="flex items-center gap-1">
                         <button
+                          onClick={() => setViewExam(exam)}
+                          className="p-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded transition"
+                          title="View Exam Notice"
+                        >
+                          <FaEye className="w-3.5 h-3.5" />
+                        </button>
+                        <button
                           onClick={() => setEditExam(exam)}
                           className="p-2 text-amber-600 bg-amber-50 hover:bg-amber-100 rounded transition"
                           title="Edit"
@@ -751,6 +1040,14 @@ export default function ExamList() {
           classes={classes}
           onClose={() => setEditExam(null)}
           onSave={handleSave}
+        />
+      )}
+      {viewExam && (
+        <ExamNoticeModal
+          exam={viewExam}
+          schoolName={schoolName}
+          schoolLogo={schoolLogo}
+          onClose={() => setViewExam(null)}
         />
       )}
     </div>
