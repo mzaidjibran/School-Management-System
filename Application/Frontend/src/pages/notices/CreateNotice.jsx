@@ -119,14 +119,16 @@ export default function CreateNotice() {
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const validate = () => {
+  const validate = (isDraft = false) => {
     const e = {};
-    if (!form.title.trim())    e.title = "Title required";
-    if (!form.publishDate)     e.publishDate = "Publish date required";
-    if (!form.expiryDate)      e.expiryDate = "Expiry date required";
-    else if (form.expiryDate < form.publishDate)
-                               e.expiryDate = "Must be after publish date";
-    if (!form.content.trim())  e.content = "Content required";
+    if (!form.title.trim()) e.title = "Title required";
+    if (!isDraft) {
+      if (!form.publishDate) e.publishDate = "Publish date required";
+      if (!form.expiryDate) e.expiryDate = "Expiry date required";
+      else if (form.expiryDate < form.publishDate)
+        e.expiryDate = "Must be after publish date";
+      if (!form.content.trim()) e.content = "Content required";
+    }
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -138,28 +140,29 @@ export default function CreateNotice() {
 
   // ── Submit ────────────────────────────────────────────────────
   const handleSubmit = async (e, saveAsDraft = false) => {
-    e.preventDefault();
-    if (!validate()) return;
+    if (e) e.preventDefault();
+    const isDraft = Boolean(saveAsDraft || form.status === "draft");
+    if (!validate(isDraft)) return;
     setLoading(true);
 
     const payload = {
       title:          form.title.trim(),
       targetAudience: form.targetAudience,
       priority:       form.priority,
-      publishDate:    form.publishDate,
+      publishDate:    form.publishDate || new Date().toISOString().split("T")[0],
       expiryDate:     form.expiryDate || undefined,
-      content:        form.content.trim(),
-      status:         saveAsDraft ? "draft" : "published",
+      content:        form.content.trim() || "Draft notice content",
+      status:         isDraft ? "draft" : "published",
     };
 
     try {
       if (isEdit) {
         await updateNotice(id, payload);
-        toast.success("Notice updated successfully!");
+        toast.success(isDraft ? "Notice saved as draft!" : "Notice updated successfully!");
         navigate("/notices");
       } else {
         await createNotice(payload);
-        toast.success(saveAsDraft ? "Saved as draft!" : "Notice published!");
+        toast.success(isDraft ? "Saved as draft!" : "Notice published!");
         navigate("/notices");
       }
     } catch (err) {
@@ -313,9 +316,17 @@ export default function CreateNotice() {
                 className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 disabled:opacity-50 transition"
               >
                 <FaSave className="w-3 h-3" />
-                {loading ? "Saving..." : isEdit ? "Update Notice" : "Publish Notice"}
+                {loading
+                  ? "Saving..."
+                  : form.status === "draft"
+                  ? isEdit
+                    ? "Update Draft"
+                    : "Save as Draft"
+                  : isEdit
+                  ? "Update Notice"
+                  : "Publish Notice"}
               </button>
-              {!isEdit && (
+              {form.status !== "draft" && (
                 <button
                   type="button"
                   onClick={(e) => handleSubmit(e, true)}
