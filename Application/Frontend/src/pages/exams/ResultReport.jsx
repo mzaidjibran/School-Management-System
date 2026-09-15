@@ -3,6 +3,8 @@ import * as XLSX from "xlsx";
 import { FaFileCsv, FaFileExcel, FaPrint, FaSearch, FaEye } from "react-icons/fa";
 import { getAllExams, getExamResults } from "../../api/Exam_Api.js";
 import { getAllClasses } from "../../api/Class_Api.js";
+import { useAuth } from "../auth/useAuth.js";
+import toast from "react-hot-toast";
 
 const calculateGrade = (p) => {
   if (p >= 90) return "A+"; if (p >= 80) return "A";
@@ -11,13 +13,20 @@ const calculateGrade = (p) => {
 };
 
 const gradeColor = (g) => ({
-  "A+":"bg-indigo-600","A":"bg-violet-600","B":"bg-blue-500",
-  "C":"bg-amber-500","D":"bg-orange-500","F":"bg-red-500",
+  "A+": "bg-[#326080]",
+  "A": "bg-[#3d749a]",
+  "B": "bg-blue-600",
+  "C": "bg-amber-600",
+  "D": "bg-[#805232]",
+  "F": "bg-rose-600",
 }[g] || "bg-slate-500");
 
 const EXAM_TYPE_LABELS = {
-  mid_term:"Mid Term", final_term:"Final Term",
-  unit_test:"Unit Test", practical:"Practical", quiz:"Quiz",
+  mid_term: "Mid Term",
+  final_term: "Final Term",
+  unit_test: "Unit Test",
+  practical: "Practical",
+  quiz: "Quiz",
 };
 
 const StatsCard = ({ label, value, bgColor, iconColor, icon }) => (
@@ -36,49 +45,415 @@ const StatsCard = ({ label, value, bgColor, iconColor, icon }) => (
   </div>
 );
 
-const ViewModal = ({ student, exam, onClose }) => {
+// ── Print Individual Student Report Card ──────────────────────────
+const printStudentReportCard = (student, exam, schoolName, schoolLogo) => {
+  if (!student || !exam) return;
+  const pct = ((student.obtainedMarks / exam.totalMarks) * 100).toFixed(1);
+  const grade = student.grade || calculateGrade(parseFloat(pct));
+  const logoUrl = schoolLogo
+    ? schoolLogo.startsWith("http")
+      ? schoolLogo
+      : `https://api.nullstacksloution.online${schoolLogo}`
+    : null;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>${student.student?.firstName || "Student"} - Report Card</title>
+        <style>
+          @page { size: A4 portrait; margin: 15mm; }
+          body { font-family: 'Inter', system-ui, -apple-system, sans-serif; color: #1e293b; margin: 0; padding: 20px; background: #fff; }
+          .report-border { border: 3px double #326080; padding: 25px; border-radius: 8px; min-height: 88vh; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; }
+          .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #326080; padding-bottom: 15px; margin-bottom: 20px; }
+          .header-left { display: flex; align-items: center; gap: 15px; }
+          .logo { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #326080; }
+          .logo-fallback { width: 70px; height: 70px; border-radius: 50%; background: #326080; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; }
+          .school-title { font-size: 24px; font-weight: 800; color: #326080; margin: 0; }
+          .sub-title { font-size: 11px; font-weight: 700; color: #805232; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 4px; }
+          .meta-info { text-align: right; font-size: 11px; color: #64748b; line-height: 1.5; }
+          .section-title { font-size: 12px; font-weight: 800; color: #326080; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; border-left: 4px solid #326080; padding-left: 8px; }
+          .bio-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px; margin-bottom: 22px; font-size: 12px; }
+          .bio-item { display: flex; }
+          .bio-label { width: 110px; font-weight: 700; color: #64748b; text-transform: uppercase; font-size: 11px; }
+          .bio-val { font-weight: 700; color: #0f172a; flex: 1; }
+          .marks-table { width: 100%; border-collapse: collapse; margin-bottom: 22px; font-size: 13px; }
+          .marks-table th { background: #326080; color: #ffffff; padding: 10px 14px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+          .marks-table td { padding: 12px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #1e293b; }
+          .marks-table tr:nth-child(even) { background: #f8fafc; }
+          .summary-card { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; text-align: center; }
+          .summary-box { border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; background: #ffffff; }
+          .summary-label { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; }
+          .summary-val { font-size: 18px; font-weight: 800; margin-top: 4px; }
+          .remarks-box { background: #fffaf6; border: 1px solid #fed7aa; border-radius: 6px; padding: 12px 16px; margin-bottom: 25px; font-size: 12px; color: #9a3412; }
+          .signatures { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; padding-top: 20px; }
+          .sig-box { text-align: center; }
+          .sig-line { width: 160px; border-bottom: 1px solid #000; margin-bottom: 6px; }
+          .sig-name { font-size: 11px; font-weight: 700; color: #334155; text-transform: uppercase; }
+        </style>
+      </head>
+      <body>
+        <div class="report-border">
+          <div>
+            <div class="header">
+              <div class="header-left">
+                ${logoUrl ? `<img src="${logoUrl}" class="logo" alt="School Logo" />` : `<div class="logo-fallback">${(schoolName || "S")[0]?.toUpperCase()}</div>`}
+                <div>
+                  <h1 class="school-title">${schoolName || "Punjab Public High School"}</h1>
+                  <div class="sub-title">Official Student Progress Report & Mark Sheet</div>
+                </div>
+              </div>
+              <div class="meta-info">
+                <strong>Session:</strong> ${new Date().getFullYear()}-${new Date().getFullYear() + 1}<br/>
+                <strong>Issue Date:</strong> ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+              </div>
+            </div>
+
+            <div class="section-title">Student Information</div>
+            <div class="bio-grid">
+              <div class="bio-item"><span class="bio-label">Student Name:</span><span class="bio-val">${student.student?.firstName || ""} ${student.student?.lastName || ""}</span></div>
+              <div class="bio-item"><span class="bio-label">Roll Number:</span><span class="bio-val">${student.student?.rollNumber || "—"}</span></div>
+              <div class="bio-item"><span class="bio-label">Class & Sec:</span><span class="bio-val">${exam.class?.name || "—"} ${exam.class?.section ? `(${exam.class.section})` : ""}</span></div>
+              <div class="bio-item"><span class="bio-label">Exam Title:</span><span class="bio-val">${exam.name}</span></div>
+            </div>
+
+            <div class="section-title">Examination Performance</div>
+            <table class="marks-table">
+              <thead>
+                <tr>
+                  <th>Subject</th>
+                  <th style="text-align: center;">Total Marks</th>
+                  <th style="text-align: center;">Passing Marks</th>
+                  <th style="text-align: center;">Marks Obtained</th>
+                  <th style="text-align: center;">Percentage</th>
+                  <th style="text-align: center;">Grade</th>
+                  <th style="text-align: center;">Result</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="color: #326080; font-weight: 700;">${exam.subject}</td>
+                  <td style="text-align: center;">${exam.totalMarks}</td>
+                  <td style="text-align: center;">${exam.passingMarks}</td>
+                  <td style="text-align: center; font-size: 15px; font-weight: 800; color: #326080;">${student.obtainedMarks}</td>
+                  <td style="text-align: center; font-weight: 700;">${pct}%</td>
+                  <td style="text-align: center; font-weight: 800; color: #805232;">${grade}</td>
+                  <td style="text-align: center;">
+                    <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; ${student.status === "pass" ? "background: #dcfce7; color: #166534;" : "background: #fee2e2; color: #991b1b;"}">
+                      ${student.status === "pass" ? "PASS" : "FAIL"}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="summary-card">
+              <div class="summary-box"><div class="summary-label">Total Marks</div><div class="summary-val" style="color: #334155;">${exam.totalMarks}</div></div>
+              <div class="summary-box"><div class="summary-label">Marks Obtained</div><div class="summary-val" style="color: #326080;">${student.obtainedMarks}</div></div>
+              <div class="summary-box"><div class="summary-label">Percentage</div><div class="summary-val" style="color: #0f766e;">${pct}%</div></div>
+              <div class="summary-box"><div class="summary-label">Grade</div><div class="summary-val" style="color: #805232;">${grade}</div></div>
+            </div>
+
+            <div class="remarks-box">
+              <strong>Teacher Remarks:</strong><br/>
+              ${student.remarks ? student.remarks : (student.status === "pass" ? "Demonstrated commendable understanding and performance in the subject." : "Requires additional effort and guidance in key academic topics.")}
+            </div>
+          </div>
+
+          <div class="signatures">
+            <div class="sig-box">
+              <div class="sig-line"></div>
+              <div class="sig-name">Class Teacher</div>
+            </div>
+            <div class="sig-box">
+              <div class="sig-line"></div>
+              <div class="sig-name">Exam In-Charge</div>
+            </div>
+            <div class="sig-box">
+              <div class="sig-line"></div>
+              <div class="sig-name">Principal Signature & Stamp</div>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+  const printWindow = window.open("", "_blank");
+  if (!printWindow) {
+    toast.error("Please allow popups to print report card");
+    return;
+  }
+  printWindow.document.write(html);
+  printWindow.document.close();
+  printWindow.focus();
+  setTimeout(() => {
+    printWindow.print();
+    printWindow.close();
+  }, 300);
+};
+
+// ── Print Class Result Gazette / Tabulation Sheet ─────────────────
+const printClassResultGazette = (filteredResults, examObj, schoolName, schoolLogo) => {
+  if (!examObj || filteredResults.length === 0) {
+    toast.error("No results to print. Please select an exam with entered marks.");
+    return;
+  }
+
+  const logoUrl = schoolLogo
+    ? schoolLogo.startsWith("http")
+      ? schoolLogo
+      : `https://api.nullstacksloution.online${schoolLogo}`
+    : null;
+
+  const totalAppeared = filteredResults.length;
+  const totalPassed = filteredResults.filter((r) => r.status === "pass").length;
+  const totalFailed = totalAppeared - totalPassed;
+  const passRate = totalAppeared > 0 ? ((totalPassed / totalAppeared) * 100).toFixed(1) : "0.0";
+  const totalMarksObtained = filteredResults.reduce((acc, r) => acc + (Number(r.obtainedMarks) || 0), 0);
+  const avgMarks = totalAppeared > 0 ? (totalMarksObtained / totalAppeared).toFixed(1) : "0.0";
+  const avgPct = examObj.totalMarks > 0 ? ((parseFloat(avgMarks) / examObj.totalMarks) * 100).toFixed(1) : "0.0";
+
+  const rowsHtml = filteredResults.map((r, idx) => {
+    const pct = ((r.obtainedMarks / examObj.totalMarks) * 100).toFixed(1);
+    const grade = r.grade || calculateGrade(parseFloat(pct));
+    const isPass = r.status === "pass";
+    return `
+      <tr>
+        <td style="text-align: center; color: #64748b;">${idx + 1}</td>
+        <td style="font-family: monospace; font-weight: bold; color: #334155;">${r.student?.rollNumber || "—"}</td>
+        <td style="font-weight: 700; color: #0f172a;">${r.student?.firstName || ""} ${r.student?.lastName || ""}</td>
+        <td style="text-align: center; color: #475569;">${examObj.totalMarks}</td>
+        <td style="text-align: center; font-weight: 800; color: #326080;">${r.obtainedMarks}</td>
+        <td style="text-align: center; font-weight: 700;">${pct}%</td>
+        <td style="text-align: center; font-weight: 800; color: #805232;">${grade}</td>
+        <td style="text-align: center;">
+          <span style="display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; ${isPass ? "background: #dcfce7; color: #166534;" : "background: #fee2e2; color: #991b1b;"}">
+            ${isPass ? "PASS" : "FAIL"}
+          </span>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>${examObj.name} - Result Gazette</title>
+        <style>
+          @page { size: A4 portrait; margin: 12mm; }
+          body { font-family: 'Inter', system-ui, -apple-system, sans-serif; color: #1e293b; margin: 0; padding: 20px; background: #fff; }
+          .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #326080; padding-bottom: 12px; margin-bottom: 16px; }
+          .header-left { display: flex; align-items: center; gap: 14px; }
+          .logo { width: 65px; height: 65px; border-radius: 50%; object-fit: cover; border: 2px solid #326080; }
+          .logo-fallback { width: 65px; height: 65px; border-radius: 50%; background: #326080; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: bold; }
+          .school-title { font-size: 22px; font-weight: 800; color: #326080; margin: 0; }
+          .gazette-title { font-size: 11px; font-weight: 700; color: #805232; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 3px; }
+          .meta-info { text-align: right; font-size: 11px; color: #64748b; line-height: 1.5; }
+          .exam-meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 11px; }
+          .meta-item { display: flex; flex-direction: column; }
+          .meta-label { font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase; }
+          .meta-val { font-size: 12px; font-weight: 700; color: #0f172a; margin-top: 2px; }
+          .gazette-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 12px; }
+          .gazette-table th { background: #326080; color: #ffffff; padding: 8px 10px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #326080; }
+          .gazette-table td { padding: 7px 10px; border: 1px solid #cbd5e1; font-size: 11px; }
+          .gazette-table tr:nth-child(even) { background: #f8fafc; }
+          .stats-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; background: #fffaf6; border: 1px solid #fed7aa; border-radius: 6px; padding: 10px; margin-bottom: 25px; text-align: center; }
+          .stats-strip-box { display: flex; flex-direction: column; }
+          .stats-strip-label { font-size: 9px; font-weight: 700; color: #805232; text-transform: uppercase; }
+          .stats-strip-val { font-size: 14px; font-weight: 800; color: #0f172a; margin-top: 2px; }
+          .signatures { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; padding-top: 15px; }
+          .sig-box { text-align: center; }
+          .sig-line { width: 160px; border-bottom: 1px solid #000; margin-bottom: 5px; }
+          .sig-name { font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="header-left">
+            ${logoUrl ? `<img src="${logoUrl}" class="logo" alt="School Logo" />` : `<div class="logo-fallback">${(schoolName || "S")[0]?.toUpperCase()}</div>`}
+            <div>
+              <h1 class="school-title">${schoolName || "Punjab Public High School"}</h1>
+              <div class="gazette-title">Official Examination Result Gazette & Tabulation Sheet</div>
+            </div>
+          </div>
+          <div class="meta-info">
+            <strong>Session:</strong> ${new Date().getFullYear()}-${new Date().getFullYear() + 1}<br/>
+            <strong>Date Generated:</strong> ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+          </div>
+        </div>
+
+        <div class="exam-meta-grid">
+          <div class="meta-item"><span class="meta-label">Exam Name</span><span class="meta-val">${examObj.name}</span></div>
+          <div class="meta-item"><span class="meta-label">Class & Section</span><span class="meta-val">${examObj.class?.name || "—"} ${examObj.class?.section ? `(${examObj.class.section})` : ""}</span></div>
+          <div class="meta-item"><span class="meta-label">Subject</span><span class="meta-val" style="color: #326080;">${examObj.subject}</span></div>
+          <div class="meta-item"><span class="meta-label">Total / Passing</span><span class="meta-val">${examObj.totalMarks} / ${examObj.passingMarks}</span></div>
+        </div>
+
+        <table class="gazette-table">
+          <thead>
+            <tr>
+              <th style="width: 35px; text-align: center;">#</th>
+              <th style="width: 80px;">Roll No</th>
+              <th>Student Name</th>
+              <th style="text-align: center; width: 60px;">Total</th>
+              <th style="text-align: center; width: 75px;">Obtained</th>
+              <th style="text-align: center; width: 70px;">Pct %</th>
+              <th style="text-align: center; width: 55px;">Grade</th>
+              <th style="text-align: center; width: 65px;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+
+        <div class="stats-strip">
+          <div class="stats-strip-box"><span class="stats-strip-label">Total Appeared</span><span class="stats-strip-val">${totalAppeared}</span></div>
+          <div class="stats-strip-box"><span class="stats-strip-label">Total Passed</span><span class="stats-strip-val" style="color: #166534;">${totalPassed}</span></div>
+          <div class="stats-strip-box"><span class="stats-strip-label">Total Failed</span><span class="stats-strip-val" style="color: #991b1b;">${totalFailed}</span></div>
+          <div class="stats-strip-box"><span class="stats-strip-label">Pass Rate</span><span class="stats-strip-val" style="color: #326080;">${passRate}%</span></div>
+          <div class="stats-strip-box"><span class="stats-strip-label">Class Average</span><span class="stats-strip-val" style="color: #805232;">${avgMarks} (${avgPct}%)</span></div>
+        </div>
+
+        <div class="signatures">
+          <div class="sig-box">
+            <div class="sig-line"></div>
+            <div class="sig-name">Subject Teacher</div>
+          </div>
+          <div class="sig-box">
+            <div class="sig-line"></div>
+            <div class="sig-name">Tabulator / In-Charge</div>
+          </div>
+          <div class="sig-box">
+            <div class="sig-line"></div>
+            <div class="sig-name">Principal Signature & Stamp</div>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+  const printWindow = window.open("", "_blank");
+  if (!printWindow) {
+    toast.error("Please allow popups to print result gazette");
+    return;
+  }
+  printWindow.document.write(html);
+  printWindow.document.close();
+  printWindow.focus();
+  setTimeout(() => {
+    printWindow.print();
+    printWindow.close();
+  }, 300);
+};
+
+// ── View Result Modal (Marina Theme) ──────────────────────────────
+const ViewModal = ({ student, exam, schoolName, schoolLogo, onClose }) => {
   if (!student) return null;
   const pct   = exam ? ((student.obtainedMarks / exam.totalMarks) * 100).toFixed(1) : 0;
   const grade = student.grade || calculateGrade(parseFloat(pct));
+  const logoUrl = schoolLogo
+    ? schoolLogo.startsWith("http")
+      ? schoolLogo
+      : `https://api.nullstacksloution.online${schoolLogo}`
+    : null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-md shadow-2xl w-full max-w-md">
-        <div className="bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-5 flex justify-between items-start rounded-t-2xl">
-          <div>
-            <p className="text-xs font-semibold text-indigo-200 uppercase tracking-widest mb-1">Student Result</p>
-            <h2 className="text-xl font-bold text-white">{student.student?.firstName} {student.student?.lastName}</h2>
-            <p className="text-sm text-indigo-200 mt-1">Roll No: {student.student?.rollNumber || "—"}</p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
+      <div className="bg-white rounded-md shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200">
+        {/* Marina Themed Header */}
+        <div className="bg-[#326080] text-white px-6 py-5 flex justify-between items-start">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-full bg-white/10 p-0.5 flex items-center justify-center border border-white/20 shrink-0 overflow-hidden">
+              {logoUrl ? (
+                <img src={logoUrl} alt="School Logo" className="w-full h-full object-cover rounded-full" />
+              ) : (
+                <span className="text-base font-bold font-serif text-white">
+                  {(schoolName || "S")[0]?.toUpperCase()}
+                </span>
+              )}
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-[#fcefe7] uppercase tracking-widest">
+                {schoolName || "Punjab Public High School"} · Statement of Marks
+              </p>
+              <h2 className="text-lg font-bold text-white leading-tight mt-0.5">
+                {student.student?.firstName} {student.student?.lastName}
+              </h2>
+              <p className="text-xs text-white/80 mt-0.5">
+                Roll No: <span className="font-mono font-bold text-white">{student.student?.rollNumber || "—"}</span>
+                {exam?.class?.name ? ` · Class: ${exam.class.name}` : ""}
+              </p>
+            </div>
           </div>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-md bg-white/20 text-white hover:bg-white/30 transition">✕</button>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition">
+            ✕
+          </button>
         </div>
-        <div className="p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+
+        {/* Modal Body */}
+        <div className="p-6 space-y-4 bg-[#fffaf6]/30">
+          <div className="flex items-center justify-between px-3.5 py-2 bg-white rounded border border-slate-200">
+            <span className="text-xs text-slate-500 font-semibold">Subject / Exam:</span>
+            <span className="text-xs font-bold text-[#326080]">
+              {exam?.name || "Examination"} ({exam?.subject || "All Subjects"})
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             {[
-              { label:"Total Marks",  value: exam?.totalMarks || "—", color:"text-slate-700" },
-              { label:"Obtained",     value: student.obtainedMarks,   color:"text-indigo-600" },
-              { label:"Percentage",   value: `${pct}%`,              color:"text-violet-600" },
-              { label:"Grade",        value: grade,                   color:"text-slate-800" },
+              { label: "Total Marks", value: exam?.totalMarks || "—", color: "text-slate-800" },
+              { label: "Obtained", value: student.obtainedMarks, color: "text-[#326080]" },
+              { label: "Percentage", value: `${pct}%`, color: "text-[#0f766e]" },
+              { label: "Grade", value: grade, color: "text-[#805232]" },
             ].map(({ label, value, color }) => (
-              <div key={label} className="bg-slate-50 border border-slate-100 rounded-md p-4">
-                <p className="text-xs text-slate-400 mb-1">{label}</p>
-                <p className={`text-2xl font-bold ${color}`}>{value}</p>
+              <div key={label} className="bg-white border border-slate-200 rounded-md p-3 text-center shadow-sm">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{label}</p>
+                <p className={`text-xl font-extrabold ${color}`}>{value}</p>
               </div>
             ))}
           </div>
-          <div className={`rounded-md px-4 py-3 flex items-center gap-2 text-sm font-semibold border
-            ${student.status === "pass" ? "bg-emerald-50 border-emerald-200 text-emerald-800" : "bg-red-50 border-red-200 text-red-800"}`}>
-            <span>{student.status === "pass" ? "🎉" : "⚠️"}</span>
-            {student.status === "pass" ? `Passed with ${grade} Grade` : "Failed — Improvement Required"}
+
+          <div className={`rounded-md px-4 py-3 flex items-center justify-between text-xs font-bold border ${
+            student.status === "pass"
+              ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+              : "bg-rose-50 border-rose-200 text-rose-800"
+          }`}>
+            <span className="flex items-center gap-1.5">
+              <span>{student.status === "pass" ? "🎉" : "⚠️"}</span>
+              <span>{student.status === "pass" ? `Passed with ${grade} Grade` : "Needs Academic Improvement"}</span>
+            </span>
+            <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-black ${
+              student.status === "pass" ? "bg-emerald-600 text-white" : "bg-rose-600 text-white"
+            }`}>
+              {student.status === "pass" ? "PASSED" : "FAILED"}
+            </span>
           </div>
-          {student.remarks && (
-            <div className="bg-slate-50 rounded-md p-3">
-              <p className="text-xs text-slate-500 mb-1">Remarks</p>
-              <p className="text-sm text-slate-700">{student.remarks}</p>
+
+          {student.remarks ? (
+            <div className="bg-white rounded-md p-3 border border-slate-200 text-xs">
+              <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Remarks</p>
+              <p className="text-slate-700">{student.remarks}</p>
             </div>
-          )}
+          ) : null}
         </div>
-        <div className="px-6 pb-5">
-          <button onClick={onClose} className="w-full py-2.5 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-medium transition">Close</button>
+
+        {/* Modal Actions */}
+        <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex justify-end gap-2.5">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 border border-slate-200 hover:bg-slate-100 rounded text-xs font-semibold text-slate-600 transition"
+          >
+            Close
+          </button>
+          <button
+            type="button"
+            onClick={() => printStudentReportCard(student, exam, schoolName, schoolLogo)}
+            className="px-4 py-2 bg-[#326080] hover:bg-[#254961] text-white rounded text-xs font-bold shadow transition flex items-center gap-1.5"
+          >
+            <FaPrint className="w-3 h-3" /> Print Result Card
+          </button>
         </div>
       </div>
     </div>
@@ -86,6 +461,7 @@ const ViewModal = ({ student, exam, onClose }) => {
 };
 
 export default function ResultReport() {
+  const { schoolName, schoolLogo } = useAuth();
   const [exams, setExams]             = useState([]);
   const [classes, setClasses]         = useState([]);
   const [results, setResults]         = useState([]);
